@@ -17,7 +17,7 @@
 ## Completed Artifacts
 
 ### M0
-- Monorepo skeleton (`apps/portal`, `apps/console`, `apps/workers`, 3 packages)
+- Monorepo skeleton (`apps/portal`, `apps/console`, `workers/`, 3 packages)
 - Docker Compose infra (Postgres/PostGIS+pgvector, Redis, Odoo 18, nginx, worker/portal/console stubs)
 - CI workflow, env template, Biome/Turbo/pnpm tooling
 
@@ -47,7 +47,7 @@
 
 ### M3
 - `00000000000010_agent_control_plane.sql` — `agent_registry` (7 agents, pause/block/budget) + durable `agent_tasks` queue with dedupe keys + claim (SKIP LOCKED)/complete/fail/dead-letter/spend/heartbeat RPCs
-- Python core (`apps/workers`): `capabilities.py` 7-agent matrix · `state_machine.py` §13 flows · `loop_guardian.py` cap/malformed/hallucination/loop gates · `tracing.py` Langfuse-safe (trace=heartbeat_id) · `executor.py` intervention sink → `ai_agent_interventions` · `kernel.py` tick loop
+- Python core (`workers/`): `capabilities.py` 7-agent matrix · `state_machine.py` §13 flows · `loop_guardian.py` cap/malformed/hallucination/loop gates · `tracing.py` Langfuse-safe (trace=heartbeat_id) · `executor.py` intervention sink → `ai_agent_interventions` · `kernel.py` tick loop
 - pytest suite: **11/11** in workspace venv (malformed, hallucinated, unauthorized, loop, cap, budget cases)
 - verify_m3.sql: **14/14** live (pause-skip at claim, dead-letter ladder, dedupe, budget exhaustion + catch-path persistence)
 

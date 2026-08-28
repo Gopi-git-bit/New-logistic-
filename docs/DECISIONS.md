@@ -1,0 +1,31 @@
+# Zippy Logistics — DECISIONS (§25 Change Control)
+
+> All deviations from the PRD must be logged here before implementation. This is mandatory.
+
+## Format
+
+```
+| # | Date | Decision | Rationale | Impact | Approved By |
+|---|------|----------|-----------|--------|-------------|
+```
+
+## Log
+
+| # | Date | Decision | Rationale | Impact | Approved By |
+|---|------|----------|-----------|--------|-------------|
+| D-01 | 2026-08-01 | Tesseract as default OCR | Free, no API costs, runs locally | None — interface is engine-agnostic | @Gopi |
+| D-02 | 2026-08-01 | `vector` extension name (not `pgvector`) | Postgres 16 naming convention | Migration scripts updated | @Gopi |
+| D-03 | 2026-08-01 | Docker Compose over Kubernetes | Solo developer, VPS deployment | Simpler ops, single-node | @Gopi |
+| D-04 | 2026-08-01 | Razorpay primary, Stripe failover | India-first payments | Dual integration | @Gopi |
+| D-05 | 2026-08-15 | `match_nearby_drivers` returns `users.user_id` | Driver assignment is by user, not vehicle | D-05 alignment | @Gopi |
+| D-06 | 2026-08-15 | `validate_payment_plan` full mode = 100% advance | Business rule: full payment means full advance | Handler auto-sets advance=total | @Gopi |
+| D-07 | 2026-08-28 | Move workers/ to root level | PRD canonical structure | Repository reorganization | @Gopi |
+
+## Pending Decisions
+
+| ID | Question | Options | Recommendation |
+|----|----------|---------|----------------|
+| R1 | DeepSeek model IDs | `deepseek-v4-pro` / `deepseek-v4-flash` on OpenRouter | Confirm availability first |
+| R4 | Razorpay live keys | Sandbox → Live KYC | Business/compliance required |
+| R5 | Permit verification API | Vahan API, SERPAPI, custom | National permit scope TBD |
+| R9 | Honcho deployment | Self-hosted vs managed | Self-hosted for control |

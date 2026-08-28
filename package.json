@@ -20,7 +20,7 @@
     "test": "turbo run test",
     "clean": "turbo run clean && rm -rf node_modules .turbo",
     "typecheck": "turbo run typecheck",
-    "m0:verify": "pnpm install --frozen-lockfile && pnpm typecheck && docker compose -f infra/docker/docker-compose.yml config"
+    "m0:verify": "pnpm install --frozen-lockfile && pnpm typecheck && docker compose config"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
