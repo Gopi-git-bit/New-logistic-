@@ -1,0 +1,141 @@
+services:
+  db:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.db
+    container_name: zippy-db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-postgres}
+    ports:
+      - "${POSTGRES_PORT:-54322}:5432"
+    volumes:
+      - zippy_postgres_data:/var/lib/postgresql/data
+      - ../supabase/migrations:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - zippy
+
+  redis:
+    image: redis:7-alpine
+    container_name: zippy-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - zippy_redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - zippy
+
+  odoo:
+    image: odoo:18.0
+    container_name: zippy-odoo
+    environment:
+      HOST: db
+      USER: ${POSTGRES_USER:-postgres}
+      PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      DB_NAME: ${ODOO_DB:-odoo18}
+    ports:
+      - "8069:8069"
+    volumes:
+      - zippy_odoo_data:/var/lib/odoo
+      - ../odoo/addons:/mnt/extra-addons:ro
+      - ../odoo/config:/etc/odoo:ro
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - zippy
+
+  honcho-api:
+    image: python:3.12-slim
+    container_name: zippy-honcho-api
+    command: >
+      sh -c "echo 'Honcho API placeholder — replace with production image' &&
+             python -m http.server 8001"
+    ports:
+      - "8001:8001"
+    networks:
+      - zippy
+
+  workers:
+    build:
+      context: ../../apps/workers
+      dockerfile: Dockerfile
+    container_name: zippy-workers
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - REDIS_URL=${REDIS_URL}
+      - ODOO_URL=${ODOO_URL}
+      - LANGFUSE_HOST=${LANGFUSE_HOST}
+      - HONCHO_API_URL=${HONCHO_API_URL}
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - zippy
+
+  nginx:
+    image: nginx:alpine
+    container_name: zippy-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - portal
+      - console
+    networks:
+      - zippy
+
+  portal:
+    build:
+      context: ../../apps/portal
+      dockerfile: Dockerfile
+    container_name: zippy-portal
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - NODE_ENV=production
+      - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
+      - NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+    networks:
+      - zippy
+
+  console:
+    build:
+      context: ../../apps/console
+      dockerfile: Dockerfile
+    container_name: zippy-console
+    ports:
+      - "3001:3000"
+    environment:
+      - PORT=3000
+      - NODE_ENV=production
+      - VITE_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
+      - VITE_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+    networks:
+      - zippy
+
+volumes:
+  zippy_postgres_data:
+  zippy_redis_data:
+  zippy_odoo_data:
+
+networks:
+  zippy:
+    driver: bridge
