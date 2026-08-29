@@ -18,12 +18,26 @@
 
 ### Authority Inheritance Rule
 
-```
-Paperclip > Hermes > Odoo > Zippy DB > Honcho
-```
+Authority is **domain-specific**, not absolute. Each system is supreme in its domain:
 
-When two systems disagree, the higher-authority system wins.
-Example: If Honcho remembers a customer preference but Zippy DB has a different value, **Zippy DB wins**.
+| Domain | Supreme Authority | Why |
+| --- | --- | --- |
+| Financial/accounting state | **Odoo** | Odoo owns the ledger, invoices, reconciliation |
+| Operational state | **Zippy DB** | Orders, trips, drivers, POD, delivery state |
+| Governance decisions | **Paperclip** | Whether an action was permitted |
+| Execution capability | **Hermes** | Delegated tool execution with grants |
+
+When two systems disagree about a fact in **their own domain**, that system wins.
+When a system tries to mutate **another system's domain**, governance blocks it.
+
+```text
+Paperclip decides WHAT MAY execute.
+Hermes executes WHAT WAS APPROVED.
+Odoo owns financial truth.
+Zippy owns operational truth.
+Honcho is advisory only.
+Langfuse is evidence only.
+```
 
 ---
 
@@ -153,14 +167,26 @@ For **high-risk/financial operations** (e.g., creating an invoice, processing a 
 
 ### When HITL Is Required
 
-| Trigger | Escalation Target | SLA |
-| --- | --- | --- |
-| Settlement > ₹50,000 | Finance team via Paperclip | 4 hours |
-| New driver onboarding | Operations team | 24 hours |
-| Invoice dispute | Finance team | 12 hours |
-| Agent budget exhaustion | Admin team | Immediate |
-| Paperclip HOLD decision | Assigned reviewer | Per policy |
-| Unknown tool invocation | Security team | Immediate |
+| Risk Level | Threshold | Trigger | Escalation Target | SLA |
+| --- | --- | --- | --- | --- |
+| **CRITICAL** | ≥ ₹100,000 | Any financial settlement | Finance head + Admin | 1 hour |
+| **HIGH** | ≥ ₹25,000 | Invoice creation, refund, credit note | Finance team | 4 hours |
+| **MEDIUM** | ≥ ₹5,000 | Vendor bill, payment reconciliation | Operations lead | 12 hours |
+| **LOW** | < ₹5,000 | Standard operations | Auto-approve (no HITL) | N/A |
+| Any | — | New driver onboarding | Operations team | 24 hours |
+| Any | — | Invoice dispute | Finance team | 12 hours |
+| Any | — | Agent budget exhaustion | Admin team | Immediate |
+| Any | — | Paperclip HOLD decision | Assigned reviewer | Per policy |
+| Any | — | Unknown tool invocation | Security team | Immediate |
+
+### Risk Level Assignment
+
+| Risk Level | Criteria |
+| --- | --- |
+| **CRITICAL** | Financial amount ≥ ₹100,000 OR involves posted accounting records OR reversal of reconciled payment |
+| **HIGH** | Financial amount ≥ ₹25,000 OR creates customer-facing invoice OR modifies settlement |
+| **MEDIUM** | Financial amount ≥ ₹5,000 OR vendor bill OR payment matching |
+| **LOW** | Financial amount < ₹5,000 AND standard operational flow |
 
 ### HITL Resolution Flow
 
