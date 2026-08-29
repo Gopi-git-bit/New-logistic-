@@ -17,9 +17,13 @@ import httpx
 class Tracer:
     """Minimal Langfuse span emitter; no-op when keys are absent."""
 
-    def __init__(self, public_key: str | None, secret_key: str | None,
-                 host: str = "https://us.cloud.langfuse.com",
-                 trace_id: str | None = None) -> None:
+    def __init__(
+        self,
+        public_key: str | None,
+        secret_key: str | None,
+        host: str = "https://us.cloud.langfuse.com",
+        trace_id: str | None = None,
+    ) -> None:
         self.enabled = bool(public_key and secret_key)
         self.host = host.rstrip("/")
         self.trace_id = trace_id or str(uuid.uuid4())
@@ -29,8 +33,7 @@ class Tracer:
             self._auth = "Basic " + base64.b64encode(raw).decode()
 
     @contextlib.contextmanager
-    def span(self, name: str, metadata: dict[str, Any] | None = None,
-             parent_id: str | None = None):
+    def span(self, name: str, metadata: dict[str, Any] | None = None, parent_id: str | None = None):
         sid = str(uuid.uuid4())
         try:
             yield sid
@@ -60,9 +63,11 @@ class Tracer:
 
 def _now_iso() -> str:
     import datetime as _dt
+
     return _dt.datetime.now(_dt.UTC).isoformat()
 
 
 def heartbeat_trace(settings) -> Tracer:
-    return Tracer(settings.langfuse_public_key, settings.langfuse_secret_key,
-                  settings.langfuse_host)
+    return Tracer(
+        settings.langfuse_public_key, settings.langfuse_secret_key, settings.langfuse_host
+    )

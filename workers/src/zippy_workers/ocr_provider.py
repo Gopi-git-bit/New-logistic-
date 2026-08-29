@@ -27,18 +27,19 @@ from typing import Protocol, runtime_checkable
 @dataclass(frozen=True)
 class OCRRawResult:
     """Structured output from any OCR engine."""
+
     raw_text: str
-    confidence: float       # 0.0–1.0 (best-effort; Tesseract returns per-word avg)
-    provider: str           # 'tesseract' | 'vision_llm' | ...
+    confidence: float  # 0.0–1.0 (best-effort; Tesseract returns per-word avg)
+    provider: str  # 'tesseract' | 'vision_llm' | ...
     word_count: int = 0
     char_count: int = 0
 
     def __post_init__(self):
         # derived fields auto-computed
         if self.word_count == 0 and self.raw_text:
-            object.__setattr__(self, 'word_count', len(self.raw_text.split()))
+            object.__setattr__(self, "word_count", len(self.raw_text.split()))
         if self.char_count == 0 and self.raw_text:
-            object.__setattr__(self, 'char_count', len(self.raw_text))
+            object.__setattr__(self, "char_count", len(self.raw_text))
 
 
 @runtime_checkable
@@ -81,18 +82,31 @@ class TesseractExtractor:
         out_base = image_path.with_suffix("")
         try:
             subprocess.run(
-                [self._cmd, str(image_path), str(out_base),
-                 "--oem", "3", "--psm", "6", "-l", "eng"],
-                capture_output=True, check=True, timeout=30,
+                [
+                    self._cmd,
+                    str(image_path),
+                    str(out_base),
+                    "--oem",
+                    "3",
+                    "--psm",
+                    "6",
+                    "-l",
+                    "eng",
+                ],
+                capture_output=True,
+                check=True,
+                timeout=30,
             )
         except FileNotFoundError:
             return OCRRawResult(
-                raw_text="", confidence=0.0,
+                raw_text="",
+                confidence=0.0,
                 provider="tesseract_unavailable",
             )
         except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as exc:
             return OCRRawResult(
-                raw_text="", confidence=0.0,
+                raw_text="",
+                confidence=0.0,
                 provider=f"tesseract_error:{type(exc).__name__}",
             )
 
@@ -109,8 +123,7 @@ class TesseractExtractor:
         try:
             lines = tsv_path.read_text(encoding="utf-8", errors="replace").splitlines()
         except FileNotFoundError:
-            return OCRRawResult(raw_text="", confidence=0.0,
-                                provider="tesseract")
+            return OCRRawResult(raw_text="", confidence=0.0, provider="tesseract")
 
         for line in lines:
             parts = line.split("\t")

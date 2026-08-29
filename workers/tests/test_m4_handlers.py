@@ -30,15 +30,12 @@ class FakeDb:
 # ---------------------------------------------------------------- payments
 def test_payment_captured_advances_and_enqueues():
     db = FakeDb()
-    r = process_payment_event(
-        {"event_type": "razorpay_payment.captured", "order_id": "o-1"}, db)
+    r = process_payment_event({"event_type": "razorpay_payment.captured", "order_id": "o-1"}, db)
     assert r.ok and ("o-1", "inventory_confirmed") in db.transitions
     assert db.tasks[0][1] == "push_order_to_odoo"
 
 
 def test_payment_replay_is_idempotent_noop():
-    db = FakeDb()
-
     class Replayed(FakeDb):
         def transition_order(self, *_):
             raise RuntimeError("Invalid transition from inventory_confirmed")
@@ -54,8 +51,7 @@ def test_missing_order_id_rejected():
 
 def test_failed_event_short_circuits():
     db = FakeDb()
-    r = process_payment_event({"event_type": "razorpay_payment.failed",
-                               "order_id": "o-3"}, db)
+    r = process_payment_event({"event_type": "razorpay_payment.failed", "order_id": "o-3"}, db)
     assert r.ok and "failed" in r.detail["status"]
     assert not db.transitions
 
@@ -63,29 +59,32 @@ def test_failed_event_short_circuits():
 # ---------------------------------------------------------------- odoo push
 def test_push_happy_path_marks_synced():
     class FakeOdoo:
-        def find_or_create_partner(self, email, name): return 42
+        def find_or_create_partner(self, email, name):
+            return 42
 
-        def create_sale_order(self, **kw): return 9001
+        def create_sale_order(self, **kw):
+            return 9001
 
     db = FakeDb()
-    r = push_order_to_odoo({"order_id": "o-9", "order_number": "ZP-1",
-                            "total_amount": 3463.95}, db, FakeOdoo())
+    r = push_order_to_odoo(
+        {"order_id": "o-9", "order_number": "ZP-1", "total_amount": 3463.95}, db, FakeOdoo()
+    )
     assert r.ok and r.detail["sale_order_id"] == 9001
     assert db.synced == [("o-9", 9001)] and not db.failed
 
 
 def test_push_transport_failure_marks_failed():
     class BoomOdoo:
-        def find_or_create_partner(self, **_): raise OdooError("transport:ConnectError")
+        def find_or_create_partner(self, **_):
+            raise OdooError("transport:ConnectError")
 
     db = FakeDb()
-    r = push_order_to_odoo({"order_id": "o-10", "order_number": "ZP-2"},
-                           db, BoomOdoo())
+    r = push_order_to_odoo({"order_id": "o-10", "order_number": "ZP-2"}, db, BoomOdoo())
     assert not r.ok and "transport" in db.failed[0][1]
 
 
 def test_capability_matrix_gates_odoo_to_correct_agents():
-    assert_can_call_external("order_management", "odoo")     # allowed
+    assert_can_call_external("order_management", "odoo")  # allowed
     assert_can_call_external("resource_management", "odoo")  # allowed
     try:
         assert_can_call_external("communication", "odoo")

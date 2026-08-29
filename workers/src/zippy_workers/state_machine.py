@@ -23,9 +23,21 @@ class ExecutionState(str, enum.Enum):
 
 
 _TRANSITIONS: dict[ExecutionState, set[ExecutionState]] = {
-    ExecutionState.PLANNING: {ExecutionState.EXECUTING, ExecutionState.FAILED, ExecutionState.REJECTED},
-    ExecutionState.EXECUTING: {ExecutionState.VALIDATING, ExecutionState.FAILED, ExecutionState.BLOCKED},
-    ExecutionState.VALIDATING: {ExecutionState.COMPLETED, ExecutionState.FAILED, ExecutionState.BLOCKED},
+    ExecutionState.PLANNING: {
+        ExecutionState.EXECUTING,
+        ExecutionState.FAILED,
+        ExecutionState.REJECTED,
+    },
+    ExecutionState.EXECUTING: {
+        ExecutionState.VALIDATING,
+        ExecutionState.FAILED,
+        ExecutionState.BLOCKED,
+    },
+    ExecutionState.VALIDATING: {
+        ExecutionState.COMPLETED,
+        ExecutionState.FAILED,
+        ExecutionState.BLOCKED,
+    },
     # Terminal states accept no further transitions.
     ExecutionState.COMPLETED: set(),
     ExecutionState.FAILED: set(),

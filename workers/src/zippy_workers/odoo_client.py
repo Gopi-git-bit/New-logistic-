@@ -11,12 +11,12 @@ from pydantic import BaseModel
 
 
 class OdooError(Exception):
-    """ Raised for transport or Odoo-side protocol errors."""
+    """Raised for transport or Odoo-side protocol errors."""
 
 
 class OdooRecord(BaseModel):
     model: str
-    method: str                 # create | write | search | search_read ...
+    method: str  # create | write | search | search_read ...
     args: list = []
     kwargs: dict = {}
 
@@ -24,8 +24,7 @@ class OdooRecord(BaseModel):
 class OdooClient:
     """Thin /jsonrpc wrapper — no ORM, deterministic request shapes."""
 
-    def __init__(self, base_url: str, db: str, username: str,
-                 api_key: str, timeout_s: float = 8.0):
+    def __init__(self, base_url: str, db: str, username: str, api_key: str, timeout_s: float = 8.0):
         self.base_url = base_url.rstrip("/")
         self.db = db
         self.username = username
@@ -52,8 +51,7 @@ class OdooClient:
 
         data = resp.json()
         if "error" in data:
-            raise OdooError(str(data["error"].get("data", {}).get("message",
-                                                              data["error"]))[:200])
+            raise OdooError(str(data["error"].get("data", {}).get("message", data["error"]))[:200])
         return data.get("result")
 
     def authenticate(self) -> int:
@@ -63,31 +61,44 @@ class OdooClient:
         self._uid = uid
         return uid
 
-    def execute_kw(self, model: str, method: str,
-                   args: list | None = None, kwargs: dict | None = None):
+    def execute_kw(
+        self, model: str, method: str, args: list | None = None, kwargs: dict | None = None
+    ):
         if self._uid is None:
             self.authenticate()
-        return self._call("object", "execute_kw", [
-            self.db, self._uid, self.api_key, model, method,
-            args or [], kwargs or {},
-        ])
+        return self._call(
+            "object",
+            "execute_kw",
+            [
+                self.db,
+                self._uid,
+                self.api_key,
+                model,
+                method,
+                args or [],
+                kwargs or {},
+            ],
+        )
 
     # ------------------------------------------------------- high-level ops
     def find_or_create_partner(self, email: str, name: str) -> int:
-        ids = self.execute_kw("res.partner", "search",
-                              [[["email", "=", email]]],
-                              {"limit": 1})
+        ids = self.execute_kw("res.partner", "search", [[["email", "=", email]]], {"limit": 1})
         if isinstance(ids, list) and ids:
             return int(ids[0])
         new_id = self.execute_kw("res.partner", "create", [{"name": name, "email": email}])
         return int(new_id)
 
-    def create_sale_order(self, partner_id: int, order_number: str,
-                          total_amount: float, reference_note: str | None = None) -> int:
+    def create_sale_order(
+        self,
+        partner_id: int,
+        order_number: str,
+        total_amount: float,
+        reference_note: str | None = None,
+    ) -> int:
         payload = {
             "partner_id": partner_id,
             "client_order_ref": order_number,
-            "amount_total_mirror": total_amount,   # mirrored; Odoo recomputes its own totals
+            "amount_total_mirror": total_amount,  # mirrored; Odoo recomputes its own totals
         }
         if reference_note:
             payload["note"] = reference_note

@@ -2,32 +2,26 @@
 
 from __future__ import annotations
 
-import os
-import tempfile
-from pathlib import Path
-
+from zippy_workers.handlers import (
+    process_document_upload,
+    process_notification_job,
+)
+from zippy_workers.notification_sender import (
+    ResendEmailSender,
+    StubSender,
+    TwilioSMSSender,
+    make_notification_sender,
+)
 from zippy_workers.ocr_provider import (
     OCRRawResult,
     TesseractExtractor,
     make_ocr_provider,
 )
-from zippy_workers.notification_sender import (
-    DeliveryResult,
-    StubSender,
-    TwilioSMSSender,
-    ResendEmailSender,
-    make_notification_sender,
-)
-from zippy_workers.handlers import (
-    HandlerResult,
-    process_document_upload,
-    process_notification_job,
-)
-
 
 # =========================================================================
 # OCR Provider
 # =========================================================================
+
 
 class TestOCRRawResult:
     def test_derived_fields(self):
@@ -76,6 +70,7 @@ class TestMakeOCRProvider:
 # Notification Sender
 # =========================================================================
 
+
 class TestStubSender:
     def test_always_succeeds(self):
         s = StubSender()
@@ -123,8 +118,10 @@ class TestMakeNotificationSender:
 # Handlers — POD pipeline
 # =========================================================================
 
+
 class FakeDocDb:
     """Fake Db with only the M5 document methods."""
+
     def __init__(self):
         self.docs: list[dict] = []
         self.transitions: list[tuple[str, str]] = []
@@ -132,21 +129,29 @@ class FakeDocDb:
     def transition_order(self, order_id, new_status):
         self.transitions.append((order_id, new_status))
 
-    def upsert_document(self, order_id, doc_type, image_url,
-                        ocr_text, ocr_confidence, ocr_provider, uploaded_by):
-        doc_id = f"doc-{len(self.docs)+1}"
-        self.docs.append({
-            "order_id": order_id, "doc_type": doc_type,
-            "image_url": image_url, "ocr_text": ocr_text,
-            "ocr_confidence": ocr_confidence, "ocr_provider": ocr_provider,
-        })
+    def upsert_document(
+        self, order_id, doc_type, image_url, ocr_text, ocr_confidence, ocr_provider, uploaded_by
+    ):
+        doc_id = f"doc-{len(self.docs) + 1}"
+        self.docs.append(
+            {
+                "order_id": order_id,
+                "doc_type": doc_type,
+                "image_url": image_url,
+                "ocr_text": ocr_text,
+                "ocr_confidence": ocr_confidence,
+                "ocr_provider": ocr_provider,
+            }
+        )
         return doc_id
 
 
 class FailingOCR:
     """OCR that always fails."""
+
     @property
-    def provider_name(self): return "failing"
+    def provider_name(self):
+        return "failing"
 
     def extract(self, image_bytes, content_type="image/jpeg"):
         raise RuntimeError("OCR boom")
@@ -154,12 +159,13 @@ class FailingOCR:
 
 class StubOCR:
     """OCR that returns fixed text."""
+
     @property
-    def provider_name(self): return "stub_ocr"
+    def provider_name(self):
+        return "stub_ocr"
 
     def extract(self, image_bytes, content_type="image/jpeg"):
-        return OCRRawResult(raw_text="DELIVERED OK", confidence=0.95,
-                            provider="stub_ocr")
+        return OCRRawResult(raw_text="DELIVERED OK", confidence=0.95, provider="stub_ocr")
 
 
 def test_pod_handler_missing_order_id():
@@ -178,9 +184,9 @@ def test_pod_handler_non_pod_does_not_advance():
     db = FakeDocDb()
     # Non-POD doc — no transition
     r = process_document_upload(
-        {"order_id": "o-2", "document_type": "invoice",
-         "image_url": "http://example.com/img.jpg"},
-        db, StubOCR(),
+        {"order_id": "o-2", "document_type": "invoice", "image_url": "http://example.com/img.jpg"},
+        db,
+        StubOCR(),
     )
     assert r.ok and r.detail["doc_id"] == "doc-1"
     assert not db.transitions  # no state machine advance for invoice
@@ -191,9 +197,9 @@ def test_pod_handler_advances_to_delivered():
     but handler still stores the doc — OCR failure is non-fatal)."""
     db = FakeDocDb()
     r = process_document_upload(
-        {"order_id": "o-3", "document_type": "pod",
-         "image_url": "http://example.com/pod.jpg"},
-        db, StubOCR(),
+        {"order_id": "o-3", "document_type": "pod", "image_url": "http://example.com/pod.jpg"},
+        db,
+        StubOCR(),
     )
     assert r.ok
     assert ("o-3", "delivered") in db.transitions
@@ -201,15 +207,16 @@ def test_pod_handler_advances_to_delivered():
 
 def test_pod_handler_idempotent_already_delivered():
     """transition_order raises 'Invalid transition' → treated as idempotent."""
+
     class DeliveredDb(FakeDocDb):
         def transition_order(self, oid, ns):
             raise RuntimeError("Invalid transition from delivered")
 
     db = DeliveredDb()
     r = process_document_upload(
-        {"order_id": "o-4", "document_type": "pod",
-         "image_url": "http://example.com/pod2.jpg"},
-        db, StubOCR(),
+        {"order_id": "o-4", "document_type": "pod", "image_url": "http://example.com/pod2.jpg"},
+        db,
+        StubOCR(),
     )
     assert r.ok  # idempotent no-op
 
@@ -217,6 +224,7 @@ def test_pod_handler_idempotent_already_delivered():
 # =========================================================================
 # Handlers — Notification delivery
 # =========================================================================
+
 
 class FakeNotifyDb:
     def __init__(self):
@@ -230,10 +238,20 @@ class FakeNotifyDb:
     def mark_notification_failed(self, nid, reason=None):
         self.failed.append((nid, reason))
 
-    def log_notification(self, user_id, channel, ntype, title, body,
-                         payload=None, external_id=None, idempotency_key=None):
-        self.logs.append({"user_id": user_id, "channel": channel,
-                          "title": title, "external_id": external_id})
+    def log_notification(
+        self,
+        user_id,
+        channel,
+        ntype,
+        title,
+        body,
+        payload=None,
+        external_id=None,
+        idempotency_key=None,
+    ):
+        self.logs.append(
+            {"user_id": user_id, "channel": channel, "title": title, "external_id": external_id}
+        )
 
 
 def test_notification_missing_id():
@@ -249,9 +267,16 @@ def test_notification_missing_user():
 def test_notification_success():
     db = FakeNotifyDb()
     r = process_notification_job(
-        {"notification_id": "n-2", "user_id": "u-1", "channel": "sms",
-         "title": "Hi", "body": "Hello", "notification_type": "order_update"},
-        db, StubSender(),
+        {
+            "notification_id": "n-2",
+            "user_id": "u-1",
+            "channel": "sms",
+            "title": "Hi",
+            "body": "Hello",
+            "notification_type": "order_update",
+        },
+        db,
+        StubSender(),
     )
     assert r.ok
     assert r.detail["provider"] == "stub"
@@ -262,9 +287,15 @@ def test_notification_success():
 def test_notification_failure():
     db = FakeNotifyDb()
     r = process_notification_job(
-        {"notification_id": "n-3", "user_id": "u-2", "channel": "sms",
-         "title": "Hi", "body": "Body"},
-        db, TwilioSMSSender(),  # no creds → fails
+        {
+            "notification_id": "n-3",
+            "user_id": "u-2",
+            "channel": "sms",
+            "title": "Hi",
+            "body": "Body",
+        },
+        db,
+        TwilioSMSSender(),  # no creds → fails
     )
     assert not r.ok
     assert db.failed == [("n-3", r.detail["error"])]

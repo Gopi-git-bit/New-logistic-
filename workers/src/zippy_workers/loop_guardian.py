@@ -17,7 +17,7 @@ from dataclasses import dataclass, field
 
 @dataclass(slots=True)
 class GuardianVerdict:
-    decision: str            # ALLOW | DENY | BLOCKED
+    decision: str  # ALLOW | DENY | BLOCKED
     reason: str | None = None
 
 
@@ -38,11 +38,16 @@ class LoopGuardian:
         return self.max_tool_calls - self._calls_used
 
     # ---- pre-execution gate ------------------------------------------------
-    def admit(self, *, tool: str, args_hash: str | None = None,
-              capabilities_check: bool = True,
-              required_capability_satisfied: bool = True,
-              payload_valid: bool = True,
-              hallucination_score: float = 0.0) -> GuardianVerdict:
+    def admit(
+        self,
+        *,
+        tool: str,
+        args_hash: str | None = None,
+        capabilities_check: bool = True,
+        required_capability_satisfied: bool = True,
+        payload_valid: bool = True,
+        hallucination_score: float = 0.0,
+    ) -> GuardianVerdict:
         """Return the verdict for one proposed tool invocation."""
         if not required_capability_satisfied:
             return GuardianVerdict("DENY", "unauthorized")
@@ -76,5 +81,6 @@ class LoopGuardian:
 def hash_args(args: dict | list | tuple | set) -> str:
     """Stable content hash used by repeat-detection."""
     import json
+
     blob = json.dumps(args, sort_keys=True, separators=(",", ":"), default=str)
     return hashlib.sha256(blob.encode()).hexdigest()

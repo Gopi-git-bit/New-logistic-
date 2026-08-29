@@ -9,9 +9,13 @@ logger = structlog.get_logger()
 app = typer.Typer(help="Zippy Logistics agent workers")
 
 AGENTS = [
-    "customer_service", "order_management", "transportation",
-    "resource_management", "payment_settlement",
-    "platform_administration", "communication",
+    "customer_service",
+    "order_management",
+    "transportation",
+    "resource_management",
+    "payment_settlement",
+    "platform_administration",
+    "communication",
 ]
 
 
@@ -19,6 +23,7 @@ AGENTS = [
 def start() -> None:
     """Start the heartbeat kernel loop for all registered agents."""
     from .kernel import Kernel
+
     logger.info("zippy-workers starting", version="0.0.1")
     Kernel(AGENTS).start_forever()
 

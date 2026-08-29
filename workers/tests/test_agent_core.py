@@ -4,7 +4,7 @@ import pytest
 
 from zippy_workers.capabilities import UnauthorizedCapability, assert_financial, has_capability
 from zippy_workers.executor import Executor, TaskContext
-from zippy_workers.loop_guardian import LoopGuardian, hash_args
+from zippy_workers.loop_guardian import LoopGuardian
 from zippy_workers.state_machine import ExecutionState as ES
 from zippy_workers.state_machine import IllegalTransition, validate_transition
 
@@ -17,13 +17,15 @@ def make_guardian(cap: int = 20) -> LoopGuardian:
     return g
 
 
-def run_simple(payload: dict | None = None, output: dict | None = None,
-               guardian: LoopGuardian | None = None) -> tuple:
+def run_simple(
+    payload: dict | None = None, output: dict | None = None, guardian: LoopGuardian | None = None
+) -> tuple:
     outbox: list[dict] = []
-    ex = Executor(AGENT, guardian or make_guardian(),
-                  intervention_sink=outbox.append)
-    res = ex.run(TaskContext(AGENT, "t1", "noop_task", payload or {}),
-                 lambda p: output if output is not None else {"ok": True})
+    ex = Executor(AGENT, guardian or make_guardian(), intervention_sink=outbox.append)
+    res = ex.run(
+        TaskContext(AGENT, "t1", "noop_task", payload or {}),
+        lambda p: output if output is not None else {"ok": True},
+    )
     return res, outbox
 
 
@@ -35,11 +37,11 @@ def test_happy_path_completes():
 
 def test_all_illegal_transitions_rejected():
     with pytest.raises(IllegalTransition):
-        validate_transition(ES.PLANNING, ES.COMPLETED)          # skipping execution
+        validate_transition(ES.PLANNING, ES.COMPLETED)  # skipping execution
     with pytest.raises(IllegalTransition):
-        validate_transition(ES.EXECUTING, ES.PLANNING)          # backward
+        validate_transition(ES.EXECUTING, ES.PLANNING)  # backward
     with pytest.raises(IllegalTransition):
-        validate_transition(ES.COMPLETED, ES.FAILED)            # terminal frozen
+        validate_transition(ES.COMPLETED, ES.FAILED)  # terminal frozen
 
 
 # ------------------------------------------------------------------ malformed
@@ -48,7 +50,9 @@ def test_malformed_payload_blocks_with_intervention():
     # payload_valid=False comes from guardian admit(); emulate via broken guard below
     assert res.final_state in {ES.BLOCKED, ES.FAILED}
     assert box and box[0]["intervention_details"]["reason"] in {
-        "malformed_payload", "hallucination_detected"}
+        "malformed_payload",
+        "hallucination_detected",
+    }
 
 
 def _g_for(**kw):
@@ -56,6 +60,7 @@ def _g_for(**kw):
         def admit(self, **kwargs):  # type: ignore[override]
             kwargs.update(kw)
             return super().admit(**kwargs)
+
     g = PreDeny(max_tool_calls=20)
     g.reset_tick()
     return g
@@ -102,7 +107,7 @@ def test_executor_wraps_unauthorized_tool_as_blocked():
 # ------------------------------------------------------------------ loop + cap
 def test_repetitive_loop_detected_after_threshold():
     g = make_guardian()
-    for i in range(3):
+    for _ in range(3):
         v = g.admit(tool="lookup", args_hash="same-args")
         assert v.decision == "ALLOW"
     v4 = g.admit(tool="lookup", args_hash="same-args")

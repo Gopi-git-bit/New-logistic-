@@ -10,45 +10,62 @@ from dataclasses import dataclass, field
 from typing import Any, Protocol
 
 from .capabilities import assert_can_call_external
-from .odoo_client import OdooClient
-from .ocr_provider import OCRExtractor
 from .notification_sender import NotificationSender
+from .ocr_provider import OCRExtractor
+from .odoo_client import OdooClient
 
 
 class Db(Protocol):
     """Port mirroring the SQL RPCs the handlers need."""
 
     def transition_order(self, order_id: str, new_status: str) -> None: ...
-    def enqueue_task(self, agent: str, task_type: str,
-                     payload: dict[str, Any]) -> None: ...
-    def mark_odoo_synced(self, order_id: str, sale_id: int,
-                         invoice_id: int | None = None) -> None: ...
+    def enqueue_task(self, agent: str, task_type: str, payload: dict[str, Any]) -> None: ...
+    def mark_odoo_synced(
+        self, order_id: str, sale_id: int, invoice_id: int | None = None
+    ) -> None: ...
     def mark_odoo_failed(self, order_id: str, reason: str) -> None: ...
 
     # M5: POD / document pipeline
-    def upsert_document(self, order_id: str, doc_type: str, image_url: str | None,
-                        ocr_text: str | None, ocr_confidence: float | None,
-                        ocr_provider: str | None, uploaded_by: str | None) -> str: ...
+    def upsert_document(
+        self,
+        order_id: str,
+        doc_type: str,
+        image_url: str | None,
+        ocr_text: str | None,
+        ocr_confidence: float | None,
+        ocr_provider: str | None,
+        uploaded_by: str | None,
+    ) -> str: ...
 
     # M5: notification queue
-    def mark_notification_sent(self, notification_id: str,
-                               external_id: str | None = None) -> None: ...
-    def mark_notification_failed(self, notification_id: str,
-                                 reason: str | None = None) -> None: ...
-    def log_notification(self, user_id: str, channel: str, ntype: str,
-                         title: str, body: str, payload: dict | None = None,
-                         external_id: str | None = None,
-                         idempotency_key: str | None = None) -> None: ...
+    def mark_notification_sent(
+        self, notification_id: str, external_id: str | None = None
+    ) -> None: ...
+    def mark_notification_failed(self, notification_id: str, reason: str | None = None) -> None: ...
+    def log_notification(
+        self,
+        user_id: str,
+        channel: str,
+        ntype: str,
+        title: str,
+        body: str,
+        payload: dict | None = None,
+        external_id: str | None = None,
+        idempotency_key: str | None = None,
+    ) -> None: ...
 
     # M6: order lifecycle
     def generate_quote(self, order_id: str) -> dict | None: ...
-    def match_drivers(self, pickup_wkt: str, radius_m: float, limit: int,
-                      required_class: str | None,
-                      cargo_weight: float | None) -> list[dict]: ...
-    def assign_provider(self, order_id: str, provider_id: str,
-                        provider_type: str) -> None: ...
-    def validate_payment_plan(self, mode: str, total: float,
-                              advance: float) -> bool: ...
+    def match_drivers(
+        self,
+        pickup_wkt: str,
+        radius_m: float,
+        limit: int,
+        required_class: str | None,
+        cargo_weight: float | None,
+    ) -> list[dict]: ...
+    def assign_provider(self, order_id: str, provider_id: str, provider_type: str) -> None: ...
+    def validate_payment_plan(self, mode: str, total: float, advance: float) -> bool: ...
     def get_order(self, order_id: str) -> dict | None: ...
 
 
@@ -82,14 +99,12 @@ def process_payment_event(payload: dict[str, Any], db: Db) -> HandlerResult:
         return HandlerResult(False, {"error": msg[:200]})
 
     # Next hop in pipeline: mirror to Odoo (dedupe key reuse)
-    db.enqueue_task("order_management", "push_order_to_odoo",
-                    {"order_id": order_id})
+    db.enqueue_task("order_management", "push_order_to_odoo", {"order_id": order_id})
     return HandlerResult(True, {"advanced_to": "inventory_confirmed"})
 
 
 # ---------------------------------------------------------------- odoo push
-def push_order_to_odoo(payload: dict[str, Any], db: Db,
-                       odoo: OdooClient) -> HandlerResult:
+def push_order_to_odoo(payload: dict[str, Any], db: Db, odoo: OdooClient) -> HandlerResult:
     """Mirror the order into Odoo 18 CE (partner + sale.order)."""
     assert_can_call_external("order_management", "odoo")
 
@@ -124,8 +139,8 @@ HANDLER_TOOLS = {
 # M5 — Document / POD pipeline
 # =====================================================================
 
-def process_document_upload(payload: dict[str, Any], db: Db,
-                            ocr: OCRExtractor) -> HandlerResult:
+
+def process_document_upload(payload: dict[str, Any], db: Db, ocr: OCRExtractor) -> HandlerResult:
     """Driver uploads a document image → OCR extraction → order_documents.
 
     For POD docs, auto-transitions order to 'delivered' on success.
@@ -147,6 +162,7 @@ def process_document_upload(payload: dict[str, Any], db: Db,
     try:
         # Fetch image bytes from URL (stub: in production use httpx)
         import httpx as _httpx
+
         resp = _httpx.get(image_url, timeout=15.0)
         resp.raise_for_status()
         result = ocr.extract(resp.content, resp.headers.get("content-type", "image/jpeg"))
@@ -159,9 +175,13 @@ def process_document_upload(payload: dict[str, Any], db: Db,
 
     # Persist document
     doc_id = db.upsert_document(
-        order_id=str(order_id), doc_type=doc_type, image_url=image_url,
-        ocr_text=ocr_text, ocr_confidence=ocr_conf,
-        ocr_provider=ocr_prov, uploaded_by=payload.get("uploaded_by"),
+        order_id=str(order_id),
+        doc_type=doc_type,
+        image_url=image_url,
+        ocr_text=ocr_text,
+        ocr_confidence=ocr_conf,
+        ocr_provider=ocr_prov,
+        uploaded_by=payload.get("uploaded_by"),
     )
 
     # For POD documents, auto-advance state machine to delivered
@@ -175,20 +195,25 @@ def process_document_upload(payload: dict[str, Any], db: Db,
             else:
                 return HandlerResult(False, {"error": msg[:200], "doc_id": doc_id})
 
-    return HandlerResult(True, {
-        "doc_id": doc_id,
-        "ocr_provider": ocr_prov,
-        "ocr_confidence": ocr_conf,
-        "advanced_to": "delivered" if doc_type == "pod" else None,
-    })
+    return HandlerResult(
+        True,
+        {
+            "doc_id": doc_id,
+            "ocr_provider": ocr_prov,
+            "ocr_confidence": ocr_conf,
+            "advanced_to": "delivered" if doc_type == "pod" else None,
+        },
+    )
 
 
 # =====================================================================
 # M5 — Notification delivery
 # =====================================================================
 
-def process_notification_job(payload: dict[str, Any], db: Db,
-                             sender: NotificationSender) -> HandlerResult:
+
+def process_notification_job(
+    payload: dict[str, Any], db: Db, sender: NotificationSender
+) -> HandlerResult:
     """Dequeue → deliver → log.  Payload: {notification_id, user_id, channel,
     title, body, notification_type, payload: dict}.
     """
@@ -206,34 +231,44 @@ def process_notification_job(payload: dict[str, Any], db: Db,
         return HandlerResult(False, {"error": "missing user_id"})
 
     # Deliver via provider
-    result = sender.send(destination=str(user_id), title=title, body=body,
-                         payload=inner_payload)
+    result = sender.send(destination=str(user_id), title=title, body=body, payload=inner_payload)
 
     if result.ok:
         db.mark_notification_sent(str(notification_id), result.external_id)
         # Also log to notification_log for user visibility
         db.log_notification(
-            user_id=str(user_id), channel=channel, ntype=ntype,
-            title=title, body=body, payload=inner_payload,
+            user_id=str(user_id),
+            channel=channel,
+            ntype=ntype,
+            title=title,
+            body=body,
+            payload=inner_payload,
             external_id=result.external_id,
             idempotency_key=f"nq:{notification_id}",
         )
-        return HandlerResult(True, {
-            "notification_id": notification_id,
-            "provider": result.provider,
-            "external_id": result.external_id,
-        })
+        return HandlerResult(
+            True,
+            {
+                "notification_id": notification_id,
+                "provider": result.provider,
+                "external_id": result.external_id,
+            },
+        )
     else:
         db.mark_notification_failed(str(notification_id), result.error)
-        return HandlerResult(False, {
-            "notification_id": notification_id,
-            "error": result.error,
-        })
+        return HandlerResult(
+            False,
+            {
+                "notification_id": notification_id,
+                "error": result.error,
+            },
+        )
 
 
 # =====================================================================
 # M6 — Order lifecycle handlers
 # =====================================================================
+
 
 def place_order(payload: dict[str, Any], db: Db) -> HandlerResult:
     """Place a new order: validate payment plan → generate quote → persist.
@@ -264,10 +299,15 @@ def place_order(payload: dict[str, Any], db: Db) -> HandlerResult:
 
     # 2. Validate payment plan
     if not db.validate_payment_plan(mode, total, advance):
-        return HandlerResult(False, {
-            "error": "invalid_payment_plan",
-            "mode": mode, "total": total, "advance": advance,
-        })
+        return HandlerResult(
+            False,
+            {
+                "error": "invalid_payment_plan",
+                "mode": mode,
+                "total": total,
+                "advance": advance,
+            },
+        )
 
     # 3. Transition to pending (initial state)
     try:
@@ -279,12 +319,15 @@ def place_order(payload: dict[str, Any], db: Db) -> HandlerResult:
         else:
             return HandlerResult(False, {"error": msg[:200]})
 
-    return HandlerResult(True, {
-        "order_id": order_id,
-        "total_amount": total,
-        "quote": quote,
-        "payment_mode": mode,
-    })
+    return HandlerResult(
+        True,
+        {
+            "order_id": order_id,
+            "total_amount": total,
+            "quote": quote,
+            "payment_mode": mode,
+        },
+    )
 
 
 def assign_driver(payload: dict[str, Any], db: Db) -> HandlerResult:
@@ -321,15 +364,17 @@ def assign_driver(payload: dict[str, Any], db: Db) -> HandlerResult:
     drivers = db.match_drivers(pickup_wkt, radius, limit, req_class, cargo_wt)
 
     if not drivers:
-        return HandlerResult(True, {"order_id": order_id, "drivers": [],
-                                    "note": "no_available_drivers"})
+        return HandlerResult(
+            True, {"order_id": order_id, "drivers": [], "note": "no_available_drivers"}
+        )
 
     # Pick best driver (first by score)
     best = drivers[0]
     provider_id = str(best.get("user_id") or best.get("driver_id", ""))
     if not provider_id:
-        return HandlerResult(True, {"order_id": order_id, "drivers": drivers,
-                                    "note": "no_valid_provider_id"})
+        return HandlerResult(
+            True, {"order_id": order_id, "drivers": drivers, "note": "no_valid_provider_id"}
+        )
 
     # Assign provider to order
     db.assign_provider(str(order_id), provider_id, "driver")
@@ -344,15 +389,18 @@ def assign_driver(payload: dict[str, Any], db: Db) -> HandlerResult:
         else:
             return HandlerResult(False, {"error": msg[:200]})
 
-    return HandlerResult(True, {
-        "order_id": order_id,
-        "driver_name": best.get("driver_name"),
-        "provider_id": provider_id,
-        "vehicle_type": best.get("vehicle_type"),
-        "distance_m": best.get("distance_m"),
-        "score": best.get("score"),
-        "drivers_found": len(drivers),
-    })
+    return HandlerResult(
+        True,
+        {
+            "order_id": order_id,
+            "driver_name": best.get("driver_name"),
+            "provider_id": provider_id,
+            "vehicle_type": best.get("vehicle_type"),
+            "distance_m": best.get("distance_m"),
+            "score": best.get("score"),
+            "drivers_found": len(drivers),
+        },
+    )
 
 
 def update_delivery_status(payload: dict[str, Any], db: Db) -> HandlerResult:
@@ -380,9 +428,7 @@ def update_delivery_status(payload: dict[str, Any], db: Db) -> HandlerResult:
     except Exception as exc:
         msg = str(exc)
         if "Invalid transition" in msg or "already" in msg.lower():
-            return HandlerResult(True, {"note": "idempotent no-op",
-                                        "action": action})
+            return HandlerResult(True, {"note": "idempotent no-op", "action": action})
         return HandlerResult(False, {"error": msg[:200]})
 
-    return HandlerResult(True, {"order_id": order_id, "action": action,
-                                "advanced_to": new_status})
+    return HandlerResult(True, {"order_id": order_id, "action": action, "advanced_to": new_status})

@@ -44,6 +44,16 @@ target-version = "py312"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "N", "W", "UP", "B", "C4"]
+ignore = [
+    "N818",   # Exception naming (pre-existing: UnauthorizedCapability, IllegalTransition)
+    "N817",   # CamelCase import aliases (pre-existing: ExecutionState as ES)
+    "N806",   # Variable naming in functions (pre-existing: _ACTION_TO_STATUS)
+    "UP042",  # StrEnum inheritance (pre-existing: class X(str, Enum))
+    "UP035",  # collections.abc imports (pre-existing: from typing import Callable)
+    "E501",   # Line length (pre-existing: long lines in kernel/state_machine)
+    "B007",   # Unused loop variable (pre-existing: for i in range)
+    "B011",   # assert False (pre-existing in tests)
+]
 
 [tool.mypy]
 python_version = "3.12"

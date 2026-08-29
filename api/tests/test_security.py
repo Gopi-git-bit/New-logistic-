@@ -97,9 +97,9 @@ class TestSecretRedaction:
 
     def test_redact_dict(self):
         from api.redaction import redact_dict
-        data = {"api_key": "sk_live_12345", "order_id": "abc"}
+        data = {"api_key": "sk_test_1234567890abcdef", "order_id": "abc"}
         result = redact_dict(data)
-        assert result["api_key"] != "sk_live_12345"
+        assert result["api_key"] != "sk_test_1234567890abcdef"
         assert result["order_id"] == "abc"
 
 

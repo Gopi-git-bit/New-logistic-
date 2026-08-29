@@ -33,8 +33,9 @@ class NotificationSender(Protocol):
     @property
     def provider_name(self) -> str: ...
 
-    def send(self, destination: str, title: str, body: str,
-             payload: dict | None = None) -> DeliveryResult: ...
+    def send(
+        self, destination: str, title: str, body: str, payload: dict | None = None
+    ) -> DeliveryResult: ...
 
 
 class StubSender:
@@ -44,17 +45,16 @@ class StubSender:
     def provider_name(self) -> str:
         return "stub"
 
-    def send(self, destination: str, title: str, body: str,
-             payload: dict | None = None) -> DeliveryResult:
-        return DeliveryResult(ok=True, provider="stub",
-                              external_id=f"stub_{uuid.uuid4().hex[:8]}")
+    def send(
+        self, destination: str, title: str, body: str, payload: dict | None = None
+    ) -> DeliveryResult:
+        return DeliveryResult(ok=True, provider="stub", external_id=f"stub_{uuid.uuid4().hex[:8]}")
 
 
 class TwilioSMSSender:
     """Stub for Twilio SMS (replace with real SDK when credentials land)."""
 
-    def __init__(self, account_sid: str = "", auth_token: str = "",
-                 from_number: str = ""):
+    def __init__(self, account_sid: str = "", auth_token: str = "", from_number: str = ""):
         self._sid = account_sid or os.getenv("TWILIO_ACCOUNT_SID", "")
         self._token = auth_token or os.getenv("TWILIO_AUTH_TOKEN", "")
         self._from = from_number or os.getenv("TWILIO_FROM_NUMBER", "")
@@ -63,14 +63,17 @@ class TwilioSMSSender:
     def provider_name(self) -> str:
         return "twilio_sms"
 
-    def send(self, destination: str, title: str, body: str,
-             payload: dict | None = None) -> DeliveryResult:
+    def send(
+        self, destination: str, title: str, body: str, payload: dict | None = None
+    ) -> DeliveryResult:
         if not self._sid or not self._token:
-            return DeliveryResult(ok=False, provider="twilio_sms",
-                                  error="twilio credentials not configured")
+            return DeliveryResult(
+                ok=False, provider="twilio_sms", error="twilio credentials not configured"
+            )
         # TODO: replace with real twilio SDK call
-        return DeliveryResult(ok=True, provider="twilio_sms",
-                              external_id=f"tw_{uuid.uuid4().hex[:8]}")
+        return DeliveryResult(
+            ok=True, provider="twilio_sms", external_id=f"tw_{uuid.uuid4().hex[:8]}"
+        )
 
 
 class ResendEmailSender:
@@ -84,14 +87,17 @@ class ResendEmailSender:
     def provider_name(self) -> str:
         return "resend_email"
 
-    def send(self, destination: str, title: str, body: str,
-             payload: dict | None = None) -> DeliveryResult:
+    def send(
+        self, destination: str, title: str, body: str, payload: dict | None = None
+    ) -> DeliveryResult:
         if not self._key:
-            return DeliveryResult(ok=False, provider="resend_email",
-                                  error="resend api key not configured")
+            return DeliveryResult(
+                ok=False, provider="resend_email", error="resend api key not configured"
+            )
         # TODO: replace with real resend SDK call
-        return DeliveryResult(ok=True, provider="resend_email",
-                              external_id=f"re_{uuid.uuid4().hex[:8]}")
+        return DeliveryResult(
+            ok=True, provider="resend_email", external_id=f"re_{uuid.uuid4().hex[:8]}"
+        )
 
 
 def make_notification_sender(channel: str | None = None) -> NotificationSender:
