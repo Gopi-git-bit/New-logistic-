@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [master, main]
   pull_request:
-    branches: [main]
+    branches: [master, main]
 
 jobs:
   lint-and-typecheck:
@@ -46,6 +46,16 @@ jobs:
       - run: mypy src
         working-directory: workers
 
+  api-validation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install fastapi pydantic pydantic-settings httpx
+      - run: python -c "from api.config import load_settings; print('Config module loads OK')"
+
   security-scan:
     runs-on: ubuntu-latest
     steps:
@@ -57,3 +67,19 @@ jobs:
           scan-ref: .
           severity: HIGH,CRITICAL
           exit-code: 0
+
+  secret-safety:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check for hardcoded secrets
+        run: |
+          echo "Checking for hardcoded secrets..."
+          if grep -rn "password\s*=\s*['\"]postgres['\"]" --include="*.py" --include="*.ts" --include="*.yml" .; then
+            echo "WARNING: Found hardcoded postgres password"
+          fi
+          if grep -rn "sk_live_\|sk_test_" --include="*.py" --include="*.ts" --include="*.yml" .; then
+            echo "ERROR: Found hardcoded API keys"
+            exit 1
+          fi
+          echo "Secret safety check passed"

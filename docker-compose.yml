@@ -6,15 +6,15 @@ services:
     container_name: zippy-db
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-      POSTGRES_DB: ${POSTGRES_DB:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+      POSTGRES_DB: ${POSTGRES_DB:-zippy}
     ports:
       - "${POSTGRES_PORT:-54322}:5432"
     volumes:
       - zippy_postgres_data:/var/lib/postgresql/data
       - ./supabase/migrations:/docker-entrypoint-initdb.d:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-postgres}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-zippy}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -42,7 +42,7 @@ services:
     environment:
       HOST: db
       USER: ${POSTGRES_USER:-postgres}
-      PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      PASSWORD: ${POSTGRES_PASSWORD:-changeme}
       DB_NAME: ${ODOO_DB:-odoo18}
     ports:
       - "8069:8069"
@@ -73,11 +73,84 @@ services:
       dockerfile: Dockerfile
     container_name: zippy-workers
     environment:
+      # Critical
       - DATABASE_URL=${DATABASE_URL}
-      - REDIS_URL=${REDIS_URL}
-      - ODOO_URL=${ODOO_URL}
+      - SUPABASE_URL=${SUPABASE_URL:-http://db:54321}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+      # Razorpay
+      - RAZORPAY_KEY_ID=${RAZORPAY_KEY_ID}
+      - RAZORPAY_KEY_SECRET=${RAZORPAY_KEY_SECRET}
+      - RAZORPAY_WEBHOOK_SECRET=${RAZORPAY_WEBHOOK_SECRET}
+      # Odoo
+      - ODOO_URL=${ODOO_URL:-http://odoo:8069}
+      - ODOO_DB=${ODOO_DB:-odoo18}
+      - ODOO_USER=${ODOO_USER:-zippy-integration}
+      - ODOO_API_KEY=${ODOO_API_KEY}
+      # Paperclip
+      - PAPERCLIP_URL=${PAPERCLIP_URL}
+      - PAPERCLIP_API_KEY=${PAPERCLIP_API_KEY}
+      # Hermes
+      - HERMES_API_URL=${HERMES_API_URL}
+      - HERMES_API_KEY=${HERMES_API_KEY}
+      # Redis
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379/0}
+      # AI
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+      - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY}
+      - MODEL_PLANNING=${MODEL_PLANNING:-deepseek-v4-pro}
+      - MODEL_FAST=${MODEL_FAST:-deepseek-v4-flash}
+      # Observability (optional)
       - LANGFUSE_HOST=${LANGFUSE_HOST}
+      - LANGFUSE_PUBLIC_KEY=${LANGFUSE_PUBLIC_KEY}
+      - LANGFUSE_SECRET_KEY=${LANGFUSE_SECRET_KEY}
+      # Memory (optional)
       - HONCHO_API_URL=${HONCHO_API_URL}
+      - HONCHO_API_KEY=${HONCHO_API_KEY}
+      # Governance
+      - MAX_TOOL_CALLS_PER_TICK=${MAX_TOOL_CALLS_PER_TICK:-20}
+      - AGENT_DAILY_BUDGET_USD=${AGENT_DAILY_BUDGET_USD:-50.00}
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - zippy
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: zippy-api
+    ports:
+      - "8000:8000"
+    environment:
+      # Critical
+      - DATABASE_URL=${DATABASE_URL}
+      - SUPABASE_URL=${SUPABASE_URL:-http://db:54321}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+      - SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
+      # Razorpay
+      - RAZORPAY_KEY_ID=${RAZORPAY_KEY_ID}
+      - RAZORPAY_KEY_SECRET=${RAZORPAY_KEY_SECRET}
+      - RAZORPAY_WEBHOOK_SECRET=${RAZORPAY_WEBHOOK_SECRET}
+      # Odoo
+      - ODOO_URL=${ODOO_URL:-http://odoo:8069}
+      - ODOO_DB=${ODOO_DB:-odoo18}
+      - ODOO_USER=${ODOO_USER:-zippy-integration}
+      - ODOO_API_KEY=${ODOO_API_KEY}
+      # Paperclip
+      - PAPERCLIP_URL=${PAPERCLIP_URL}
+      - PAPERCLIP_API_KEY=${PAPERCLIP_API_KEY}
+      # Hermes
+      - HERMES_API_URL=${HERMES_API_URL}
+      - HERMES_API_KEY=${HERMES_API_KEY}
+      # Redis
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379/0}
+      # App
+      - APP_ENV=${APP_ENV:-development}
+      - APP_BASE_URL=${APP_BASE_URL:-http://localhost:3000}
+      - API_BASE_URL=${API_BASE_URL:-http://localhost:8000}
     depends_on:
       db:
         condition: service_healthy
@@ -97,6 +170,7 @@ services:
     depends_on:
       - portal
       - console
+      - api
     networks:
       - zippy
 
