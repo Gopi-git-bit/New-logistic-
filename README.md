@@ -123,7 +123,7 @@ node --experimental-strip-types apps/portal/scripts/test-webhooks.mts
 - **Decisions log**: [`docs/DECISIONS.md`](./docs/DECISIONS.md)
 - **PRD v2 source**: `docs/PRD/PRD-Zippy-Logistics-Control-Plane-v2.0.md`
 - Deterministic business logic must be implemented before agent autonomy (M7+ gates)
-- No Kubernetes, Kafka, Celery, Django, FastAPI, or n8n per PRD v2 canonical decisions
+- No Kubernetes, Kafka, Celery, Django, or n8n per PRD v2 canonical decisions
 
 ## License
 
