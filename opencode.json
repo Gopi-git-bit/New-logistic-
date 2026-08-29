@@ -52,7 +52,7 @@
           "npx",
           "-y",
           "apidog-mcp-server@latest",
-          "--project-id=YOUR_PROJECT_ID"
+          "--project-id=1368748"
         ],
         "environment": {
           "APIDOG_ACCESS_TOKEN": "{env:APIDOG_ACCESS_TOKEN}"
