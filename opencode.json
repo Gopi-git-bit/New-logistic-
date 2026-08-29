@@ -30,6 +30,7 @@
   "instructions": [
     "docs/soul.md",
     "docs/DECISIONS.md",
+    "docs/API-RELIABILITY-SECURITY.md",
     ".github/copilot-instructions.md"
   ],
   "watcher": {
