@@ -69,15 +69,18 @@ def redact_string(text: str) -> str:
     result = text
     for pattern in SENSITIVE_PATTERNS:
         # Match patterns like "KEY=value" or "KEY: value"
+        # Strip trailing $ anchor for the key-matching portion, but keep the rest
+        raw = pattern.pattern
+        key_part = raw.rstrip("$")
         matches = re.finditer(
-            rf"({pattern.pattern[:-1]}[=:\s]+)([^\s,;]+)",
+            rf"({key_part}[=:\s]+)([^\s,;]+)",
             result,
             re.IGNORECASE,
         )
         for match in matches:
             original = match.group(0)
-            key_part = match.group(1)
+            key_group = match.group(1)
             val_part = match.group(2)
-            redacted = f"{key_part}{redact_value(val_part)}"
+            redacted = f"{key_group}{redact_value(val_part)}"
             result = result.replace(original, redacted)
     return result
