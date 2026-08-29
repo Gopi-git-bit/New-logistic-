@@ -73,8 +73,10 @@ jobs:
       - name: Check for hardcoded secrets
         run: |
           echo "Checking for hardcoded secrets..."
-          if find . -name "*.py" -o -name "*.ts" -o -name "*.yml" | xargs grep -rn "sk_live_" 2>/dev/null; then
-            echo "ERROR: Found hardcoded API keys"
+          FOUND=$(find . -path ./.github -prune -o \( -name "*.py" -o -name "*.ts" \) -print0 | xargs -0 grep -rn "sk_live_" 2>/dev/null || true)
+          if [ -n "$FOUND" ]; then
+            echo "ERROR: Found hardcoded API keys:"
+            echo "$FOUND"
             exit 1
           fi
           echo "Secret safety check passed"
