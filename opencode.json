@@ -1,0 +1,80 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "model": "deepseek/deepseek-chat",
+  "small_model": "deepseek/deepseek-chat",
+  "autoupdate": true,
+  "snapshot": true,
+  "compaction": {
+    "auto": true,
+    "prune": false,
+    "reserved": 10000
+  },
+  "permission": {
+    "write": "ask",
+    "edit": "ask",
+    "bash": "ask"
+  },
+  "tools": {
+    "write": true,
+    "edit": true,
+    "bash": true,
+    "glob": true,
+    "grep": true,
+    "read": true,
+    "task": true,
+    "webfetch": true,
+    "websearch": true
+  },
+  "formatter": true,
+  "lsp": true,
+  "instructions": [
+    "docs/soul.md",
+    "docs/DECISIONS.md",
+    ".github/copilot-instructions.md"
+  ],
+  "watcher": {
+    "ignore": [
+      "node_modules/**",
+      "dist/**",
+      ".next/**",
+      "build/**",
+      ".git/**",
+      "workers/.venv/**",
+      "workers/.pytest_cache/**",
+      "**/__pycache__/**"
+    ]
+  },
+  "agent": {
+    "zippy-backend": {
+      "description": "Backend agent for Supabase RPCs, PostGIS, pgvector, Python workers",
+      "prompt": "You are a backend engineer for Zippy Logistics. You work with PostgreSQL 16 + PostGIS + pgvector, Supabase RPCs, and Python 3.11 workers. Always follow the PRD-database.md specs. Never bypass RLS. Never mutate orders.status directly - use transition_order(). Use verify SQL suites to validate changes.",
+      "tools": {
+        "write": true,
+        "edit": true,
+        "bash": true
+      }
+    },
+    "zippy-frontend": {
+      "description": "Frontend agent for Next.js 15 portal and Vite 6 console",
+      "prompt": "You are a frontend engineer for Zippy Logistics. You work with Next.js 15 App Router (portal) and Vite 6 + React 19 (console). Follow PRD-frontend.md specs. Use the design system colors: Primary Teal #009688, Customer Orange #FF9800, Provider Purple #9C27B0.",
+      "tools": {
+        "write": true,
+        "edit": true,
+        "bash": true
+      }
+    },
+    "zippy-agent": {
+      "description": "AI agent engineer for LoopGuardian, Hermes, Paperclip, Honcho",
+      "prompt": "You are an AI agent engineer for Zippy Logistics. You work with the agent control plane, LoopGuardian safety gates, task queue, and agent communication. Follow PRD-agents.md specs. All agents must pass LoopGuardian checks. No agent can self-approve.",
+      "tools": {
+        "write": true,
+        "edit": true,
+        "bash": true
+      }
+    },
+    "plan": {
+      "description": "Planning agent that creates implementation plans",
+      "prompt": "You are a planning agent for Zippy Logistics. Create detailed implementation plans before any code changes. Reference docs/soul.md for non-negotiables. Check docs/DECISIONS.md for existing decisions. Output step-by-step plans with file paths and verification commands."
+    }
+  }
+}
