@@ -2,9 +2,20 @@
 
 > Current state of the project. Updated after each milestone completion.
 
-## Current Phase: M6 Complete ✅
+## Current Phase: M6 Complete ✅ + Architecture Correction
 
-**Last updated**: 2026-08-28
+**Last updated**: 2026-08-29
+
+## Architecture Correction (D-09)
+
+Backend execution model corrected:
+- **FastAPI** — Application API layer
+- **Qoder Wake** — Autonomous backend engineering/execution
+- **Paperclip** — Governance authority
+- **Hermes** — Approved tool/API execution
+- **Odoo 18** — ERP / financial system of record
+- **Apidog/OpenAPI** — API contract
+- **No Temporal** — Background execution via PostgreSQL queues + Python workers
 
 ## Completed Milestones
 

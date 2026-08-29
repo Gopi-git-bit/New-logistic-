@@ -24,15 +24,53 @@ Zippy Logistics is an AI-augmented logistics platform that connects MSMEs/shippe
 | **Idempotency is mandatory** | Every mutation must be idempotent. Use `idempotency_key` for bookings, payments, webhooks |
 | **Agents don't approve themselves** | No agent can approve its own HITL decisions or bypass Paperclip decision-locks |
 | **Odoo is system of record** | All financial data (invoices, payments, settlements) flows through Odoo 18 CE |
+| **No Temporal** | Background execution via PostgreSQL queues + Python workers only |
 
 ## Architecture Decisions (Canonical)
 
 - **No Kubernetes** — VPS + Docker Compose
 - **No Kafka/Celery** — PostgreSQL LISTEN/NOTIFY + Python workers
-- **No Django/FastAPI** — Supabase (Postgres RPC) + Next.js API routes
+- **No Temporal** — Background execution via PostgreSQL queues + Python workers
 - **No n8n** — Python-native workflow orchestration
 - **Razorpay primary, Stripe failover** — Payment processing
 - **Hostinger VPS + Vercel** — Deployment
+
+## Backend Execution Model
+
+```
+Client / FlutterFlow / Next.js
+    ↓
+FastAPI / Switch Point API
+    ↓
+validation + authentication + authorization
+    ↓
+Supabase/PostgreSQL operational transaction
+    ↓
+queue / worker / background execution where required
+    ↓
+Paperclip governance
+    ↓
+Hermes approved tool execution
+    ↓
+Odoo / Razorpay / communications / other external system
+    ↓
+result persisted into Zippy operational state
+    ↓
+API / realtime update to clients
+```
+
+### Component Roles
+
+| Component | Role |
+|-----------|------|
+| **FastAPI** | Application API layer |
+| **Supabase/PostgreSQL** | Operational database |
+| **Qoder Wake** | Autonomous backend engineering/execution layer |
+| **Paperclip** | Governance authority |
+| **Hermes** | Approved tool/API execution |
+| **Odoo 18** | ERP / financial system of record |
+| **Apidog/OpenAPI** | API contract |
+| **Background Workers** | Async jobs where required by implemented architecture |
 
 ## Stack
 
@@ -40,12 +78,15 @@ Zippy Logistics is an AI-augmented logistics platform that connects MSMEs/shippe
 |-------|------------|
 | Frontend (Customer) | Next.js 15 App Router |
 | Frontend (Admin/Driver) | Vite 6 + React 19 |
-| Backend | Supabase (Postgres RPC, RLS, Realtime) |
-| Workers | Python 3.11/3.12 headless runners |
+| Backend API | FastAPI |
+| Backend Engineering | Qoder Wake |
+| Governance | Paperclip |
+| Tool Execution | Hermes |
 | Database | PostgreSQL 16 + PostGIS + pgvector |
 | AI Models | DeepSeek (primary), OpenRouter routing |
 | Observability | Langfuse |
 | ERP | Odoo 18 CE (system of record) |
+| API Contract | Apidog/OpenAPI |
 | Payments | Razorpay (primary), Stripe (failover) |
 | Maps | Mapbox |
 | Orchestration | Docker Compose (local), VPS (production) |
@@ -64,3 +105,44 @@ Zippy Logistics is an AI-augmented logistics platform that connects MSMEs/shippe
 ```
 
 All agents operate under LoopGuardian constraints. No agent has unilateral power. The Platform Administration Agent has oversight authority over all other agents.
+
+## Qoder Wake Scope
+
+Qoder Wake is the backend engineering and autonomous execution environment. It is responsible for:
+
+- Backend code generation and maintenance
+- API implementation
+- Service-layer implementation
+- Database-access-layer implementation
+- Integration adapters
+- Background worker implementation
+- Tests
+- Migrations
+- Operational bug fixing
+- Implementation of Paperclip/Hermes interfaces
+- Implementation of Apidog/OpenAPI contracts
+
+### Qoder Wake Constraints
+
+Qoder Wake must NOT:
+- Be the system of record
+- Be the governance authority
+- Be the financial ledger
+- Be the API contract owner
+- Replace PostgreSQL transaction guarantees
+- Sit inside every runtime business transaction
+
+## Background Execution Review Criteria
+
+For each asynchronous workflow, identify:
+
+1. Triggering event
+2. Persisted state
+3. Worker/consumer
+4. Retry policy
+5. Idempotency mechanism
+6. Locking/concurrency protection
+7. Terminal failure state
+8. Recovery mechanism
+9. Audit/observability
+10. Compensation behavior where applicable

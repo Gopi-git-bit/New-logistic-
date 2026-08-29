@@ -1,16 +1,44 @@
-# PRD — Backend (§7, §8, §9 Supabase, RPCs, Webhooks, Idempotency)
+# PRD — Backend (§7, §8, §9 FastAPI, Supabase, RPCs, Webhooks, Idempotency)
 
 > Source of truth for all backend specifications.
 
 ## 1. Backend Architecture
 
-**Primary**: Supabase (Postgres RPC, RLS, Realtime)
-**Secondary**: Next.js API routes (portal webhooks)
-**Workers**: Python 3.11/3.12 headless runners
+**Primary API Layer**: FastAPI
+**Database**: Supabase (PostgreSQL 16 + PostGIS + pgvector)
+**Backend Engineering**: Qoder Wake
+**Governance**: Paperclip
+**Tool Execution**: Hermes
+**ERP**: Odoo 18 CE (system of record)
+**API Contract**: Apidog/OpenAPI
 
-**Forbidden**: Django, FastAPI, n8n, Kafka, Celery (per PRD v2 canonical decisions)
+**Forbidden**: Django, n8n, Kafka, Celery, Temporal (per PRD v2 canonical decisions)
 
-## 2. Supabase RPC Functions
+## 2. Request Flow
+
+```
+Client / FlutterFlow / Next.js
+    ↓
+FastAPI / Switch Point API
+    ↓
+validation + authentication + authorization
+    ↓
+Supabase/PostgreSQL operational transaction
+    ↓
+queue / worker / background execution where required
+    ↓
+Paperclip governance
+    ↓
+Hermes approved tool execution
+    ↓
+Odoo / Razorpay / communications / other external system
+    ↓
+result persisted into Zippy operational state
+    ↓
+API / realtime update to clients
+```
+
+## 3. Supabase RPC Functions
 
 ### Order Lifecycle
 - `transition_order(order_id, new_status, actor_id, actor_role, reason)` — SECURITY DEFINER state machine
@@ -45,7 +73,7 @@
 - `revive_dead_webhooks()` — Retry dead webhooks
 - `stale_processing_payments()` — Detect stuck payments
 
-## 3. Webhook Integration
+## 4. Webhook Integration
 
 ### Razorpay Webhooks
 - **Endpoint**: `/api/webhooks/razorpay` (public, POST)
@@ -58,7 +86,7 @@
 - `payment.failed` → Payment failed → retry logic
 - `payment.refunded` → Refund processed → update financial records
 
-## 4. Idempotency Patterns
+## 5. Idempotency Patterns
 
 | Operation | Idempotency Key | Table |
 |-----------|----------------|-------|
@@ -69,36 +97,39 @@
 | Notification | `idempotency_key` | `notification_queue` |
 | Document upload | `order_id + document_type` | `order_documents` |
 
-## 5. Worker Architecture
+## 6. Background Execution Architecture
 
-### Kernel (Heartbeat Loop)
-- 15-second tick interval
-- Claims tasks via `claim_agent_task()` (SKIP LOCKED)
-- Dispatches to agent-specific handlers
-- LoopGuardian gates: cap, malformed, hallucination, infinite-loop
+### Durability Without Temporal
 
-### Handlers
-- `place_order(payload, db)` → Quote → Validate → Status 'pending'
-- `assign_driver(payload, db)` → Match → Assign → Status 'driver_assigned'
-- `update_delivery_status(payload, db)` → Status advance (pickup/delivered)
-- `process_document_upload(payload, db)` → OCR → Upsert → Auto-transition
-- `process_notification_job(payload, db)` → Deliver → Mark sent/failed
+The repository uses PostgreSQL queues + Python workers for background execution:
 
-### Agent Capabilities
-| Agent | Allowed Tools |
-|-------|---------------|
-| customer_service | place_order, update_delivery_status, send_notification |
-| order_management | place_order, assign_driver, update_delivery_status, generate_quote |
-| transportation | update_delivery_status, match_drivers |
-| resource_management | match_drivers, assign_driver |
-| payment_settlement | validate_payment_plan |
-| platform_administration | All (oversight) |
-| communication | send_notification |
-| document_processing | process_document_upload |
+| Workflow | Trigger | State | Worker | Retry | Idempotency | Locking | Terminal State | Recovery |
+|----------|---------|-------|--------|-------|-------------|---------|----------------|----------|
+| Agent tasks | `enqueue_agent_task()` | `agent_tasks` table | `claim_agent_task()` | 3 attempts | `dedupe_key` | SKIP LOCKED | dead_letter | Manual review |
+| Notifications | `enqueue_notification()` | `notification_queue` | `grab_notification_jobs()` | Exponential backoff | `idempotency_key` | SKIP LOCKED | permanent_failure | Manual review |
+| Odoo sync | Payment event | `orders.odoo_sync_status` | `handlers.py` | 3 attempts | Order ID | SELECT FOR UPDATE | sync_failed | Retry button |
+| Webhooks | External HTTP | `webhook_events` | `sweep_dead_webhooks()` | Revive once | `event_id` | SKIP LOCKED | dead | Manual review |
+| Payment reconciliation | Scheduled | `payments` | `stale_processing_payments()` | None | Payment ID | SELECT FOR UPDATE | stuck | Admin alert |
 
-## 6. Security
+### Worker Recovery
+
+Each worker type implements:
+
+1. **Triggering event**: What starts the job
+2. **Persisted state**: Database record tracking job status
+3. **Worker/consumer**: Which process handles it
+4. **Retry policy**: How many retries, backoff strategy
+5. **Idempotency mechanism**: How duplicates are prevented
+6. **Locking/concurrency**: How concurrent access is handled
+7. **Terminal failure state**: What happens when all retries exhausted
+8. **Recovery mechanism**: How to recover from failure
+9. **Audit/observability**: How to track job execution
+10. **Compensation behavior**: How to undo if needed
+
+## 7. Security
 
 ### Row Level Security (RLS)
+
 - Users read/update only their own `users` row
 - Customers see only their own orders and profiles
 - Drivers see only their own profile, assigned orders, telemetry
@@ -107,10 +138,40 @@
 - Telemetry INSERT open to authenticated service accounts
 
 ### Authentication
-- Supabase Auth (JWT tokens)
-- `auth.uid()` / `auth.role()` stubs for vanilla Postgres
+
+- Supabase Auth (JWT tokens) for client-facing APIs
+- Service identity for internal Zippy services
+- Dedicated agent identity for Hermes
+- Separate governance identity for Paperclip
+- Isolated integration credential for Odoo connector
 
 ### API Security
+
 - Service role key never exposed to client
 - Webhook HMAC verification
 - Rate limiting on public endpoints
+- See `docs/API-RELIABILITY-SECURITY.md` for full contract
+
+## 8. Qoder Wake Integration
+
+Qoder Wake is the backend engineering and autonomous execution environment. It implements:
+
+- Backend code generation and maintenance
+- API implementation
+- Service-layer implementation
+- Database-access-layer implementation
+- Integration adapters
+- Background worker implementation
+- Tests
+- Migrations
+- Operational bug fixing
+- Implementation of Paperclip/Hermes interfaces
+- Implementation of Apidog/OpenAPI contracts
+
+### Qoder Wake Constraints
+
+- Must NOT be the system of record
+- Must NOT be the governance authority
+- Must NOT be the financial ledger
+- Must NOT replace PostgreSQL transaction guarantees
+- Must NOT sit inside every runtime business transaction

@@ -21,6 +21,7 @@
 | D-06 | 2026-08-15 | `validate_payment_plan` full mode = 100% advance | Business rule: full payment means full advance | Handler auto-sets advance=total | @Gopi |
 | D-07 | 2026-08-28 | Move workers/ to root level | PRD canonical structure | Repository reorganization | @Gopi |
 | D-08 | 2026-08-29 | API Reliability & Security Contract | Autonomous-agent-safe API specification | New doc `docs/API-RELIABILITY-SECURITY.md` | @Gopi |
+| D-09 | 2026-08-29 | Backend Execution Model Correction | FastAPI + Qoder Wake + Paperclip + Hermes + Odoo 18; No Temporal | Updated soul.md, PRD-backend.md, PRD-agents.md, copilot-instructions.md | @Gopi |
 
 ## Pending Decisions
 
