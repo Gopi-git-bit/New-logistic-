@@ -20,6 +20,8 @@ class Settings:
     database_url: str = ""
     supabase_url: str = ""
     supabase_service_role_key: str = ""
+    supabase_jwt_secret: str = ""
+    postgres_password: str = ""
 
     # === Razorpay (critical for payments) ===
     razorpay_key_id: str = ""
@@ -114,6 +116,8 @@ def load_settings() -> Settings:
         database_url=_require("DATABASE_URL"),
         supabase_url=_require("SUPABASE_URL"),
         supabase_service_role_key=_require("SUPABASE_SERVICE_ROLE_KEY"),
+        supabase_jwt_secret=_require("SUPABASE_JWT_SECRET"),
+        postgres_password=_require("POSTGRES_PASSWORD"),
         # Razorpay
         razorpay_key_id=_require("RAZORPAY_KEY_ID"),
         razorpay_key_secret=_require("RAZORPAY_KEY_SECRET"),
@@ -178,6 +182,10 @@ def validate_required(settings: Settings) -> list[str]:
         missing.append("SUPABASE_URL")
     if not settings.supabase_service_role_key:
         missing.append("SUPABASE_SERVICE_ROLE_KEY")
+    if not settings.supabase_jwt_secret:
+        missing.append("SUPABASE_JWT_SECRET")
+    if not settings.postgres_password:
+        missing.append("POSTGRES_PASSWORD")
     if not settings.razorpay_key_id:
         missing.append("RAZORPAY_KEY_ID")
     if not settings.razorpay_key_secret:

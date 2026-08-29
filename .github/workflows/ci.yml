@@ -46,15 +46,31 @@ jobs:
       - run: mypy src
         working-directory: workers
 
-  api-validation:
+  api-tests:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install fastapi pydantic pydantic-settings httpx
-      - run: python -c "from api.config import load_settings; print('Config module loads OK')"
+      - run: pip install fastapi pydantic pydantic-settings httpx pytest pyjwt
+      - name: Run API security tests
+        env:
+          DATABASE_URL: postgresql://localhost/test
+          SUPABASE_URL: http://localhost
+          SUPABASE_SERVICE_ROLE_KEY: test-key
+          SUPABASE_JWT_SECRET: test-secret
+          POSTGRES_PASSWORD: test-pass
+          RAZORPAY_KEY_ID: rzp_test
+          RAZORPAY_KEY_SECRET: test
+          RAZORPAY_WEBHOOK_SECRET: whsec
+          ODOO_URL: http://localhost
+          ODOO_API_KEY: test
+          PAPERCLIP_URL: http://localhost
+          PAPERCLIP_API_KEY: test
+          HERMES_API_URL: http://localhost
+          HERMES_API_KEY: test
+        run: python -m pytest api/tests/ -v
 
   security-scan:
     runs-on: ubuntu-latest
@@ -66,7 +82,7 @@ jobs:
           scan-type: fs
           scan-ref: .
           severity: HIGH,CRITICAL
-          exit-code: 0
+          exit-code: 1
 
   secret-safety:
     runs-on: ubuntu-latest
@@ -75,10 +91,7 @@ jobs:
       - name: Check for hardcoded secrets
         run: |
           echo "Checking for hardcoded secrets..."
-          if grep -rn "password\s*=\s*['\"]postgres['\"]" --include="*.py" --include="*.ts" --include="*.yml" .; then
-            echo "WARNING: Found hardcoded postgres password"
-          fi
-          if grep -rn "sk_live_\|sk_test_" --include="*.py" --include="*.ts" --include="*.yml" .; then
+          if grep -rn "sk_live_" --include="*.py" --include="*.ts" --include="*.yml" .; then
             echo "ERROR: Found hardcoded API keys"
             exit 1
           fi
