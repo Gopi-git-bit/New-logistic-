@@ -11,6 +11,7 @@ Applied in filename order by Docker entrypoint (`db` service) or `supabase db pu
 | `00000000000004_auth_stub.sql` | Minimal `auth.uid()`/`auth.role()` compatibility for vanilla Postgres |
 | `00000000000005_rls_policies.sql` | Row-Level Security on all tables |
 | `00000000000006_seed_data.sql` | Local dev/E2E seed data |
+| `00000000000007_operational_completion.sql` | Multi-tenancy, trips, dispatch offers, exceptions, idempotency, webhook inbox, outbox, external refs, financial requests, payment events, doc verification, SLAs, operational events |
 
 ## Manual apply
 
