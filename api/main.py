@@ -3,14 +3,14 @@
 Canonical application API layer. Handles:
 1. Authentication & authorization (Supabase JWT + RBAC)
 2. Schema validation
-3. Idempotency (persistent via webhook_events)
+3. Idempotency (atomic via INSERT ON CONFLICT)
 4. Correlation IDs
 5. Rate limiting
 6. Database RPC calls
 7. Background task enqueueing
 8. Deterministic responses
 9. Paperclip → Hermes governance enforcement
-10. POD verification lifecycle
+10. POD verification lifecycle (persisted to DB)
 
 FastAPI must NOT perform unrestricted agent reasoning inside synchronous request handlers.
 """
@@ -23,6 +23,7 @@ import uuid
 from contextlib import asynccontextmanager
 from typing import Any, Optional
 
+import httpx
 from fastapi import Depends, FastAPI, Header, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -31,8 +32,16 @@ from pydantic import BaseModel, Field
 from .auth import UserIdentity, get_current_user, require_role, UserRole
 from .config import load_settings, validate_required, validate_production_security
 from .idempotency import IdempotencyStore
-from .pod_lifecycle import PODStatus, can_transition, next_status
+from .pod_lifecycle import (
+    PODStatus,
+    PODStore,
+    can_transition,
+    next_status,
+    requires_paperclip,
+)
 from .redaction import redact_dict
+from .services.paperclip import Decision, PaperclipClient, Proposal
+from .services.hermes import ExecutionStatus, HermesClient
 
 
 # ---------------------------------------------------------------------------
@@ -66,12 +75,21 @@ class ErrorResponse(BaseModel):
     error: dict[str, Any]
 
 
+class PODVerifyResponse(BaseModel):
+    """POD verification response."""
+    order_id: str
+    pod_status: str
+    correlation_id: str
+    paperclip_decision_id: Optional[str] = None
+    hermes_execution_id: Optional[str] = None
+
+
 # ---------------------------------------------------------------------------
 # Lifespan
 # ---------------------------------------------------------------------------
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Validate configuration on startup."""
+    """Validate configuration on startup and initialise service clients."""
     settings = load_settings()
     missing = validate_required(settings)
     if missing:
@@ -83,12 +101,25 @@ async def lifespan(app: FastAPI):
         import sys
         for w in warnings:
             print(f"WARNING: {w}", file=sys.stderr)
+
     app.state.settings = settings
     app.state.idempotency = IdempotencyStore(
         settings.supabase_url, settings.supabase_service_role_key
     )
+    app.state.pod_store = PODStore(
+        settings.supabase_url, settings.supabase_service_role_key
+    )
+    app.state.paperclip = PaperclipClient(
+        settings.paperclip_url, settings.paperclip_api_key
+    )
+    app.state.hermes = HermesClient(
+        settings.hermes_api_url, settings.hermes_api_key
+    )
     yield
     app.state.idempotency.close()
+    app.state.pod_store.close()
+    app.state.paperclip.close()
+    app.state.hermes.close()
 
 
 # ---------------------------------------------------------------------------
@@ -142,11 +173,11 @@ async def ready():
 
     # Database
     try:
-        import httpx
         async with httpx.AsyncClient(timeout=5.0) as client:
-            resp = await client.get(f"{settings.supabase_url}/rest/v1/", headers={
-                "apikey": settings.supabase_anon_key or "",
-            })
+            resp = await client.get(
+                f"{settings.supabase_url}/rest/v1/",
+                headers={"apikey": settings.next_public_supabase_anon_key or ""},
+            )
             checks["database"] = "ok" if resp.status_code < 500 else "error"
     except Exception:
         checks["database"] = "error"
@@ -155,7 +186,6 @@ async def ready():
     # Paperclip
     if settings.paperclip_url:
         try:
-            import httpx
             async with httpx.AsyncClient(timeout=3.0) as client:
                 resp = await client.get(f"{settings.paperclip_url}/health")
                 checks["paperclip"] = "ok" if resp.status_code < 500 else "error"
@@ -167,7 +197,6 @@ async def ready():
     # Hermes
     if settings.hermes_api_url:
         try:
-            import httpx
             async with httpx.AsyncClient(timeout=3.0) as client:
                 resp = await client.get(f"{settings.hermes_api_url}/health")
                 checks["hermes"] = "ok" if resp.status_code < 500 else "error"
@@ -190,6 +219,52 @@ async def ready():
 
 
 # ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
+def _new_id() -> str:
+    return str(uuid.uuid4())
+
+
+async def _insert_order(
+    settings: Any,
+    order: OrderCreate,
+    order_id: str,
+    user: UserIdentity,
+) -> dict:
+    """Insert order row into Supabase via REST API. Returns the row."""
+    payload = {
+        "id": order_id,
+        "customer_id": user.user_id,
+        "pickup_lat": order.pickup_location.get("coordinates", [0, 0])[1],
+        "pickup_lng": order.pickup_location.get("coordinates", [0, 0])[0],
+        "delivery_lat": order.delivery_location.get("coordinates", [0, 0])[1],
+        "delivery_lng": order.delivery_location.get("coordinates", [0, 0])[0],
+        "cargo_type": order.cargo_type,
+        "cargo_weight_kg": order.cargo_weight_kg,
+        "vehicle_type": order.vehicle_type,
+        "body_type": order.body_type,
+        "payment_mode": order.payment_mode,
+        "advance_amount": order.advance_amount or 0,
+        "status": "pending",
+        "pod_status": PODStatus.UPLOADED.value,
+    }
+    async with httpx.AsyncClient(timeout=10.0) as client:
+        resp = await client.post(
+            f"{settings.supabase_url}/rest/v1/orders",
+            json=payload,
+            headers={
+                "apikey": settings.supabase_service_role_key,
+                "Authorization": f"Bearer {settings.supabase_service_role_key}",
+                "Content-Type": "application/json",
+                "Prefer": "return=representation",
+            },
+        )
+        resp.raise_for_status()
+        data = resp.json()
+        return data[0] if data else payload
+
+
+# ---------------------------------------------------------------------------
 # Orders — POST (Create)
 # ---------------------------------------------------------------------------
 @app.post(
@@ -207,51 +282,68 @@ async def create_order(
     order: OrderCreate,
     request: Request,
     x_correlation_id: Optional[str] = Header(None),
-    x_agent_id: Optional[str] = Header(None),
-    x_decision_id: Optional[str] = Header(None),
     user: UserIdentity = Depends(require_role(UserRole.CUSTOMER, UserRole.ADMIN)),
 ):
-    """Create a new order. Requires idempotency key and JWT auth."""
-    correlation_id = x_correlation_id or str(uuid.uuid4())
+    """Create a new order. Requires idempotency key and JWT auth.
+
+    Flow:
+    1. Atomic idempotency claim (INSERT ON CONFLICT)
+    2. Persist order to DB
+    3. Mark idempotency complete
+    4. On failure — mark idempotency failed, return deterministic error
+    """
+    correlation_id = x_correlation_id or _new_id()
     idempotency_store: IdempotencyStore = request.app.state.idempotency
 
-    # 1. Idempotency check
-    existing = idempotency_store.check(order.idempotency_key)
-    if existing:
-        return OrderResponse(
-            order_id=str(existing.get("id", "")),
-            status="pending",
-            idempotency_key=order.idempotency_key,
-            correlation_id=correlation_id,
-        )
-
-    # 2. Store idempotency key
-    idempotency_store.store(
-        idempotency_key=order.idempotency_key,
-        provider="api",
-        event_type="order_created",
+    # 1. Atomic idempotency claim
+    claimed, existing = idempotency_store.claim(
+        order.idempotency_key,
+        resource_type="order",
         payload=order.model_dump(),
     )
+    if not claimed and existing.found:
+        # Return the stored response for deterministic replay
+        resp_data = existing.response_data or {}
+        return OrderResponse(
+            order_id=resp_data.get("order_id", ""),
+            status=resp_data.get("status", "pending"),
+            idempotency_key=order.idempotency_key,
+            correlation_id=correlation_id,
+            pod_status=resp_data.get("pod_status", PODStatus.UPLOADED.value),
+        )
 
-    # 3. Call Supabase RPC to create order
-    settings = request.app.state.settings
+    # 2. Persist order to DB
+    order_id = _new_id()
     try:
-        import httpx
-        async with httpx.AsyncClient(timeout=10.0) as client:
-            resp = await client.post(
-                f"{settings.supabase_url}/rest/v1/rpc/generate_order_quote",
-                json={
-                    "p_order_id": str(uuid.uuid4()),
-                },
-                headers={
-                    "apikey": settings.supabase_service_role_key,
-                    "Authorization": f"Bearer {settings.supabase_service_role_key}",
-                },
-            )
-            # For now, return a placeholder order_id
-            order_id = str(uuid.uuid4())
-    except Exception:
-        order_id = str(uuid.uuid4())
+        settings = request.app.state.settings
+        row = await _insert_order(settings, order, order_id, user)
+        order_id = row.get("id", order_id)
+    except Exception as exc:
+        # Mark idempotency as failed so retry can re-attempt
+        idempotency_store.fail(
+            order.idempotency_key, "order", f"DB insert failed: {type(exc).__name__}"
+        )
+        raise HTTPException(
+            status_code=503,
+            detail={
+                "error": {
+                    "code": "ORDER_PERSIST_FAILED",
+                    "message": "Order could not be persisted. Please retry.",
+                    "retryable": True,
+                    "correlation_id": correlation_id,
+                }
+            },
+        )
+
+    # 3. Mark idempotency complete
+    response_data = {
+        "order_id": order_id,
+        "status": "pending",
+        "pod_status": PODStatus.UPLOADED.value,
+    }
+    idempotency_store.complete(
+        order.idempotency_key, "order", response_data
+    )
 
     return OrderResponse(
         order_id=order_id,
@@ -273,32 +365,154 @@ async def get_order(
     user: UserIdentity = Depends(get_current_user),
 ):
     """Get order by ID."""
+    settings = request.app.state.settings
+    try:
+        async with httpx.AsyncClient(timeout=5.0) as client:
+            resp = await client.get(
+                f"{settings.supabase_url}/rest/v1/orders",
+                params={
+                    "id": f"eq.{order_id}",
+                    "select": "*",
+                },
+                headers={
+                    "apikey": settings.supabase_service_role_key,
+                    "Authorization": f"Bearer {settings.supabase_service_role_key}",
+                },
+            )
+            if resp.status_code == 200:
+                data = resp.json()
+                if data:
+                    return data[0]
+    except Exception:
+        pass
+
     return {
         "order_id": order_id,
         "status": "pending",
-        "correlation_id": x_correlation_id or str(uuid.uuid4()),
+        "correlation_id": x_correlation_id or _new_id(),
     }
 
 
 # ---------------------------------------------------------------------------
 # POD Verification — POST
 # ---------------------------------------------------------------------------
-@app.post("/api/v1/orders/{order_id}/pod/verify")
+@app.post(
+    "/api/v1/orders/{order_id}/pod/verify",
+    response_model=PODVerifyResponse,
+    responses={
+        400: {"model": ErrorResponse},
+        401: {"model": ErrorResponse},
+        403: {"model": ErrorResponse},
+        409: {"model": ErrorResponse},
+    },
+)
 async def verify_pod(
     order_id: str,
     request: Request,
     x_correlation_id: Optional[str] = Header(None),
     user: UserIdentity = Depends(require_role(UserRole.DRIVER, UserRole.ADMIN)),
 ):
-    """Verify POD and advance lifecycle. Requires Paperclip governance for settlement."""
-    # TODO: Check current POD status from DB
-    # TODO: Advance through lifecycle
-    # TODO: Enforce Paperclip governance before DELIVERY_CONFIRMED
-    return {
-        "order_id": order_id,
-        "pod_status": PODStatus.VERIFICATION_PENDING.value,
-        "correlation_id": x_correlation_id or str(uuid.uuid4()),
-    }
+    """Verify POD and advance lifecycle. Enforces:
+    - State machine transitions (cannot skip steps)
+    - Paperclip governance required before DELIVERY_CONFIRMED → SETTLEMENT_ELIGIBLE
+    - Hermes execution only after Paperclip APPROVE
+    - All state changes persisted to DB
+    """
+    correlation_id = x_correlation_id or _new_id()
+    pod_store: PODStore = request.app.state.pod_store
+    paperclip: PaperclipClient = request.app.state.paperclip
+    hermes: HermesClient = request.app.state.hermes
+
+    # 1. Read current status from DB
+    current_status = pod_store.get_order_status(order_id)
+    if current_status is None:
+        raise HTTPException(status_code=404, detail="Order not found")
+
+    target = next_status(current_status)
+    if target is None:
+        raise HTTPException(
+            status_code=409,
+            detail=f"Order already in terminal state: {current_status.value}",
+        )
+
+    # 2. Validate transition
+    if not can_transition(current_status, target):
+        raise HTTPException(
+            status_code=409,
+            detail=f"Invalid transition: {current_status.value} → {target.value}",
+        )
+
+    # 3. If this transition requires Paperclip → Hermes chain
+    paperclip_decision_id = None
+    hermes_execution_id = None
+
+    if requires_paperclip(current_status, target):
+        # 3a. Submit proposal to Paperclip
+        proposal = Proposal(
+            tool="update_delivery_status",
+            arguments={
+                "order_id": order_id,
+                "from_status": current_status.value,
+                "to_status": target.value,
+                "driver_id": user.user_id,
+            },
+            agent="api",
+            order_id=order_id,
+            correlation_id=correlation_id,
+        )
+        decision = paperclip.evaluate(proposal)
+        paperclip_decision_id = decision.decision_id
+
+        if decision.decision != Decision.APPROVE:
+            raise HTTPException(
+                status_code=403,
+                detail={
+                    "error": {
+                        "code": "GOVERNANCE_REJECTED",
+                        "message": f"Paperclip rejected: {decision.reason}",
+                        "paperclip_decision_id": decision.decision_id,
+                        "correlation_id": correlation_id,
+                    }
+                },
+            )
+
+        # 3b. Execute via Hermes (only after Paperclip APPROVE)
+        exec_result = hermes.execute(
+            tool="update_delivery_status",
+            arguments={
+                "order_id": order_id,
+                "new_status": target.value,
+            },
+            decision_id=decision.decision_id,
+            correlation_id=correlation_id,
+        )
+        hermes_execution_id = exec_result.execution_id
+
+        if exec_result.status != ExecutionStatus.SUCCESS:
+            raise HTTPException(
+                status_code=500,
+                detail={
+                    "error": {
+                        "code": "HERMES_EXECUTION_FAILED",
+                        "message": f"Hermes execution failed: {exec_result.error}",
+                        "hermes_execution_id": exec_result.execution_id,
+                        "correlation_id": correlation_id,
+                    }
+                },
+            )
+
+    # 4. Persist status transition to DB
+    ok, msg = pod_store.advance_status(order_id, current_status, target)
+    if not ok:
+        raise HTTPException(status_code=409, detail=msg)
+
+    return PODVerifyResponse(
+        order_id=order_id,
+        pod_status=target.value,
+        correlation_id=correlation_id,
+        paperclip_decision_id=paperclip_decision_id,
+        hermes_execution_id=hermes_execution_id,
+    )
 
 
 # ---------------------------------------------------------------------------

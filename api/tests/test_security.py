@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import os
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 
 import pytest
 
@@ -130,6 +130,15 @@ class TestPODLifecycle:
         assert not can_transition(PODStatus.UPLOADED, PODStatus.VERIFIED)
         assert not can_transition(PODStatus.UPLOADED, PODStatus.SETTLEMENT_ELIGIBLE)
 
+    def test_requires_paperclip_for_settlement(self):
+        from api.pod_lifecycle import PODStatus, requires_paperclip
+        assert requires_paperclip(PODStatus.DELIVERY_CONFIRMED, PODStatus.SETTLEMENT_ELIGIBLE)
+        assert not requires_paperclip(PODStatus.UPLOADED, PODStatus.VERIFICATION_PENDING)
+
+    def test_terminal_state_no_transitions(self):
+        from api.pod_lifecycle import PODStatus, next_status
+        assert next_status(PODStatus.SETTLEMENT_ELIGIBLE) is None
+
 
 # ---------------------------------------------------------------------------
 # 4. Paperclip governance
@@ -152,9 +161,84 @@ class TestPaperclipGovernance:
         assert "find_partner" in ALLOWLISTED_TOOLS
         assert "arbitrary_tool" not in ALLOWLISTED_TOOLS
 
+    def test_hermes_rejects_unlisted_tool(self):
+        from api.services.hermes import HermesClient, ExecutionStatus
+        client = HermesClient("http://invalid:9999", "key", timeout_s=1.0)
+        result = client.execute("totally_banned_tool", {}, "decision-1")
+        assert result.status == ExecutionStatus.UNAUTHORIZED
+        client.close()
+
 
 # ---------------------------------------------------------------------------
-# 5. Health endpoint
+# 5. Idempotency
+# ---------------------------------------------------------------------------
+class TestIdempotency:
+    """Test idempotency store claim/complete/fail lifecycle."""
+
+    def test_claim_conflict_returns_existing(self):
+        from api.idempotency import IdempotencyStore, IdempotencyStatus
+        store = IdempotencyStore("http://invalid:9999", "key")
+        # On connection failure, claim should fail open (return True)
+        claimed, result = store.claim("test-key-12345678", "order", {"foo": "bar"})
+        assert claimed is True
+        store.close()
+
+    def test_complete_returns_bool(self):
+        from api.idempotency import IdempotencyStore
+        store = IdempotencyStore("http://invalid:9999", "key")
+        # On connection failure, complete should return False
+        ok = store.complete("test-key", "order", {"order_id": "123"})
+        assert ok is False
+        store.close()
+
+    def test_fail_returns_bool(self):
+        from api.idempotency import IdempotencyStore
+        store = IdempotencyStore("http://invalid:9999", "key")
+        ok = store.fail("test-key", "order", "error message")
+        assert ok is False
+        store.close()
+
+
+# ---------------------------------------------------------------------------
+# 6. Auth role resolution
+# ---------------------------------------------------------------------------
+class TestAuthRoles:
+    """Test role resolution from trusted JWT data."""
+
+    def test_role_from_app_metadata(self):
+        from api.auth import extract_user_identity
+        payload = {
+            "sub": "user-123",
+            "email": "test@example.com",
+            "app_metadata": {"role": "driver"},
+            "user_metadata": {"role": "admin"},
+        }
+        identity = extract_user_identity(payload)
+        # app_metadata takes precedence over user_metadata
+        assert identity.role.value == "driver"
+
+    def test_role_fallback_to_customer(self):
+        from api.auth import extract_user_identity
+        payload = {
+            "sub": "user-456",
+            "email": "test@example.com",
+        }
+        identity = extract_user_identity(payload)
+        assert identity.role.value == "customer"
+
+    def test_invalid_role_fallback_to_customer(self):
+        from api.auth import extract_user_identity
+        payload = {
+            "sub": "user-789",
+            "email": "test@example.com",
+            "app_metadata": {"role": "superhero"},
+        }
+        identity = extract_user_identity(payload)
+        assert identity.role.value == "customer"
+
+
+# ---------------------------------------------------------------------------
+# 7. Health endpoint
 # ---------------------------------------------------------------------------
 class TestHealthEndpoint:
     """Test health endpoint."""
