@@ -1,0 +1,212 @@
+services:
+  zippy-db:
+    build:
+      context: ./infra/docker
+      dockerfile: Dockerfile.db
+    container_name: zippy-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${ZIPPY_POSTGRES_USER:-zippy}
+      POSTGRES_PASSWORD: ${ZIPPY_POSTGRES_PASSWORD}
+      POSTGRES_DB: ${ZIPPY_POSTGRES_DB:-zippy}
+    volumes:
+      - zippy_postgres_data:/var/lib/postgresql/data
+      - ./supabase/migrations:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${ZIPPY_POSTGRES_USER:-zippy} -d ${ZIPPY_POSTGRES_DB:-zippy}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks: [zippy]
+
+  odoo-db:
+    image: postgres:16-alpine
+    container_name: zippy-odoo-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${ODOO_POSTGRES_USER:-odoo}
+      POSTGRES_PASSWORD: ${ODOO_POSTGRES_PASSWORD}
+      POSTGRES_DB: ${ODOO_DB:-odoo18}
+    volumes:
+      - odoo_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${ODOO_POSTGRES_USER:-odoo} -d ${ODOO_DB:-odoo18}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks: [zippy]
+
+  redis:
+    image: redis:7-alpine
+    container_name: zippy-redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - zippy_redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks: [zippy]
+
+  odoo:
+    image: odoo:18.0
+    container_name: zippy-odoo
+    restart: unless-stopped
+    environment:
+      HOST: odoo-db
+      USER: ${ODOO_POSTGRES_USER:-odoo}
+      PASSWORD: ${ODOO_POSTGRES_PASSWORD}
+      DB_NAME: ${ODOO_DB:-odoo18}
+    volumes:
+      - zippy_odoo_data:/var/lib/odoo
+      - ./infra/odoo/addons:/mnt/extra-addons:ro
+      - ./infra/odoo/config:/etc/odoo:ro
+    depends_on:
+      odoo-db:
+        condition: service_healthy
+    networks: [zippy]
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: zippy-api
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://${ZIPPY_POSTGRES_USER:-zippy}:${ZIPPY_POSTGRES_PASSWORD}@zippy-db:5432/${ZIPPY_POSTGRES_DB:-zippy}
+      SUPABASE_URL: ${SUPABASE_URL}
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
+      SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY}
+      SUPABASE_JWT_SECRET: ${SUPABASE_JWT_SECRET}
+      POSTGRES_PASSWORD: ${ZIPPY_POSTGRES_PASSWORD}
+      RAZORPAY_KEY_ID: ${RAZORPAY_KEY_ID}
+      RAZORPAY_KEY_SECRET: ${RAZORPAY_KEY_SECRET}
+      RAZORPAY_WEBHOOK_SECRET: ${RAZORPAY_WEBHOOK_SECRET}
+      ODOO_URL: http://odoo:8069
+      ODOO_DB: ${ODOO_DB:-odoo18}
+      ODOO_USER: ${ODOO_USER:-zippy-integration}
+      ODOO_API_KEY: ${ODOO_API_KEY}
+      PAPERCLIP_URL: ${PAPERCLIP_URL}
+      PAPERCLIP_API_KEY: ${PAPERCLIP_API_KEY}
+      HERMES_API_URL: ${HERMES_API_URL}
+      HERMES_API_KEY: ${HERMES_API_KEY}
+      REDIS_URL: redis://redis:6379/0
+      APP_ENV: production
+      APP_BASE_URL: ${APP_BASE_URL}
+      API_BASE_URL: ${API_BASE_URL}
+      LANGFUSE_HOST: ${LANGFUSE_HOST}
+      LANGFUSE_PUBLIC_KEY: ${LANGFUSE_PUBLIC_KEY}
+      LANGFUSE_SECRET_KEY: ${LANGFUSE_SECRET_KEY}
+      HONCHO_API_URL: ${HONCHO_API_URL}
+      HONCHO_API_KEY: ${HONCHO_API_KEY}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY}
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY}
+      MODEL_PLANNING: ${MODEL_PLANNING}
+      MODEL_FAST: ${MODEL_FAST}
+      COMPOSIO_API_KEY: ${COMPOSIO_API_KEY}
+      COMPOSIO_MCP_URL: ${COMPOSIO_MCP_URL}
+    depends_on:
+      zippy-db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      odoo:
+        condition: service_started
+    expose: ["8000"]
+    networks: [zippy]
+
+  workers:
+    build:
+      context: ./workers
+      dockerfile: Dockerfile
+    container_name: zippy-workers
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://${ZIPPY_POSTGRES_USER:-zippy}:${ZIPPY_POSTGRES_PASSWORD}@zippy-db:5432/${ZIPPY_POSTGRES_DB:-zippy}
+      SUPABASE_URL: ${SUPABASE_URL}
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
+      RAZORPAY_KEY_ID: ${RAZORPAY_KEY_ID}
+      RAZORPAY_KEY_SECRET: ${RAZORPAY_KEY_SECRET}
+      RAZORPAY_WEBHOOK_SECRET: ${RAZORPAY_WEBHOOK_SECRET}
+      ODOO_URL: http://odoo:8069
+      ODOO_DB: ${ODOO_DB:-odoo18}
+      ODOO_USER: ${ODOO_USER:-zippy-integration}
+      ODOO_API_KEY: ${ODOO_API_KEY}
+      PAPERCLIP_URL: ${PAPERCLIP_URL}
+      PAPERCLIP_API_KEY: ${PAPERCLIP_API_KEY}
+      HERMES_API_URL: ${HERMES_API_URL}
+      HERMES_API_KEY: ${HERMES_API_KEY}
+      REDIS_URL: redis://redis:6379/0
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY}
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY}
+      MODEL_PLANNING: ${MODEL_PLANNING}
+      MODEL_FAST: ${MODEL_FAST}
+      LANGFUSE_HOST: ${LANGFUSE_HOST}
+      LANGFUSE_PUBLIC_KEY: ${LANGFUSE_PUBLIC_KEY}
+      LANGFUSE_SECRET_KEY: ${LANGFUSE_SECRET_KEY}
+      HONCHO_API_URL: ${HONCHO_API_URL}
+      HONCHO_API_KEY: ${HONCHO_API_KEY}
+      MAX_TOOL_CALLS_PER_TICK: ${MAX_TOOL_CALLS_PER_TICK:-20}
+      AGENT_DAILY_BUDGET_USD: ${AGENT_DAILY_BUDGET_USD:-50.00}
+    depends_on:
+      zippy-db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks: [zippy]
+
+  portal:
+    build:
+      context: ./apps/portal
+      dockerfile: Dockerfile
+    container_name: zippy-portal
+    restart: unless-stopped
+    environment:
+      PORT: 3000
+      NODE_ENV: production
+      NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
+    expose: ["3000"]
+    networks: [zippy]
+
+  console:
+    build:
+      context: ./apps/console
+      dockerfile: Dockerfile
+    container_name: zippy-console
+    restart: unless-stopped
+    environment:
+      PORT: 3000
+      NODE_ENV: production
+      VITE_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
+      VITE_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+    expose: ["3000"]
+    networks: [zippy]
+
+  nginx:
+    image: nginx:alpine
+    container_name: zippy-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./infra/docker/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - portal
+      - console
+      - api
+    networks: [zippy]
+
+volumes:
+  zippy_postgres_data:
+  odoo_postgres_data:
+  zippy_redis_data:
+  zippy_odoo_data:
+
+networks:
+  zippy:
+    driver: bridge

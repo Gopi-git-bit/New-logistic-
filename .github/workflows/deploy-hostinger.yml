@@ -1,0 +1,159 @@
+name: Deploy Hostinger via ServerAvatar
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: Branch to deploy
+        required: false
+        default: codex/m7-governed-execution-foundation
+
+permissions:
+  contents: read
+
+env:
+  HOSTINGER_IP: ${{ vars.HOSTINGER_IP || vars.SERVER_IP }}
+  HOSTINGER_NAME: ${{ vars.HOSTINGER_NAME || vars.SERVER_NAME || 'zippy' }}
+  SERVERAVATAR_APP_NAME: ${{ vars.SERVERAVATAR_APP_NAME || vars.HOSTINGER_NAME || vars.SERVER_NAME || 'zippy' }}
+  DEPLOY_BRANCH: ${{ inputs.branch || github.ref_name }}
+
+jobs:
+  deploy:
+    name: Resolve ServerAvatar target and deploy
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Checkout selected branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.DEPLOY_BRANCH }}
+
+      - name: Validate deployment configuration
+        env:
+          SERVERAVATAR_TOKEN: ${{ secrets.SERVERAVATAR_TOKEN || secrets.SERVERAVATAR_API_KEY || secrets.SERVER_AVATAR_API_KEY }}
+        run: |
+          set -euo pipefail
+          [ -n "${SERVERAVATAR_TOKEN:-}" ] || { echo "Missing ServerAvatar API token secret"; exit 1; }
+          if [ -z "${HOSTINGER_IP:-}" ] && [ -z "${HOSTINGER_NAME:-}" ]; then
+            echo "Set HOSTINGER_IP or HOSTINGER_NAME in the GitHub production environment."
+            exit 1
+          fi
+          docker compose -f docker-compose.production.yml config >/dev/null
+          echo "Production compose validated."
+
+      - name: Resolve ServerAvatar organization, server and application
+        id: resolve
+        env:
+          SERVERAVATAR_TOKEN: ${{ secrets.SERVERAVATAR_TOKEN || secrets.SERVERAVATAR_API_KEY || secrets.SERVER_AVATAR_API_KEY }}
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, os, urllib.request, urllib.error
+
+          token = os.environ['SERVERAVATAR_TOKEN']
+          wanted_ip = (os.environ.get('HOSTINGER_IP') or '').strip()
+          wanted_name = (os.environ.get('HOSTINGER_NAME') or '').strip().lower()
+          wanted_app = (os.environ.get('SERVERAVATAR_APP_NAME') or 'zippy').strip().lower()
+
+          def get(url):
+              req = urllib.request.Request(url, headers={
+                  'Accept': 'application/json',
+                  'Content-Type': 'application/json',
+                  'Authorization': token,
+              })
+              try:
+                  with urllib.request.urlopen(req, timeout=30) as r:
+                      return json.load(r)
+              except urllib.error.HTTPError as e:
+                  body = e.read().decode('utf-8', 'replace')
+                  raise SystemExit(f'ServerAvatar API {e.code} for {url}: {body[:500]}')
+
+          org_payload = get('https://api.serveravatar.com/organizations')
+          orgs = org_payload.get('organizations', org_payload)
+          if isinstance(orgs, dict):
+              orgs = orgs.get('data', [])
+          if not isinstance(orgs, list):
+              raise SystemExit('Could not parse ServerAvatar organizations response')
+
+          target = None
+          target_org = None
+          for org in orgs:
+              oid = org.get('id')
+              if oid is None:
+                  continue
+              payload = get(f'https://api.serveravatar.com/organizations/{oid}/servers?pagination=1')
+              servers = payload.get('servers', {})
+              if isinstance(servers, dict):
+                  servers = servers.get('data', [])
+              for server in servers or []:
+                  sip = str(server.get('ip') or '').strip()
+                  sname = str(server.get('name') or '').strip().lower()
+                  if (wanted_ip and sip == wanted_ip) or (wanted_name and sname == wanted_name):
+                      target = server
+                      target_org = oid
+                      break
+              if target:
+                  break
+
+          if not target:
+              raise SystemExit('No ServerAvatar server matched HOSTINGER_IP/HOSTINGER_NAME')
+
+          sid = target['id']
+          apps_payload = get(f'https://api.serveravatar.com/organizations/{target_org}/servers/{sid}/applications')
+          apps = apps_payload.get('applications', {})
+          if isinstance(apps, dict):
+              apps = apps.get('data', [])
+
+          app = None
+          for candidate in apps or []:
+              name = str(candidate.get('name') or '').strip().lower()
+              if name == wanted_app or 'zippy' in name:
+                  app = candidate
+                  break
+
+          if not app:
+              names = ', '.join(str(a.get('name')) for a in (apps or []))
+              raise SystemExit(f'Server found, but no Zippy application matched. Existing apps: {names or "none"}')
+
+          with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as f:
+              f.write(f'organization_id={target_org}\n')
+              f.write(f'server_id={sid}\n')
+              f.write(f'application_id={app["id"]}\n')
+              f.write(f'application_name={app.get("name", "")}\n')
+
+          print(f'Resolved ServerAvatar target: server={target.get("name")} app={app.get("name")}')
+          PY
+
+      - name: Start ServerAvatar Git deployment
+        env:
+          SERVERAVATAR_TOKEN: ${{ secrets.SERVERAVATAR_TOKEN || secrets.SERVERAVATAR_API_KEY || secrets.SERVER_AVATAR_API_KEY }}
+          SERVER_ID: ${{ steps.resolve.outputs.server_id }}
+          APPLICATION_ID: ${{ steps.resolve.outputs.application_id }}
+        run: |
+          set -euo pipefail
+          payload=$(python - <<'PY'
+          import json, os
+          print(json.dumps({
+              'type': 'public',
+              'provider': 'github',
+              'clone_url': f"https://github.com/{os.environ['GITHUB_REPOSITORY']}.git",
+              'branch': os.environ['DEPLOY_BRANCH'],
+          }))
+          PY
+          )
+
+          response=$(curl --fail-with-body --silent --show-error \
+            --request POST \
+            --url "https://api.serveravatar.com/git-deployment/server/${SERVER_ID}/application/${APPLICATION_ID}/clone" \
+            --header 'Content-Type: application/json' \
+            --header "Authorization: ${SERVERAVATAR_TOKEN}" \
+            --data "$payload")
+          echo "$response"
+
+      - name: Deployment summary
+        run: |
+          echo "### ServerAvatar deployment started" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Branch: \`${DEPLOY_BRANCH}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Application: \`${{ steps.resolve.outputs.application_name }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Compose file: \`docker-compose.production.yml\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- ServerAvatar server id: \`${{ steps.resolve.outputs.server_id }}\`" >> "$GITHUB_STEP_SUMMARY"
