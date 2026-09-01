@@ -1,6 +1,9 @@
 name: Deploy Hostinger via ServerAvatar
 
 on:
+  push:
+    branches:
+      - codex/m7-governed-execution-foundation
   workflow_dispatch:
     inputs:
       branch:
