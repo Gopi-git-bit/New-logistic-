@@ -15,9 +15,9 @@ permissions:
   contents: read
 
 env:
-  HOSTINGER_IP: ${{ vars.HOSTINGER_IP || vars.SERVER_IP }}
-  HOSTINGER_NAME: ${{ vars.HOSTINGER_NAME || vars.SERVER_NAME || 'zippy' }}
-  SERVERAVATAR_APP_NAME: ${{ vars.SERVERAVATAR_APP_NAME || vars.HOSTINGER_NAME || vars.SERVER_NAME || 'zippy' }}
+  HOSTINGER_IP: ${{ secrets.HOSTINGER_IP || secrets.SERVER_IP || vars.HOSTINGER_IP || vars.SERVER_IP }}
+  HOSTINGER_NAME: ${{ secrets.HOSTINGER_NAME || secrets.SERVER_NAME || vars.HOSTINGER_NAME || vars.SERVER_NAME || 'zippy' }}
+  SERVERAVATAR_APP_NAME: ${{ secrets.SERVERAVATAR_APP_NAME || vars.SERVERAVATAR_APP_NAME || secrets.HOSTINGER_NAME || secrets.SERVER_NAME || vars.HOSTINGER_NAME || vars.SERVER_NAME || 'zippy' }}
   DEPLOY_BRANCH: ${{ inputs.branch || github.ref_name }}
 
 jobs:
@@ -38,7 +38,7 @@ jobs:
           set -euo pipefail
           [ -n "${SERVERAVATAR_TOKEN:-}" ] || { echo "Missing ServerAvatar API token secret"; exit 1; }
           if [ -z "${HOSTINGER_IP:-}" ] && [ -z "${HOSTINGER_NAME:-}" ]; then
-            echo "Set HOSTINGER_IP or HOSTINGER_NAME in the GitHub production environment."
+            echo "Set HOSTINGER_IP or HOSTINGER_NAME as a GitHub repository/environment secret or variable."
             exit 1
           fi
           docker compose -f docker-compose.production.yml config >/dev/null
