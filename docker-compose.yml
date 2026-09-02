@@ -99,6 +99,12 @@ services:
       - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY}
       - MODEL_PLANNING=${MODEL_PLANNING:-deepseek-v4-pro}
       - MODEL_FAST=${MODEL_FAST:-deepseek-v4-flash}
+      # External tool gateway / TinyFish
+      - COMPOSIO_API_KEY=${COMPOSIO_API_KEY}
+      - COMPOSIO_MCP_URL=${COMPOSIO_MCP_URL}
+      - TINYFISH_API_KEY=${TINYFISH_API_KEY}
+      - TINYFISH_API_URL=${TINYFISH_API_URL}
+      - TINYFISH_TOOL_NAME=${TINYFISH_TOOL_NAME:-tinyfish.start_task}
       # Observability (optional)
       - LANGFUSE_HOST=${LANGFUSE_HOST}
       - LANGFUSE_PUBLIC_KEY=${LANGFUSE_PUBLIC_KEY}
@@ -147,6 +153,12 @@ services:
       - HERMES_API_KEY=${HERMES_API_KEY}
       # Redis
       - REDIS_URL=${REDIS_URL:-redis://redis:6379/0}
+      # External tool gateway / TinyFish
+      - COMPOSIO_API_KEY=${COMPOSIO_API_KEY}
+      - COMPOSIO_MCP_URL=${COMPOSIO_MCP_URL}
+      - TINYFISH_API_KEY=${TINYFISH_API_KEY}
+      - TINYFISH_API_URL=${TINYFISH_API_URL}
+      - TINYFISH_TOOL_NAME=${TINYFISH_TOOL_NAME:-tinyfish.start_task}
       # App
       - APP_ENV=${APP_ENV:-development}
       - APP_BASE_URL=${APP_BASE_URL:-http://localhost:3000}
