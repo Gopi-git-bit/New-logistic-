@@ -23,6 +23,7 @@
 | D-08 | 2026-08-29 | API Reliability & Security Contract | Autonomous-agent-safe API specification | New doc `docs/API-RELIABILITY-SECURITY.md` | @Gopi |
 | D-09 | 2026-08-29 | Backend Execution Model Correction | FastAPI + Qoder Wake + Paperclip + Hermes + Odoo 18; No Temporal | Updated soul.md, PRD-backend.md, PRD-agents.md, copilot-instructions.md | @Gopi |
 | D-10 | 2026-08-29 | Production API Key Wiring & Integration Hardening | Full audit + canonical env contract + FastAPI + config validation + secret redaction | New files: api/, .env.production.example, Dockerfile.api, docs/DEPLOYMENT-KEY-OWNERSHIP.md | @Gopi |
+| D-11 | 2026-09-02 | Composio/TinyFish integration boundary | Composio is a typed MCP tool gateway; TinyFish is a bounded adapter. Neither is a system of record or database synchronization bus. | Added runtime contract, allowlisted adapter, production Compose wiring and deployment health gate | @Gopi |
 
 ## Pending Decisions
 
