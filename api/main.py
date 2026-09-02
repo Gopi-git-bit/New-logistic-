@@ -366,31 +366,68 @@ async def get_order(
 ):
     """Get order by ID."""
     settings = request.app.state.settings
+    correlation_id = x_correlation_id or _new_id()
+    params = {"id": f"eq.{order_id}", "select": "*"}
+    # The API uses a service credential, so tenant filtering MUST be explicit.
+    # Admins may inspect any order; every other role is restricted to its own row.
+    if user.active_role != UserRole.ADMIN:
+        params["customer_id"] = f"eq.{user.user_id}"
+
     try:
         async with httpx.AsyncClient(timeout=5.0) as client:
             resp = await client.get(
                 f"{settings.supabase_url}/rest/v1/orders",
-                params={
-                    "id": f"eq.{order_id}",
-                    "select": "*",
-                },
+                params=params,
                 headers={
                     "apikey": settings.supabase_service_role_key,
                     "Authorization": f"Bearer {settings.supabase_service_role_key}",
                 },
             )
-            if resp.status_code == 200:
-                data = resp.json()
-                if data:
-                    return data[0]
-    except Exception:
-        pass
+    except httpx.TimeoutException as exc:
+        raise HTTPException(
+            status_code=503,
+            detail={
+                "error": {
+                    "code": "ORDER_STORE_TIMEOUT",
+                    "message": "Order store timed out. Please retry.",
+                    "retryable": True,
+                    "correlation_id": correlation_id,
+                }
+            },
+        ) from exc
+    except httpx.HTTPError as exc:
+        raise HTTPException(
+            status_code=503,
+            detail={
+                "error": {
+                    "code": "ORDER_STORE_UNAVAILABLE",
+                    "message": "Order store is unavailable. Please retry.",
+                    "retryable": True,
+                    "correlation_id": correlation_id,
+                }
+            },
+        ) from exc
 
-    return {
-        "order_id": order_id,
-        "status": "pending",
-        "correlation_id": x_correlation_id or _new_id(),
-    }
+    if resp.status_code >= 500:
+        raise HTTPException(
+            status_code=503,
+            detail={
+                "error": {
+                    "code": "ORDER_STORE_UNAVAILABLE",
+                    "message": "Order store is unavailable. Please retry.",
+                    "retryable": True,
+                    "correlation_id": correlation_id,
+                }
+            },
+        )
+    if resp.status_code >= 400:
+        raise HTTPException(status_code=502, detail="Order store rejected the request")
+
+    data = resp.json()
+    if not data:
+        # Do not reveal whether another tenant owns this identifier.
+        raise HTTPException(status_code=404, detail="Order not found")
+    return data[0]
 
 
 # ---------------------------------------------------------------------------
