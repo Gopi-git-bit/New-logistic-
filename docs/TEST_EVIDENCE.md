@@ -452,3 +452,21 @@ These commands validate the documentation diff and working-tree inventory. They 
 | Redactions | No credentials or secret values read; environment variable names only where needed for configuration relevance |
 | Operator/automation | GitHub Copilot |
 | Notes | The correction resolves the inventory-completeness gap while preserving the conclusion that no existing SQL set is an approved or executable production migration chain. `M1-MIGRATIONS` is complete; `M1-STAGING-ROUTE` is sole active and has not begun. |
+
+## M1 Staging Route Evidence
+
+### M1-E013: Read-Only Staging Route Discovery and Plan
+
+| Field | Value |
+|---|---|
+| Command | `cd /opt/new-logistic`; Git branch/SHA/status/remote checks; tracker-table `awk` active-task check; `hostname`; `uname -a`; `systemctl is-active apache2`; `apache2ctl -v`, `-S`, and `-M`; `ss -lntp`; `docker ps`; Apache enabled-site listing and sanitized vhost/config reads; `ps` process inspection; `certbot certificates`; staging-host config search; status-only `curl` probes for public root/API/health and local API/frontend ports; `supervisorctl status`; repository Compose/proxy/deploy configuration reads; plan structure/safety checks; `git diff --check` |
+| Timestamp | 2026-09-08 UTC; exact command timestamp not captured |
+| Commit | `1af111cf78994f8c934d4d3229a54c40ece8a3db`; documentation changes uncommitted |
+| Environment | `srv1943844`, `/opt/new-logistic`, Remote SSH |
+| Preconditions | Local and `origin/master` matched the recorded commit; working tree was clean; `M1-STAGING-ROUTE` was sole active task |
+| Exit code | 0 for the completed read-only discovery and final plan validation commands |
+| Result | PASS: Apache 2.4.58 owns public `80`/`443` with valid production TLS; current Zippy vhost is Basic-Auth PHP/FastCGI with no discovered `/api` proxy; no Zippy containers or API/frontend listeners exist; no staging host/site exists; plan separates verified facts from approval-gated staging/production routing and requires isolated staging data with sandbox/manual financial behavior |
+| Evidence location | `docs/reports/M1_STAGING_ROUTE_PLAN.md`, `docs/EXECUTION_TRACKER.md`, this record |
+| Redactions | ServerAvatar user paths, credential-bearing configuration values, and private identifiers omitted or redacted; endpoint probes recorded status only |
+| Operator/automation | GitHub Copilot |
+| Notes | No Apache, ServerAvatar, DNS, TLS, firewall, port, service, container, environment, database, or deployment change occurred. `M1-STAGING-ROUTE` is complete; `M1-LOCK-STRATEGY` is sole active and has not begun. |
