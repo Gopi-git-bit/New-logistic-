@@ -1,0 +1,64 @@
+# Zippy Production Execution Tracker
+
+## Control Rules
+
+- Current verdict: **BLOCKED FOR PRODUCTION — SAFE TO PLAN M1**.
+- Only one tracker row may be active at a time.
+- M1 is documentation/configuration planning only until separately approved.
+- All M2 and later tasks remain `BLOCKED` until M1 exit criteria and explicit owner approval are recorded.
+- A status in this tracker is not permission to modify systems. The `Authorized scope` column is controlling.
+
+`docs/ZIPPY_PRODUCTION_EXECUTION_PRD.md` was imported after M0 discovery and is the production execution source of truth pending final owner approval and commit. Conflicting legacy documents are historical until reconciled. Their business rules must not be silently rewritten or discarded. Architecture deviations require a proposed `docs/DECISIONS.md` entry and owner approval. Legacy documents are not edited by this tracker update.
+
+## Status Values
+
+- `COMPLETE`: Evidence exists for the authorized scope.
+- Active: currently authorized work; exactly one tracker row uses the active status token.
+- `PENDING`: Sequenced but not started; remains within planning scope.
+- `BLOCKED`: Cannot begin until dependencies and human approvals are satisfied.
+
+## Canonical Milestone Structure
+
+| Milestone | Canonical name |
+|---|---|
+| M0 | Discovery and baseline |
+| M1 | Repository, contracts and CI baseline |
+| M2 | Databases and tenancy |
+| M3 | Deterministic operational core |
+| M4 | Payments, dispatch, POD and Odoo staging |
+| M5 | Paperclip governance |
+| M6 | Langfuse observability |
+| M7 | Agent activation |
+| M8 | Staging E2E and resilience |
+| M9 | Production readiness review |
+| M10 | Controlled production rollout |
+
+## Tracker
+
+| Task ID | Milestone | Task | Status | Dependencies | Authorized scope | Evidence required | Human approval | Rollback | Notes |
+|---|---|---|---|---|---|---|---|---|---|
+| M0-DISCOVERY | M0 | Read-only repository and VPS production discovery | COMPLETE | Verified Git baseline | Read-only inspection only | Discovery commands, commit, environment inventory, findings | Discovery authorization received | None; no mutation occurred | Secret values and sensitive SSH details redacted |
+| M0-DOCS | M0 | Document discovery report, risk register, M0-to-M1 plan, tracker, evidence ledger, and imported PRD provenance | COMPLETE | M0-DISCOVERY | Six authorized Markdown files only | `git diff --check`, `git status --short`, `git diff --stat`; owner review | Current documentation-only authorization | Remove uncommitted documentation files or revert later reviewed documentation commit | No commit or push authorized |
+| M1-PRD | M1 | Review and establish the imported `docs/ZIPPY_PRODUCTION_EXECUTION_PRD.md` | IN_PROGRESS | M0-DOCS | Documentation review only | Approved source/version and owner sign-off | Required before final canonical designation | Revert/remove unapproved draft documentation | Imported after discovery; pending approval and commit |
+| M1-RECONCILE | M1 | Reconcile `soul.md`, `memory.md`, `MILESTONES.md`, milestone PRDs, and placeholder claims | PENDING | M1-PRD | Documentation analysis and approved edits only | Conflict matrix and reviewed wording | Required before changing legacy claims | Revert documentation edits | Historical counts are not fresh evidence |
+| M1-DECISIONS | M1 | Draft architecture decisions as `PROPOSED` | PENDING | M1-PRD, M1-RECONCILE | Documentation only | Proposed entries with rationale, alternatives, impact, rollback | Required to approve each decision | Remove/revise proposals | Must not mark proposals approved |
+| M1-MIGRATIONS | M1 | Select canonical migration directory without moving files | PENDING | M1-PRD, M1-DECISIONS | Inventory and manifest documentation only | Ordered manifest, checksums, target DB ownership | Database and application owner approval | Revise manifest | No migrations executed |
+| M1-STAGING-ROUTE | M1 | Design a staging-only deployment route and future production network constraints | PENDING | M1-PRD, M1-DECISIONS, M1-MIGRATIONS | Design documentation only | Route, isolation, secret, rollback, and evidence review | Infrastructure owner approval | Revise/discard design | No Compose implementation, provisioning, or proxy change |
+| M1-LOCK-STRATEGY | M1 | Define dependency-lock strategy | PENDING | M1-PRD | Documentation only | Package-manager and lock policy review | Engineering owner approval | Revise policy | No package installation or lockfile generation |
+| M1-DB-REQUIREMENTS | M1 | Define M2 database initialization and rollback requirements | PENDING | M1-MIGRATIONS, M1-STAGING-ROUTE | Requirements documentation only | Environment gates, ordering, rollback, and future verification plan | Database owner approval | Revise requirements | Database creation and migration execution belong to M2 |
+| M1-BACKUPS | M1 | Define backup, retention, monitoring, and restoration requirements | PENDING | M1-PRD, M1-STAGING-ROUTE | Policy documentation only | RPO/RTO, schedule, retention, and future restore criteria | Owner and data custodian approval | Revise policy | Backup/restore execution belongs to later milestones |
+| M1-EVIDENCE | M1 | Define fresh CI, security, contract, database, and restore evidence | PENDING | M1-PRD, M1-MIGRATIONS, M1-LOCK-STRATEGY, M1-BACKUPS | Evidence-matrix documentation only | Required commands, environments, result fields, gate owners | Engineering/security owner approval | Revise matrix | No tests executed under planning authorization |
+| M1-OWNER-GATE | M1 | Review all M1 artifacts and authorize or reject implementation | PENDING | All prior M1 tasks | Review and decision recording only | Explicit per-artifact decisions and exact implementation scope | Owner approval required | Keep M2 blocked and revise M1 artifacts | Approval must name files/services/environments/commands |
+| M2-DATABASES | M2 | Databases and tenancy | BLOCKED | M1-OWNER-GATE | None currently authorized | Fresh isolated DB, migration, tenancy/RLS, rollback, no-cross-FK, and no-Odoo-core-SQL evidence | Database and owner approval required | Approved disposable staging or restoration procedure | No assumed table count |
+| M3-CORE | M3 | Deterministic operational core | BLOCKED | M2-DATABASES | None currently authorized | Order intake, `202 + workflow_id`, pricing, transitions, idempotency, outbox, retry, and recovery evidence | Application owner approval required | Approved application/data rollback | Agents remain outside pricing/state authority |
+| M4-OPERATIONS-FINANCE | M4 | Payments, dispatch, POD and Odoo staging | BLOCKED | M3-CORE | None currently authorized | Sandbox payment, duplicate prevention, compliance, POD, Odoo draft/posting, and reconciliation evidence | Product, finance, and Odoo owner approval required | Sandbox reset and staged rollback | No live credentials or ledger mirroring |
+| M5-PAPERCLIP | M5 | Paperclip governance | BLOCKED | M4-OPERATIONS-FINANCE, preserved immutable Paperclip source | None currently authorized | Isolated schema, decision lock/HITL, grant, fail-closed, loop, budget, and audit evidence | Governance and owner approval required | Approved isolated service/database rollback | `/opt/paperclip` must not be modified or deployed until preserved/reviewed |
+| M6-LANGFUSE | M6 | Langfuse observability | BLOCKED | M5-PAPERCLIP | None currently authorized | Isolated storage, trace correlation, audit separation, cost reconciliation, and non-fatal failure evidence | Observability and owner approval required | Disable instrumentation without affecting transactions | Observability only |
+| M7-AGENTS | M7 | Agent activation | BLOCKED | M6-LANGFUSE, open provider decisions | None currently authorized | Model/provider validation, capability/allowlist, shadow, HITL, and narrow-automation evidence | Product, governance, and owner approval required | Pause agents and revoke capabilities | Honcho remains contextual only |
+| M8-STAGING-E2E | M8 | Staging E2E and resilience | BLOCKED | M7-AGENTS | None currently authorized | Clean-environment unit/integration/contract/E2E/security/failure and backup-restore evidence | Engineering, security, operations approval required | Restore/tear down staging per runbook | Includes outage, retry, duplicate, lock, and rollback drills |
+| M9-READINESS | M9 | Production readiness review | BLOCKED | M8-STAGING-E2E | None currently authorized | No unresolved critical/high security findings; secrets, monitoring, backups, restores, runbook, rollback, external-system evidence | Owner, security, finance, and operations approval required | Remain in staging | Explicit human go-live decision required |
+| M10-ROLLOUT | M10 | Controlled production rollout | BLOCKED | M9-READINESS | None currently authorized | Shadow, internal pilot, canary, monitored expansion, thresholds, smoke, and rollback evidence | Explicit per-stage human approval required | Execute approved stage rollback | Live payments, DNS, financial autonomy, and irreversible actions need explicit approval |
+
+## Current Authorized Work
+
+`M1-PRD` is the sole active task. Its scope is limited to reviewing and establishing the imported production PRD as the source of truth. No M1 implementation has begun.
