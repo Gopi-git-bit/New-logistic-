@@ -6,7 +6,7 @@
 **Owner:** Gopinathan
 **Target:** Zippy Logistics production foundation on the Hostinger VPS
 
-**Repository adoption status:** Imported after M0 discovery for owner review. This document is the production execution source of truth pending final owner approval and commit. Conflicting legacy documents remain historical until reconciled; their business rules must not be silently rewritten or discarded. Architecture deviations require a proposed `DECISIONS.md` entry and owner approval.
+**Repository adoption status:** Owner-approved and established as the production execution source of truth at commit `cee3307861fc4d19c5a85c7bbce3ca1367c9a6a2`. This document supersedes conflicting production claims; conflicting legacy documents remain historical until reconciled, and their business rules must not be silently rewritten or discarded. Architecture deviations require a proposed `DECISIONS.md` entry and owner approval.
 
 ## 1. Purpose
 

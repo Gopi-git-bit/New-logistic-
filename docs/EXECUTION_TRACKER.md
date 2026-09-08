@@ -8,7 +8,7 @@
 - All M2 and later tasks remain `BLOCKED` until M1 exit criteria and explicit owner approval are recorded.
 - A status in this tracker is not permission to modify systems. The `Authorized scope` column is controlling.
 
-`docs/ZIPPY_PRODUCTION_EXECUTION_PRD.md` was imported after M0 discovery and is the production execution source of truth pending final owner approval and commit. Conflicting legacy documents are historical until reconciled. Their business rules must not be silently rewritten or discarded. Architecture deviations require a proposed `docs/DECISIONS.md` entry and owner approval. Legacy documents are not edited by this tracker update.
+`docs/ZIPPY_PRODUCTION_EXECUTION_PRD.md` was imported after M0 discovery and is the owner-approved production execution source of truth established at commit `cee3307861fc4d19c5a85c7bbce3ca1367c9a6a2`. Conflicting legacy documents are historical until reconciled. Their business rules must not be silently rewritten or discarded. Architecture deviations require a proposed `docs/DECISIONS.md` entry and owner approval. Legacy documents are not edited by this tracker update.
 
 ## Status Values
 
@@ -39,8 +39,8 @@
 |---|---|---|---|---|---|---|---|---|---|
 | M0-DISCOVERY | M0 | Read-only repository and VPS production discovery | COMPLETE | Verified Git baseline | Read-only inspection only | Discovery commands, commit, environment inventory, findings | Discovery authorization received | None; no mutation occurred | Secret values and sensitive SSH details redacted |
 | M0-DOCS | M0 | Document discovery report, risk register, M0-to-M1 plan, tracker, evidence ledger, and imported PRD provenance | COMPLETE | M0-DISCOVERY | Six authorized Markdown files only | `git diff --check`, `git status --short`, `git diff --stat`; owner review | Current documentation-only authorization | Remove uncommitted documentation files or revert later reviewed documentation commit | No commit or push authorized |
-| M1-PRD | M1 | Review and establish the imported `docs/ZIPPY_PRODUCTION_EXECUTION_PRD.md` | IN_PROGRESS | M0-DOCS | Documentation review only | Approved source/version and owner sign-off | Required before final canonical designation | Revert/remove unapproved draft documentation | Imported after discovery; pending approval and commit |
-| M1-RECONCILE | M1 | Reconcile `soul.md`, `memory.md`, `MILESTONES.md`, milestone PRDs, and placeholder claims | PENDING | M1-PRD | Documentation analysis and approved edits only | Conflict matrix and reviewed wording | Required before changing legacy claims | Revert documentation edits | Historical counts are not fresh evidence |
+| M1-PRD | M1 | Review and establish the imported `docs/ZIPPY_PRODUCTION_EXECUTION_PRD.md` | COMPLETE | M0-DOCS | Documentation review only | Approved source/version and owner sign-off | Required before final canonical designation | Revert/remove unapproved draft documentation | Owner-approved at commit `cee3307861fc4d19c5a85c7bbce3ca1367c9a6a2` |
+| M1-RECONCILE | M1 | Reconcile `soul.md`, `memory.md`, `MILESTONES.md`, milestone PRDs, and placeholder claims | IN_PROGRESS | M1-PRD | Documentation analysis and approved edits only | Conflict matrix and reviewed wording | Required before changing legacy claims | Revert documentation edits | Historical counts are not fresh evidence |
 | M1-DECISIONS | M1 | Draft architecture decisions as `PROPOSED` | PENDING | M1-PRD, M1-RECONCILE | Documentation only | Proposed entries with rationale, alternatives, impact, rollback | Required to approve each decision | Remove/revise proposals | Must not mark proposals approved |
 | M1-MIGRATIONS | M1 | Select canonical migration directory without moving files | PENDING | M1-PRD, M1-DECISIONS | Inventory and manifest documentation only | Ordered manifest, checksums, target DB ownership | Database and application owner approval | Revise manifest | No migrations executed |
 | M1-STAGING-ROUTE | M1 | Design a staging-only deployment route and future production network constraints | PENDING | M1-PRD, M1-DECISIONS, M1-MIGRATIONS | Design documentation only | Route, isolation, secret, rollback, and evidence review | Infrastructure owner approval | Revise/discard design | No Compose implementation, provisioning, or proxy change |
@@ -61,4 +61,4 @@
 
 ## Current Authorized Work
 
-`M1-PRD` is the sole active task. Its scope is limited to reviewing and establishing the imported production PRD as the source of truth. No M1 implementation has begun.
+`M1-RECONCILE` is the sole active task. Its scope is limited to documenting conflicts between the production PRD and legacy documents and proposing reviewed wording. No legacy-document edit or M1 implementation has begun.

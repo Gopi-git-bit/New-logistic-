@@ -11,7 +11,7 @@
 
 ## Production PRD Precedence
 
-`docs/ZIPPY_PRODUCTION_EXECUTION_PRD.md` was imported after M0 discovery and is the production execution source of truth pending final owner approval and commit. It was not present during discovery and is not discovery-time evidence. Conflicting legacy documents are historical until reconciled. Their business rules must not be silently rewritten or discarded. Architecture deviations require a proposed `docs/DECISIONS.md` entry and owner approval. No legacy document was edited during this correction task.
+`docs/ZIPPY_PRODUCTION_EXECUTION_PRD.md` was imported after M0 discovery and is the owner-approved production execution source of truth established at commit `cee3307861fc4d19c5a85c7bbce3ca1367c9a6a2`. It was not present during discovery and is not discovery-time evidence. Conflicting legacy documents are historical until reconciled. Their business rules must not be silently rewritten or discarded. Architecture deviations require a proposed `docs/DECISIONS.md` entry and owner approval. No legacy document was edited during this correction task.
 
 ## Evidence Record Template
 
@@ -266,3 +266,55 @@ The documentation task is validated only with:
 - `git diff --stat`
 
 These commands validate the documentation diff and working-tree inventory. They are not application or production-readiness tests.
+
+## M1 Production PRD Adoption Evidence
+
+### M1-E001: Remote Repository Baseline
+
+| Field | Value |
+|---|---|
+| Command | `pwd`; `hostname`; `git branch --show-current`; `git rev-parse HEAD`; `git status --short` |
+| Timestamp | 2026-09-08 UTC; exact command timestamp not captured |
+| Commit | `cee3307861fc4d19c5a85c7bbce3ca1367c9a6a2` |
+| Environment | `srv1943844`, `/opt/new-logistic`, Remote SSH |
+| Exit code | 0 |
+| Result | PASS: remote repository, `master`, expected commit, and clean tree verified |
+| Evidence location | This record and `docs/EXECUTION_TRACKER.md` |
+
+### M1-E002: Required Document Review
+
+| Field | Value |
+|---|---|
+| Command | Complete reads of repository instructions, production PRD, tracker, evidence ledger, decisions, M0 discovery report, risk register, and M0-to-M1 plan |
+| Timestamp | 2026-09-08 UTC; exact command timestamp not captured |
+| Commit | `cee3307861fc4d19c5a85c7bbce3ca1367c9a6a2` |
+| Environment | `/opt/new-logistic` |
+| Exit code | 0 |
+| Result | PASS: required sources read completely; `M1-PRD` confirmed as the sole active task |
+| Evidence location | `docs/ZIPPY_PRODUCTION_EXECUTION_PRD.md`, `docs/EXECUTION_TRACKER.md` |
+
+### M1-E003: PRD Adoption Criteria Review
+
+| Field | Value |
+|---|---|
+| Command | PRD grep for adoption status, pending approval, placeholder, precedence, owner, and version; `git show -s --format='%H%n%s' HEAD` |
+| Timestamp | 2026-09-08 UTC; exact command timestamp not captured |
+| Commit | `cee3307861fc4d19c5a85c7bbce3ca1367c9a6a2` |
+| Environment | `/opt/new-logistic` |
+| Exit code | 0 |
+| Result | PASS: version `1.0`, owner `Gopinathan`, precedence, owner approval, and baseline commit established; no unresolved PRD placeholder found |
+| Evidence location | `docs/ZIPPY_PRODUCTION_EXECUTION_PRD.md` |
+| Notes | The only `placeholder` match described safe placeholders in `.env.example`; it is not unresolved PRD content. |
+
+### M1-E004: PRD Adoption Final Validation
+
+| Field | Value |
+|---|---|
+| Command | `git diff --check`; `git status --short`; PRD grep for version, owner, adoption status, and precedence; tracker-table `awk` count for `IN_PROGRESS` rows |
+| Timestamp | 2026-09-08 UTC; exact command timestamp not captured |
+| Commit | Baseline `cee3307861fc4d19c5a85c7bbce3ca1367c9a6a2`; documentation changes uncommitted |
+| Environment | `srv1943844`, `/opt/new-logistic`, Remote SSH |
+| Exit code | 0 for every command |
+| Result | PASS: no whitespace errors; only the three authorized documents changed; PRD acceptance wording present; exactly one active tracker row (`M1-RECONCILE`) |
+| Evidence location | `docs/ZIPPY_PRODUCTION_EXECUTION_PRD.md`, `docs/EXECUTION_TRACKER.md`, this record |
+| Notes | No application, infrastructure, database, service, configuration, or legacy-document change was made. |
