@@ -418,3 +418,37 @@ These commands validate the documentation diff and working-tree inventory. They 
 | Redactions | No secret values, credentials, or server usernames recorded |
 | Operator/automation | GitHub Copilot |
 | Notes | `M1-DECISIONS` is complete. The next eligible ordered task is `M1-MIGRATIONS`, which is now sole active but not started; it remains documentation-only and may not execute or move migrations. |
+
+## M1 Migration Inventory Evidence
+
+### M1-E011: Static Migration Inventory and Manifest Review
+
+| Field | Value |
+|---|---|
+| Command | `cd /opt/new-logistic`; `pwd`; `git branch --show-current`; `git rev-parse HEAD`; `git ls-remote origin refs/heads/master`; `git status --short --untracked-files=all`; tracker-table `awk` active-task check; static `find` of SQL/ownership artifacts; `sha256sum`; static SQL structural-marker inspection; complete source reads of numbered migrations, stubs, seeds, verification fixtures, operational completion schema, Paperclip schema, and Odoo ownership blueprint; `cmp -s` duplicate verification checks; inventory path/checksum/field `awk` checks; `git diff --check -- docs/reports/M1_MIGRATION_INVENTORY.md` |
+| Timestamp | 2026-09-08 UTC; exact command timestamp not captured |
+| Commit | `5c7ce5281f4c85cb238fe6cc803d18d648889229`; documentation changes uncommitted |
+| Environment | `srv1943844`, `/opt/new-logistic`, Remote SSH |
+| Preconditions | Local and `origin/master` matched the recorded commit; working tree was clean; `M1-MIGRATIONS` was sole active task |
+| Exit code | 0 for final preflight, duplicate comparison, and corrected inventory validation commands |
+| Result | PASS: 35 database-related repository artifacts inventoried with SHA-256 checksum, owner, static safety profile, conflict/assumption note, and MVP disposition; all six root verification scripts are byte-identical to their `infra/supabase` counterparts; no SQL, database, container, credential, or migration command was executed |
+| Evidence location | `docs/reports/M1_MIGRATION_INVENTORY.md`, `docs/EXECUTION_TRACKER.md`, this record |
+| Redactions | No secret values, database credentials, or server usernames recorded |
+| Operator/automation | GitHub Copilot |
+| Notes | Existing numbered and root-level artifacts are not an executable production chain: root operational completion uses incompatible table/key names and duplicate verification paths exist. The report proposes a non-executable logical MVP manifest only. `M1-MIGRATIONS` is complete; `M1-STAGING-ROUTE` is sole active and has not begun. |
+
+### M1-E012: Expanded Migration Inventory Completeness Correction
+
+| Field | Value |
+|---|---|
+| Command | Preflight `pwd`, Git branch/SHA/status/remote/diff checks; temporary tracker active-row `awk` check; attempted `rg --files` and targeted `rg` content search; static `find` and recursive `grep` fallback for migration, schema, initdb, seed, fixture, backup, restore, rollback, Odoo, Paperclip, and database-write terms; `file`/`ls` inspection of `supabase/migrations`; Odoo addon listing; `sha256sum`; targeted runtime writer reads; inventory coverage/checksum/reference-table `awk` validation; `git diff --check` |
+| Timestamp | 2026-09-08 UTC; exact command timestamp not captured |
+| Commit | `5c7ce5281f4c85cb238fe6cc803d18d648889229`; documentation changes uncommitted |
+| Environment | `srv1943844`, `/opt/new-logistic`, Remote SSH |
+| Preconditions | Owner-authorized temporary reopen of `M1-MIGRATIONS`; local and `origin/master` matched the recorded commit; only the three authorized documentation paths changed |
+| Exit code | 0 for final fallback discovery and inventory validation commands; `rg` unavailable and not installed |
+| Result | PASS: 152 repository files searched statically; revised inventory contains 37 executable/state-mutating artifacts and 12 migration-affecting references; no Alembic/Prisma/Drizzle/ORM auto-create/backup-restore/Odoo addon migration found; `supabase/migrations` is a regular text file despite Compose mounting it as initdb source; root `supabase/verify_m*.sql` files exactly duplicate `infra/supabase/verify_m*.sql` files |
+| Evidence location | `docs/reports/M1_MIGRATION_INVENTORY.md`, `docs/EXECUTION_TRACKER.md`, this record |
+| Redactions | No credentials or secret values read; environment variable names only where needed for configuration relevance |
+| Operator/automation | GitHub Copilot |
+| Notes | The correction resolves the inventory-completeness gap while preserving the conclusion that no existing SQL set is an approved or executable production migration chain. `M1-MIGRATIONS` is complete; `M1-STAGING-ROUTE` is sole active and has not begun. |
