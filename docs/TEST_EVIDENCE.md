@@ -318,3 +318,69 @@ These commands validate the documentation diff and working-tree inventory. They 
 | Result | PASS: no whitespace errors; only the three authorized documents changed; PRD acceptance wording present; exactly one active tracker row (`M1-RECONCILE`) |
 | Evidence location | `docs/ZIPPY_PRODUCTION_EXECUTION_PRD.md`, `docs/EXECUTION_TRACKER.md`, this record |
 | Notes | No application, infrastructure, database, service, configuration, or legacy-document change was made. |
+
+## M1 PRD Reconciliation Evidence
+
+### M1-E005: Required Legacy Corpus Review
+
+| Field | Value |
+|---|---|
+| Command | Complete editor reads of the production PRD, repository instructions, `soul.md`, `memory.md`, `HEARTBEAT.md`, `MILESTONES.md`, `DECISIONS.md`, authority/API contracts, four component PRDs, and every file under `docs/PRD/` |
+| Timestamp | 2026-09-08 UTC; exact read timestamps not captured |
+| Commit | `501514c1c17e55d2b98557f1e0d40624212ea3bf` |
+| Environment | `srv1943844`, `/opt/new-logistic`, Remote SSH |
+| Preconditions | Clean `master`; local and `origin/master` at the recorded commit; `M1-RECONCILE` sole active task |
+| Exit code | 0 for all file reads |
+| Result | PASS: all 21 required files, totaling 2,617 lines, were read; no legacy file was edited |
+| Evidence location | `docs/reports/M1_PRD_CONFLICT_MATRIX.md` |
+| Redactions | None required; no secret-bearing files or values were read |
+| Operator/automation | GitHub Copilot |
+| Notes | Source comparison only; historical claims were not treated as current test evidence. |
+
+### M1-E006: Conflict Matrix Structural Validation
+
+| Field | Value |
+|---|---|
+| Command | `awk` validation of matrix IDs, allowed classification vocabulary, row count, and Markdown column count; trailing-whitespace `grep` across all three authorized documents |
+| Timestamp | 2026-09-08 UTC; exact command timestamp not captured |
+| Commit | Baseline `501514c1c17e55d2b98557f1e0d40624212ea3bf`; documentation changes uncommitted |
+| Environment | `srv1943844`, `/opt/new-logistic`, Remote SSH |
+| Preconditions | Matrix drafted from the complete required corpus |
+| Exit code | 0 |
+| Result | PASS: 28 matrix rows, zero invalid classifications, zero malformed rows, and no whitespace errors |
+| Evidence location | `docs/reports/M1_PRD_CONFLICT_MATRIX.md` |
+| Redactions | None |
+| Operator/automation | GitHub Copilot |
+| Notes | An initial validator expected the wrong awk field count because Markdown tables have leading/trailing delimiters; the corrected validator passed without changing matrix content. The explicit grep covered the untracked matrix, which ordinary `git diff --check` does not. |
+
+### M1-E007: Tracker Handoff Validation
+
+| Field | Value |
+|---|---|
+| Command | Tracker-table `awk` count and active-ID validation; `git diff --check -- docs/EXECUTION_TRACKER.md` |
+| Timestamp | 2026-09-08 UTC; exact command timestamp not captured |
+| Commit | Baseline `501514c1c17e55d2b98557f1e0d40624212ea3bf`; documentation changes uncommitted |
+| Environment | `srv1943844`, `/opt/new-logistic`, Remote SSH |
+| Preconditions | Matrix structural validation passed |
+| Exit code | 0 |
+| Result | PASS: exactly one active tracker row, `M1-DECISIONS`; `M1-RECONCILE` marked `COMPLETE` |
+| Evidence location | `docs/EXECUTION_TRACKER.md`, this record |
+| Redactions | None |
+| Operator/automation | GitHub Copilot |
+| Notes | The active-row handoff does not begin `M1-DECISIONS` and authorizes no implementation. |
+
+### M1-E008: Reconciliation Correction Pass
+
+| Field | Value |
+|---|---|
+| Command | `git branch --show-current`; `git rev-parse HEAD`; `git status --short --untracked-files=all`; `git diff --check`; `sed -n '1,20l' docs/reports/M1_PRD_CONFLICT_MATRIX.md`; classification-count `awk` validation; fixed-policy `grep` checks; `git diff --check -- docs/reports/M1_PRD_CONFLICT_MATRIX.md` |
+| Timestamp | 2026-09-08 UTC; exact command timestamp not captured |
+| Commit | Baseline `501514c1c17e55d2b98557f1e0d40624212ea3bf`; documentation changes uncommitted |
+| Environment | `srv1943844`, `/opt/new-logistic`, Remote SSH |
+| Preconditions | `master` at expected baseline; only the three authorized M1 documentation paths changed |
+| Exit code | 0 for the final preflight and corrected validation commands |
+| Result | PASS: matrix begins with normal Markdown `# M1 Production PRD Conflict Matrix` and has no escaped structural syntax; R04 fixes execution order while retaining only protocol details as unresolved; R05 records phase-one single operational tenant direction; R07 is `SUPERSEDED` and prohibits automatic refunds; 28 rows total with counts 6 compatible, 3 stale, 4 superseded, 7 requires decision, 5 missing implementation, and 3 missing evidence |
+| Evidence location | `docs/reports/M1_PRD_CONFLICT_MATRIX.md`, `docs/EXECUTION_TRACKER.md`, this record |
+| Redactions | None |
+| Operator/automation | GitHub Copilot |
+| Notes | The first classification awk attempt used reserved variable name `index` and failed before evaluating content; rerunning with `item` passed. `M1-RECONCILE` remains complete and `M1-DECISIONS` remains the sole active tracker task; no decision drafting or implementation began. |
