@@ -384,3 +384,37 @@ These commands validate the documentation diff and working-tree inventory. They 
 | Redactions | None |
 | Operator/automation | GitHub Copilot |
 | Notes | The first classification awk attempt used reserved variable name `index` and failed before evaluating content; rerunning with `item` passed. `M1-RECONCILE` remains complete and `M1-DECISIONS` remains the sole active tracker task; no decision drafting or implementation began. |
+
+## M1 Decisions Draft Evidence
+
+### M1-E009: Controlled M1-DECISIONS Draft Pass
+
+| Field | Value |
+|---|---|
+| Command | `cd /opt/new-logistic`; `pwd`; `git branch --show-current`; `git rev-parse HEAD`; `git status --short --untracked-files=all`; `git ls-remote origin refs/heads/master`; tracker-table `awk` active-task check; complete editor reads of repository instructions, production PRD, conflict matrix, decisions, tracker, evidence, operational completion schema, initial schema, functions/triggers, Paperclip governance schema, and Odoo ownership blueprint; draft-record `awk` validation; `git diff --check -- docs/DECISIONS.md` |
+| Timestamp | 2026-09-08 UTC; exact command timestamp not captured |
+| Commit | `1394d10875e530c5e7c6364e4513604b90c0571b`; documentation changes uncommitted |
+| Environment | `srv1943844`, `/opt/new-logistic`, Remote SSH |
+| Preconditions | Local and `origin/master` matched the recorded commit; working tree was clean; `M1-DECISIONS` was the sole active task |
+| Exit code | 0 |
+| Result | PASS: 13 D-11 through D-23 records appended as `PROPOSED — OWNER APPROVAL REQUIRED`; zero draft records marked approved; no implementation, schema, infrastructure, tracker, or legacy-document changes made |
+| Evidence location | `docs/DECISIONS.md`, this record |
+| Redactions | No secret values, credentials, or server usernames recorded |
+| Operator/automation | GitHub Copilot |
+| Notes | The records capture current owner MVP direction and distinguish it from seven unresolved technical recommendations requiring owner approval. `M1-DECISIONS` remains active and incomplete. |
+
+### M1-E010: M1-DECISIONS Owner Approval and Handoff
+
+| Field | Value |
+|---|---|
+| Command | `cd /opt/new-logistic`; `pwd`; `git branch --show-current`; `git rev-parse HEAD`; `git ls-remote origin refs/heads/master`; `git status --short --untracked-files=all`; `git diff --check`; tracker-table `awk` active-task check; M1 decision-record `awk` approval check; technical-direction `awk` check; required admin-control `grep` checks; `git diff --check -- docs/DECISIONS.md` |
+| Timestamp | 2026-09-08 UTC; exact command timestamp not captured |
+| Commit | `1394d10875e530c5e7c6364e4513604b90c0571b`; documentation changes uncommitted |
+| Environment | `srv1943844`, `/opt/new-logistic`, Remote SSH |
+| Preconditions | Local and `origin/master` matched the recorded commit; only `docs/DECISIONS.md` and `docs/TEST_EVIDENCE.md` contained the prior M1 draft changes; `M1-DECISIONS` was sole active task |
+| Exit code | 0 |
+| Result | PASS: owner approval recorded for D-11 through D-24 and all seven technical directions; 14 records have dated owner approval, zero draft statuses remain, admin account-control requirements are present, and no implementation occurred |
+| Evidence location | `docs/DECISIONS.md`, `docs/EXECUTION_TRACKER.md`, this record |
+| Redactions | No secret values, credentials, or server usernames recorded |
+| Operator/automation | GitHub Copilot |
+| Notes | `M1-DECISIONS` is complete. The next eligible ordered task is `M1-MIGRATIONS`, which is now sole active but not started; it remains documentation-only and may not execute or move migrations. |
