@@ -488,3 +488,21 @@ These commands validate the documentation diff and working-tree inventory. They 
 | Redactions | No `.env` values or credentials read; runtime metadata only; no server username recorded |
 | Operator/automation | GitHub Copilot |
 | Notes | `M1-LOCK-STRATEGY` is complete. `M1-DB-REQUIREMENTS` is the next eligible ordered task because M1 migration inventory and staging-route design are complete; it is sole active but has not begun. |
+
+## M1 Database Requirements Evidence
+
+### M1-E015: Static MVP Database Requirements Contract
+
+| Field | Value |
+|---|---|
+| Command | `cd /opt/new-logistic`; Git branch/SHA/status/remote checks; tracker-table `awk` active-task check; complete reads of controlling documents and M1 reports; static reads of initial operational schema, operational-completion draft, legacy triggers, Paperclip governance schema, and Odoo ownership blueprint; 30-domain `awk` count; required ownership/security/realtime grep checks; sensitive-material and whitespace scan; `git diff --check` |
+| Timestamp | 2026-09-08 UTC; exact command timestamp not captured |
+| Commit | `8334f0a0550f60e53cdf9d64a8ff7a10dd795ced`; documentation changes uncommitted |
+| Environment | `srv1943844`, `/opt/new-logistic`, Remote SSH |
+| Preconditions | Local and `origin/master` matched the recorded commit; working tree was clean; `M1-DB-REQUIREMENTS` was sole active task |
+| Exit code | 0 |
+| Result | PASS: requirements contract covers all 30 required logical domains; ownership boundaries, server-side RBAC, isolated staging, manual refunds, deterministic state/pricing, authorized SSE projections, Odoo API/ORM boundary, and deferred scope are explicit; no unresolved business-model ambiguity remained |
+| Evidence location | `docs/reports/M1_MVP_DATABASE_REQUIREMENTS.md`, `docs/EXECUTION_TRACKER.md`, this record |
+| Redactions | No database credentials, secret values, or ServerAvatar usernames read or recorded |
+| Operator/automation | GitHub Copilot |
+| Notes | No SQL, schema, migration, ORM model, configuration, database, service, or runtime action occurred. `M1-DB-REQUIREMENTS` is complete; `M1-BACKUPS` is sole active and has not begun. |
