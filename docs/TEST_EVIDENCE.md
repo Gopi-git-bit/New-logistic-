@@ -470,3 +470,21 @@ These commands validate the documentation diff and working-tree inventory. They 
 | Redactions | ServerAvatar user paths, credential-bearing configuration values, and private identifiers omitted or redacted; endpoint probes recorded status only |
 | Operator/automation | GitHub Copilot |
 | Notes | No Apache, ServerAvatar, DNS, TLS, firewall, port, service, container, environment, database, or deployment change occurred. `M1-STAGING-ROUTE` is complete; `M1-LOCK-STRATEGY` is sole active and has not begun. |
+
+## M1 Dependency Lock Strategy Evidence
+
+### M1-E014: Static Dependency and Reproducibility Assessment
+
+| Field | Value |
+|---|---|
+| Command | `cd /opt/new-logistic`; Git branch/SHA/status/remote checks; tracker-table `awk` active-task check; static `find` of manifests, lockfiles, Dockerfiles, Compose, workspace, and workflow files; `sha256sum`; static grep of runtime/image/action declarations; installed runtime version metadata commands only; complete reads of Node/Python manifests, Dockerfiles, Compose, and workflows; static source-import/declaration comparisons; missing-lock checks; report checksum/policy/redaction `awk` and grep validation; `git diff --check` |
+| Timestamp | 2026-09-08 UTC; exact command timestamp not captured |
+| Commit | `0c19f4928cdd3296fa45d68310dd7d683be017ca`; documentation changes uncommitted |
+| Environment | `srv1943844`, `/opt/new-logistic`, Remote SSH |
+| Preconditions | Local and `origin/master` matched the recorded commit; working tree was clean; `M1-LOCK-STRATEGY` was sole active task |
+| Exit code | 0 for final static inventory and fail-fast report validation; an earlier TypeScript-import extractor had shell quoting error and was not used as evidence |
+| Result | PASS: 19 dependency/runtime declaration artifacts inventoried with checksums and disposition; no Node, Python, or constraints lockfile exists; API imports `jwt` but API requirements omit PyJWT while CI installs it ad hoc; mutable Docker image tags and GitHub Action tags found; no dependency install, lock generation, update, removal, or online scan occurred |
+| Evidence location | `docs/reports/M1_DEPENDENCY_LOCK_STRATEGY.md`, `docs/EXECUTION_TRACKER.md`, this record |
+| Redactions | No `.env` values or credentials read; runtime metadata only; no server username recorded |
+| Operator/automation | GitHub Copilot |
+| Notes | `M1-LOCK-STRATEGY` is complete. `M1-DB-REQUIREMENTS` is the next eligible ordered task because M1 migration inventory and staging-route design are complete; it is sole active but has not begun. |
