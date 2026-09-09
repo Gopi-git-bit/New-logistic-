@@ -506,3 +506,37 @@ These commands validate the documentation diff and working-tree inventory. They 
 | Redactions | No database credentials, secret values, or ServerAvatar usernames read or recorded |
 | Operator/automation | GitHub Copilot |
 | Notes | No SQL, schema, migration, ORM model, configuration, database, service, or runtime action occurred. `M1-DB-REQUIREMENTS` is complete; `M1-BACKUPS` is sole active and has not begun. |
+
+## M1 Backup and Restoration Evidence
+
+### M1-E016: Read-Only Backup Capability and Restoration Assessment
+
+| Field | Value |
+|---|---|
+| Command | `cd /opt/new-logistic`; repository branch/SHA/remote/status preflight; tracker active-task `awk`; complete reads of `.github/copilot-instructions.md`, production PRD, decisions, tracker, evidence ledger, migration inventory, staging route, and database requirements; status-only `systemctl is-active/is-enabled` for PostgreSQL, Odoo, Paperclip, Docker, Apache, and ServerAvatar; sanitized `docker ps`, `docker volume ls`, `df -hP`, `findmnt`; `command -v` checks for PostgreSQL dump/restore, encryption, archive, checksum, and backup utilities; `systemctl list-timers --all`; cron metadata listing; metadata-only backup-directory and ServerAvatar-path listing; repository backup/restore reference search; Compose volume/bind declaration inspection; non-secret service/storage metadata search |
+| Timestamp | 2026-09-08 UTC; exact command timestamp not captured |
+| Commit | `6980e4c0652cb2539ef7292bebaba2b90c58d7b6`; documentation changes uncommitted |
+| Environment | `srv1943844`, `/opt/new-logistic`, Remote SSH |
+| Preconditions | Local and `origin/master` matched the expected baseline; working tree was clean; `M1-BACKUPS` was the sole active task; no database or backup contents were accessed |
+| Exit code | 0 for final preflight and bounded discovery command groups |
+| Result | PASS: read-only assessment completed. No host PostgreSQL service, running PostgreSQL/Odoo/Paperclip container, Docker volume, PostgreSQL dump/restore utility, application backup schedule, application backup directory, off-server backup tool/configuration, or successful restore evidence was verified. Docker and Apache are present; ServerAvatar is active; `/var/backups` contains OS package metadata only. Root capacity was approximately 181 GB available at discovery time. |
+| Evidence location | `docs/reports/M1_BACKUP_RESTORE_PLAN.md`, this record |
+| Redactions | No database contents, backup contents, database names, usernames, connection strings, credentials, secret values, private keys, document contents, or customer data recorded |
+| Operator/automation | GitHub Copilot |
+| Notes | Repository Compose declares future PostgreSQL, Redis, and Odoo data volumes and Odoo addon/config binds, but no corresponding Docker volumes were present. Paperclip is a source checkout only. No backup, archive, upload, restore, delete, schedule, service, configuration, database, or runtime action occurred. `M1-BACKUPS` remains sole active and is not complete. |
+
+### M1-E017: M1-BACKUPS Owner Approval and Handoff
+
+| Field | Value |
+|---|---|
+| Command | Git branch, local/remote SHA, working-tree, and whitespace preflight; tracker active-row check; Minimal MVP approval and stronger-option deferral table checks; static custodian and boundary wording review |
+| Timestamp | 2026-09-09 UTC; exact command timestamp not captured |
+| Commit | `6980e4c0652cb2539ef7292bebaba2b90c58d7b6`; documentation changes uncommitted |
+| Environment | Repository documentation workspace; no application, database, service, or backup runtime accessed |
+| Preconditions | Local and `origin/master` matched the expected baseline; only the approved backup-plan and evidence-ledger documentation changes existed; `M1-BACKUPS` was the sole active task |
+| Exit code | 0 for preflight and corrected Minimal MVP policy validation |
+| Result | PASS: all 10 Minimal MVP values are marked `OWNER APPROVED — 2026-09-09 — Gopinathan`; all stronger post-volume values remain `PROPOSED — OWNER APPROVAL REQUIRED`; Gopinathan is recorded as the initial backup and encryption-key custodian; `M1-BACKUPS` is complete and `M1-EVIDENCE` is the sole active task, not begun |
+| Evidence location | `docs/reports/M1_BACKUP_RESTORE_PLAN.md`, `docs/EXECUTION_TRACKER.md`, this record |
+| Redactions | No credentials, key material, usernames, connection strings, or private filesystem paths recorded |
+| Operator/automation | GitHub Copilot |
+| Notes | No backup, restore, upload, deletion, installation, service, database, configuration, or runtime operation occurred. This evidence records policy approval and documentation validation only; it does not prove a backup or restore exists or has passed. |
