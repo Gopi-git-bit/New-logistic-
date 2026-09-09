@@ -540,3 +540,21 @@ These commands validate the documentation diff and working-tree inventory. They 
 | Redactions | No credentials, key material, usernames, connection strings, or private filesystem paths recorded |
 | Operator/automation | GitHub Copilot |
 | Notes | No backup, restore, upload, deletion, installation, service, database, configuration, or runtime operation occurred. This evidence records policy approval and documentation validation only; it does not prove a backup or restore exists or has passed. |
+
+## M1 Decision Correction Evidence
+
+### M1-E018: Owner-Approved Bounded n8n Decision
+
+| Field | Value |
+|---|---|
+| Command | `pwd`; Git branch/local SHA/remote SHA/status checks; tracker active-row `awk` check; D-14 and latest decision-heading inspection; complete controlling-document review from the interrupted M1-EVIDENCE task; D-25 boundary and changed-scope validation; `git diff --check` |
+| Timestamp | 2026-09-09 UTC; exact command timestamp not captured |
+| Commit | Baseline `5676fdce02d267b20ded86a7fc97a8c7c45be17c`; documentation changes uncommitted |
+| Environment | Repository documentation workspace only |
+| Preconditions | Local and `origin/master` matched the expected baseline; working tree was clean; `M1-EVIDENCE` was the sole active task; D-14 retained its approved WhatsApp isolation rule |
+| Exit code | 0 for preflight and final validation commands |
+| Result | PASS: owner-approved D-25 records a bounded future n8n Cloud integration-adapter role while preserving FastAPI, Zippy PostgreSQL, Odoo, Paperclip, and file/object-storage authority; Zippy PostgreSQL retains durable outbox/inbox/retry/dead-letter ownership; D-14 remains controlling for isolated WhatsApp use |
+| Evidence location | `docs/DECISIONS.md`, this record |
+| Redactions | No secrets, credentials, usernames, connection strings, private filesystem paths, or personal data recorded |
+| Operator/automation | GitHub Copilot |
+| Notes | M1-EVIDENCE previously stopped safely because D-14 did not authorize broader n8n integration. D-25 resolves that documentation conflict only for later narrowly controlled non-WhatsApp integration work. No n8n deployment/configuration, runtime, network, service, database, Odoo, Paperclip, backup, or integration action occurred. `M1-EVIDENCE` remains the sole active tracker task and was not resumed. |

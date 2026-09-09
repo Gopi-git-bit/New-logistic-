@@ -219,6 +219,85 @@ All records below are **OWNER APPROVED** by Gopinathan on 2026-09-08. They defin
 | Implementation milestone | M1 contract requirements; M2 identity/RLS; M3 protected action enforcement and exceptions. |
 | Owner-approval status | OWNER APPROVED — 2026-09-08 — Gopinathan. |
 
+### D-25: Bounded n8n Cloud Integration-Adapter Role
+
+**Owner-approval status:** OWNER APPROVED — 2026-09-09 — Gopinathan.
+
+This decision permits only later, separately authorized implementation. It does not authorize deploying, configuring, connecting, or activating n8n during M1.
+
+#### Permitted Future Uses
+
+n8n Cloud may later be used for:
+
+- supported Odoo API/ORM integration;
+- partner synchronization;
+- requesting creation of draft customer invoices;
+- requesting creation of draft vendor bills;
+- read-only accounting and payment-status synchronization;
+- notifications and failure alerts;
+- scheduled reconciliation;
+- consuming controlled asynchronous integration jobs from Zippy;
+- reporting integration results back through authenticated FastAPI endpoints.
+
+These are permissions for later implementation milestones, not authorization to deploy or configure n8n now.
+
+#### Authoritative Systems
+
+- FastAPI owns commands, validation, authorization, and deterministic business rules.
+- Zippy Operational PostgreSQL remains the operational source of truth.
+- Odoo remains the accounting source of truth.
+- Paperclip remains the future authorization/governance boundary for consequential agents.
+- File/object storage owns document binaries according to the approved ownership model.
+
+#### Durable Queue and DLQ
+
+- Zippy Operational PostgreSQL owns the durable outbox, inbox, retry, and dead-letter records.
+- Every integration job requires an immutable event/correlation ID and idempotency key.
+- n8n execution history is operational convenience, not the authoritative queue, DLQ, audit ledger, or recovery evidence.
+- A failed n8n workflow cannot cause loss of the authoritative Zippy job record.
+- Manual replay must be authorized and audited.
+
+#### Prohibited n8n Authority
+
+n8n must not independently:
+
+- calculate or modify deterministic prices;
+- accept bookings as the system of record;
+- assign vehicles or drivers;
+- change authoritative order or trip states;
+- mark client-supplied payment data as verified;
+- approve or execute refunds;
+- approve or release settlements;
+- post Odoo invoices, bills, payments, or reconciliations automatically;
+- directly write to Odoo core tables;
+- directly mutate Zippy business tables outside approved FastAPI commands;
+- issue its own Paperclip authorization;
+- approve an action that it executes;
+- become the production SSE/location-tracking engine;
+- hold the sole backup-decryption key;
+- act as the backup ledger or restore controller.
+
+#### Security Boundary
+
+- n8n Cloud must never connect directly to PostgreSQL.
+- It may access only narrowly scoped authenticated HTTPS integration endpoints.
+- Later implementation must include least-privilege credentials, request authentication/signing, replay protection, idempotency, rate limits, correlation IDs, audit evidence, and credential rotation.
+- Only the minimum necessary personal, location, POD, and financial metadata may enter n8n execution data.
+
+#### Relationship to D-14
+
+- D-14 remains controlling for WhatsApp.
+- The WhatsApp group/pilot remains completely isolated and is not a production synchronization path.
+- D-25 does not authorize WhatsApp integration.
+- D-25 clarifies that n8n as a technology may later perform narrowly controlled non-WhatsApp integration-adapter work.
+- n8n remains excluded from Zippy's authoritative production core.
+
+#### Paperclip Timing
+
+- Paperclip remains deferred for the deterministic MVP core.
+- When consequential agents are introduced, the required order remains: action request -> Paperclip authorization/grant -> allowlisted execution -> recorded result.
+- n8n cannot bypass this order.
+
 ## Owner-Approved MVP Technical Directions
 
 These directions are **OWNER APPROVED** by Gopinathan on 2026-09-08. Implementation remains governed by the assigned milestone, validation evidence, and applicable go-live gates.
