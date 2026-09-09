@@ -558,3 +558,21 @@ These commands validate the documentation diff and working-tree inventory. They 
 | Redactions | No secrets, credentials, usernames, connection strings, private filesystem paths, or personal data recorded |
 | Operator/automation | GitHub Copilot |
 | Notes | M1-EVIDENCE previously stopped safely because D-14 did not authorize broader n8n integration. D-25 resolves that documentation conflict only for later narrowly controlled non-WhatsApp integration work. No n8n deployment/configuration, runtime, network, service, database, Odoo, Paperclip, backup, or integration action occurred. `M1-EVIDENCE` remains the sole active tracker task and was not resumed. |
+
+## M1 Evidence Review Evidence
+
+### M1-E019: Complete M1 Evidence Classification and Owner-Gate Handoff
+
+| Field | Value |
+|---|---|
+| Command | `pwd`; Git branch/local SHA/remote SHA/status preflight; tracker active-row `awk`; complete editor reads of repository instructions, production PRD, tracker, evidence ledger, decisions, and all six M1 reports; report-reference extraction; 2,303-line corpus count; evidence-index row/type/result `awk` checks; required `NOT VERIFIED` finding checks; D-14/D-25 checks; authorized-path, tracker, redaction, whitespace, status, and diff-stat validation |
+| Timestamp | 2026-09-09 UTC; exact command timestamp not captured |
+| Commit | Baseline `dfdcaa81690ef235e2047c8e84d87f2be9603b83`; documentation changes uncommitted |
+| Environment | Repository documentation workspace only; no runtime target accessed |
+| Preconditions | Local and `origin/master` matched the expected baseline; working tree was clean; `M1-EVIDENCE` was the sole active task; D-14 and D-25 were owner approved and non-conflicting |
+| Exit code | 0 for preflight, report-structure validation, and final validation commands |
+| Result | PASS: all 10 M1 tracker tasks have evidence-review rows; results are 9 PASS, 0 FAIL, 0 NOT VERIFIED, and 1 NOT APPLICABLE for the unstarted owner gate; nine implementation-stage limitations remain explicitly NOT VERIFIED; the package is ready to present for owner review without asserting implementation or production readiness |
+| Evidence location | `docs/reports/M1_EVIDENCE_REVIEW.md`, `docs/EXECUTION_TRACKER.md`, this record |
+| Redactions | No sensitive values, credentials, usernames, connection strings, private keys, personal data, or private filesystem paths recorded |
+| Operator/automation | GitHub Copilot |
+| Notes | D-25 resolved the earlier review blocker while D-14 continues to isolate WhatsApp. No test suite, build, SQL, migration, database, runtime, network, service, backup, restore, deployment, configuration, integration, or infrastructure action occurred. `M1-EVIDENCE` is complete; `M1-OWNER-GATE` is the sole active task and has not begun or been approved. |
