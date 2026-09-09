@@ -576,3 +576,21 @@ These commands validate the documentation diff and working-tree inventory. They 
 | Redactions | No sensitive values, credentials, usernames, connection strings, private keys, personal data, or private filesystem paths recorded |
 | Operator/automation | GitHub Copilot |
 | Notes | D-25 resolved the earlier review blocker while D-14 continues to isolate WhatsApp. No test suite, build, SQL, migration, database, runtime, network, service, backup, restore, deployment, configuration, integration, or infrastructure action occurred. `M1-EVIDENCE` is complete; `M1-OWNER-GATE` is the sole active task and has not begun or been approved. |
+
+## M1 Owner Gate Evidence
+
+### M1-E020: Owner Approval and Controlled M2 Handoff
+
+| Field | Value |
+|---|---|
+| Command | `pwd`; Git branch/local SHA/remote SHA/status preflight; tracker status and active-row `awk` checks; evidence-review task/result and nine-gap checks; D-11--D-25 approval checks; readiness-disclaimer checks; exact approval-count, exclusion-count, obligation-count, authorized-path, tracker-transition, sensitive-pattern, whitespace, status, and diff-stat validation |
+| Timestamp | 2026-09-09 UTC; exact command timestamp not captured |
+| Commit | Approved baseline `12fc30c096279be83d54e72101ea80fbd4c50fd4`; documentation changes uncommitted |
+| Environment | Repository documentation workspace only; no database or runtime target accessed |
+| Preconditions | Local and `origin/master` matched the expected baseline; working tree was clean; `M1-EVIDENCE` was complete; `M1-OWNER-GATE` was the sole active task; the evidence review retained nine implementation-stage gaps |
+| Exit code | 0 for preflight, gate-record validation, and final validation commands |
+| Result | PASS: Gopinathan approved the M1 owner gate on 2026-09-09 at the recorded baseline; the approval is recorded once; all exclusions and nine NOT VERIFIED obligations remain explicit; `M1-OWNER-GATE` is complete and `M2-DATABASES` is the sole active task, not begun |
+| Evidence location | `docs/reports/M1_OWNER_GATE_APPROVAL.md`, `docs/EXECUTION_TRACKER.md`, this record |
+| Redactions | No sensitive values, credentials, usernames, connection strings, private keys, personal data, or private filesystem paths recorded |
+| Operator/automation | GitHub Copilot |
+| Notes | The gate approves controlled backend database implementation under the M1 controls; it is not deployment or production-readiness evidence. No code, SQL, migration, dependency, configuration, database, service, network, deployment, integration, infrastructure, or runtime action occurred. M2 requires a separate preflight before work begins. |
