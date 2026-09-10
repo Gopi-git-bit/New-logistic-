@@ -67,6 +67,9 @@ class Settings:
 
     composio_api_key: Optional[str] = None
     composio_mcp_url: Optional[str] = None
+    tinyfish_api_key: Optional[str] = None
+    tinyfish_api_url: Optional[str] = None
+    tinyfish_tool_name: str = "tinyfish.start_task"
 
     mapbox_access_token: Optional[str] = None
 
@@ -153,6 +156,9 @@ def load_settings() -> Settings:
         model_fast=_require("MODEL_FAST", "deepseek-v4-flash"),
         composio_api_key=_optional("COMPOSIO_API_KEY"),
         composio_mcp_url=_optional("COMPOSIO_MCP_URL"),
+        tinyfish_api_key=_optional("TINYFISH_API_KEY"),
+        tinyfish_api_url=_optional("TINYFISH_API_URL"),
+        tinyfish_tool_name=_require("TINYFISH_TOOL_NAME", "tinyfish.start_task"),
         mapbox_access_token=_optional("MAPBOX_ACCESS_TOKEN"),
         smtp_host=_optional("SMTP_HOST"),
         smtp_port=int(_require("SMTP_PORT", "587")),
@@ -217,6 +223,15 @@ def validate_production_security(settings: Settings) -> list[str]:
             warnings.append("ODOO_URL points to localhost — likely wrong for production")
         if settings.odoo_user == "admin":
             warnings.append("ODOO_USER is 'admin' — use dedicated integration account")
+        if settings.composio_api_key and not settings.composio_mcp_url:
+            warnings.append("COMPOSIO_API_KEY is set but COMPOSIO_MCP_URL is missing")
+        if settings.tinyfish_api_key and not (
+            settings.tinyfish_api_url or settings.composio_mcp_url
+        ):
+            warnings.append(
+                "TINYFISH_API_KEY is set but neither TINYFISH_API_URL nor "
+                "COMPOSIO_MCP_URL is configured"
+            )
     return warnings
 
 
