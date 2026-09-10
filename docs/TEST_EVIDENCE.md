@@ -2,7 +2,7 @@
 
 ## Evidence Policy
 
-- Current verdict: **BLOCKED FOR PRODUCTION — SAFE TO PLAN M1**.
+- Current verdict: **BLOCKED FOR PRODUCTION — M2 DATABASE IMPLEMENTATION COMPLETE IN A DISPOSABLE ENVIRONMENT**.
 - This file distinguishes read-only discovery evidence from executable test evidence.
 - Historical repository counts are not current results.
 - No application, SQL, integration, build, lint, security, container, or database test was executed during M0 discovery.
@@ -594,3 +594,85 @@ These commands validate the documentation diff and working-tree inventory. They 
 | Redactions | No sensitive values, credentials, usernames, connection strings, private keys, personal data, or private filesystem paths recorded |
 | Operator/automation | GitHub Copilot |
 | Notes | The gate approves controlled backend database implementation under the M1 controls; it is not deployment or production-readiness evidence. No code, SQL, migration, dependency, configuration, database, service, network, deployment, integration, infrastructure, or runtime action occurred. M2 requires a separate preflight before work begins. |
+
+## M2 Database Implementation Evidence
+
+### M2-E001: Exact Preflight, Authorization, and Isolation Boundary
+
+| Field | Value |
+|---|---|
+| Command | `pwd`; Git branch/local SHA/remote SHA/status checks; tracker active-row check; production database environment-name presence check without reading values; Docker/container/port/service inventory; complete controlling-document and M1 database-report review; canonical-path absence check |
+| Timestamp | 2026-09-09 UTC; exact preflight timestamp not captured |
+| Commit | Approved M1 baseline `e2b0b5ecf0d0ee35ce3b82d896b265aca787697c`; M2 changes uncommitted |
+| Environment | `srv1943844`, `/opt/new-logistic`; repository workspace plus a uniquely named disposable Docker environment |
+| Preconditions | `M2-DATABASES` was the sole active task; controlled staging/development database implementation was owner-authorized; production database mutation, deployment and integration were excluded |
+| Exit code | 0 for final preflight command groups |
+| Result | PASS: expected baseline and scope verified; no existing PostgreSQL service/container/listener or production database target was used; no production database credential was requested or read |
+| Evidence location | `docs/reports/M2_DATABASE_IMPLEMENTATION_REPORT.md`, this record |
+| Redactions | Environment values and generated disposable password omitted; no secret was displayed or persisted |
+| Operator/automation | GitHub Copilot |
+| Notes | The test container used Docker network mode `none`, no published port, a read-only repository mount, a unique database/container/volume identity, and synthetic fixtures only. |
+
+### M2-E002: Canonical Fresh Apply, Database Behavior, and Concurrency
+
+| Field | Value |
+|---|---|
+| Command | `docker exec -e PGUSER=zippy_m2_runner -e PGDATABASE=zippy_m2_disposable_validation -e ZIPPY_ALLOW_DISPOSABLE_DB=YES zippy-m2-disposable-20260909 /workspace/db/zippy/scripts/migrate.sh up`; `docker exec zippy-m2-disposable-20260909 psql -X --set=ON_ERROR_STOP=1 -q -U zippy_m2_runner -d zippy_m2_disposable_validation --file=/workspace/db/zippy/tests/verify.sql`; `docker exec zippy-m2-disposable-20260909 pgbench -n -U zippy_m2_runner -d zippy_m2_disposable_validation -c 2 -j 2 -t 1 -f /workspace/db/zippy/tests/concurrent_claim.pgbench.sql`; corresponding `verify_concurrency.sql` and `verify_runner_rejection.sh` executions |
+| Timestamp | 2026-09-09T08:34:43Z evidence captured after execution |
+| Commit | Baseline `e2b0b5ecf0d0ee35ce3b82d896b265aca787697c`; canonical M2 implementation uncommitted |
+| Environment | PostgreSQL `16.15 (Debian 16.15-1.pgdg13+2)` in isolated disposable Docker container; network `none`; no published ports |
+| Preconditions | Healthy internal PostgreSQL endpoint; exact manifest order and SHA-256 values; ephemeral credential supplied only to container startup; repository mounted read-only |
+| Exit code | 0 for final migration, SQL assertion, concurrency and runner-rejection commands |
+| Result | PASS: four checksummed migrations applied in order; 48 Zippy tables, 45 RLS policies and exactly four ledger versions; only non-default extension `pgcrypto`; all behavioral assertions including expired-processing-lease recovery passed; two clients claimed distinct tasks; unexpected SQL was rejected |
+| Evidence location | `db/zippy/migrations/manifest.tsv`, `db/zippy/tests/verify.sql`, `db/zippy/tests/verify_concurrency.sql`, `docs/reports/M2_DATABASE_IMPLEMENTATION_REPORT.md` |
+| Redactions | Ephemeral generated password omitted; no secret, authorization header, personal data or production identifier recorded |
+| Operator/automation | GitHub Copilot |
+| Notes | Synthetic `.invalid` identities and synthetic operational/payment references only. One earlier `pgbench -q` invocation was invalid and made no claims; it was not accepted as evidence. The same test passed with the valid command shown above. PostgreSQL 15 was not separately run; 16.15 satisfies the approved PostgreSQL 15+ target. |
+
+### M2-E003: Disposable Rollback, Reapply, and Cleanup
+
+| Field | Value |
+|---|---|
+| Command | `docker exec -e PGUSER=zippy_m2_runner -e PGDATABASE=zippy_m2_disposable_validation -e ZIPPY_ALLOW_DISPOSABLE_DB=YES -e ZIPPY_CONFIRM_DISPOSABLE_DOWN=zippy_m2_disposable_validation zippy-m2-disposable-20260909 /workspace/db/zippy/scripts/migrate.sh down`; zero-schema/role `psql` assertions; repeated canonical `up` and `verify.sql`; `docker rm -f zippy-m2-disposable-20260909`; `docker volume rm zippy_m2_disposable_20260909_data`; container/volume/port absence checks |
+| Timestamp | 2026-09-09T08:34:43Z evidence captured after execution |
+| Commit | Baseline `e2b0b5ecf0d0ee35ce3b82d896b265aca787697c`; canonical M2 implementation uncommitted |
+| Environment | Same isolated disposable PostgreSQL 16.15 environment as M2-E002 |
+| Preconditions | Fresh apply, behavior, concurrency and manifest-rejection evidence passed; exact disposable database confirmation supplied |
+| Exit code | 0 |
+| Result | PASS: destructive down left zero `zippy` schemas and zero `zippy_migrator`, `zippy_app` or `zippy_readonly` roles; all four migrations reapplied; behavioral assertions passed again; only the named disposable container and volume were removed; no PostgreSQL listener remained |
+| Evidence location | `db/zippy/scripts/migrate.sh`, `db/zippy/migrations/`, `docs/reports/M2_DATABASE_IMPLEMENTATION_REPORT.md`, this record |
+| Redactions | Ephemeral generated password omitted |
+| Operator/automation | GitHub Copilot |
+| Notes | Down migrations are destructive and disposable-only. Production rollback remains forward-fix. No production database, Odoo, Paperclip, n8n, payment, deployment, DNS, firewall, Apache, system-service or legacy-migration change occurred. |
+
+### M2-E004: Security Review Correction and Failed-Attempt Record
+
+| Field | Value |
+|---|---|
+| Command | Security-focused review of role identity, ownership, RLS catalog state, ordinary down semantics, grants/default ACLs, function execution, sequence access, disposable guards and image identity; repeated executions of `db/zippy/scripts/run_isolated_proof.sh` after narrowly scoped corrections |
+| Timestamp | 2026-09-09 UTC |
+| Commit | Baseline `e2b0b5ecf0d0ee35ce3b82d896b265aca787697c`; corrected M2 implementation uncommitted |
+| Environment | Fresh uniquely named PostgreSQL 16.15 containers/volumes/databases; Docker network `none`; no published ports; read-only repository mount; synthetic data only |
+| Preconditions | M2 was reopened after review found that M2-E002 used the table-owning `zippy_m2_runner` session with `SET ROLE zippy_app`, and M2-E003 allowed ordinary rollback to delete cluster-global roles |
+| Exit code | Non-zero for failed correction attempts; each failure remained M2-blocking until corrected and rerun from a new disposable environment |
+| Result | RETAINED FAILURES: temporary-image-server readiness race; Unix-socket marker input missing because `docker exec` lacked `-i`; built-in `template1` false rejection; fixture tuple defect; RLS-before-FK test ordering; ambiguous sequence privilege overload; role-teardown inventory omitted `zippy_m2_runner`; and `pg_shdepend.deptype` internal `"char"` concatenation failed without `::text`. A separate local `grep -c` aggregation command failed before evaluating SQL and was corrected; it was not database-proof evidence. |
+| Evidence location | `db/zippy/scripts/run_isolated_proof.sh`, `db/zippy/scripts/migrate.sh`, `db/zippy/scripts/roles.sh`, `db/zippy/tests/`, `docs/reports/M2_DATABASE_IMPLEMENTATION_REPORT.md`, this record |
+| Redactions | Generated passwords and exact disposable secrets were neither printed nor recorded; external `/tmp` logs contain no credential values |
+| Operator/automation | GitHub Copilot |
+| Notes | M2-E002's owner-session RLS conclusion and M2-E003's ordinary-down role deletion are historical evidence, not accepted final security proof. Corrected design uses independent restricted LOGIN sessions, forced RLS, database-local ordinary rollback, and separately confirmed cluster-role teardown without `CASCADE`. No failed attempt is represented as passing. |
+
+### M2-E005: Definitive Restricted-Identity Apply, Rollback/Reapply, and Teardown Proof
+
+| Field | Value |
+|---|---|
+| Command | `db/zippy/scripts/run_isolated_proof.sh > /tmp/zippy-m2-security-proof-final-20260909.log 2>&1`; captured exact exit status; searched log for the first `ERROR`, `FATAL`, assertion failure, or traceback; extracted final result matrix and suite markers |
+| Timestamp | Completed before evidence capture at `2026-09-09T09:37:29Z` |
+| Commit | Baseline `e2b0b5ecf0d0ee35ce3b82d896b265aca787697c`; final M2 workspace state uncommitted |
+| Environment | PostgreSQL `16.15 (Debian 16.15-1.pgdg13+2)` from already-local `postgres@sha256:f1c3376c26f2609ab9f29f71f824103fe2fcd8ee0346485cb6122a4f93df6f94`; image ID is the same SHA-256; unique disposable database/container/volume; Docker `--network none`; no ports; read-only repository mount |
+| Preconditions | Exact manifest SHA-256 verification; independent database/container/volume/image markers; generated non-recorded credentials; guarded role bootstrap; migrations executed through restricted `zippy_m2_migration_login` under `zippy_migrator` |
+| Exit code | 0; first matching error marker: none |
+| Result | PASS: `fresh_up`, `restricted_app_rls_and_privileges`, `restricted_readonly`, `behavioral_assertions`, `concurrent_claim`, `stale_lease_recovery`, `runner_rejections`, `schema_down_roles_preserved`, `reapply_assertions`, `separate_role_teardown`, and `cleanup` all reported `PASS`. The catalog suite classified all 48 tables exactly once as 28 RLS required, 7 internal worker, 10 immutable audit, 1 migration metadata and 2 justified exempt; all 45 non-exempt operational tables had enabled and forced RLS. |
+| Evidence location | External log `/tmp/zippy-m2-security-proof-final-20260909.log` with SHA-256 `7977b7695df56a63f11e166cc0fae75849a30c92f6d5b712167f555fe6ef9f2`; status file `/tmp/zippy-m2-security-proof-final-20260909.status`; canonical scripts/tests under `db/zippy/`; `docs/reports/M2_DATABASE_IMPLEMENTATION_REPORT.md`; this record |
+| Redactions | No credentials, authorization values, production identifiers, personal data or real operational/payment data recorded |
+| Operator/automation | GitHub Copilot |
+| Notes | Application assertions ran as `zippy_m2_app_login`, read-only assertions as `zippy_m2_readonly_login`, and owner-force-RLS assertions as `zippy_migrator`. Ordinary down removed database-local objects and preserved roles; the independent guarded teardown removed exactly six managed roles while leaving the disposable superuser until container removal. PostgreSQL 15 was not separately run; PostgreSQL 16.15 is within the approved 15+ target. No production system was accessed. |
