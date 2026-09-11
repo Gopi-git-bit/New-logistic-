@@ -2,9 +2,11 @@
 
 ## Scope and Result
 
-**Task:** `M3-CORE`  
-**Baseline:** `a5b7048277a39336f0b7904702186736fc9f5ce9`  
-**Execution date:** 2026-09-10  
+**Task:** `M3-CORE`
+
+**Baseline:** `a5b7048277a39336f0b7904702186736fc9f5ce9`
+
+**Execution date:** 2026-09-10
 **Result:** COMPLETE in network-isolated disposable test environments; not deployed.
 
 M3 replaces the legacy fail-open Supabase REST path with a deterministic FastAPI/PostgreSQL command boundary. It implements typed order intake, database-resolved authorization, test-only versioned Decimal pricing, transition-RPC use, atomic idempotency, PostgreSQL tasks/outbox workers, bounded retries, stale-lease recovery, dead letters, operational exceptions, health/readiness, stable errors, exact dependency locks, and isolated integration evidence.

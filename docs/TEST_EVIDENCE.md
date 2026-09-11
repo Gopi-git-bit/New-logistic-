@@ -783,6 +783,20 @@ These commands validate the documentation diff and working-tree inventory. They 
 | Operator/automation | GitHub Copilot |
 | Notes | Retained failed attempts (not passing evidence, no blind retries): `mwACrOfD` failed on the trust-auth assertion, root-causing the image default `local ... trust` initdb behavior and leading to `POSTGRES_INITDB_ARGS=--auth-local=scram-sha-256` (authentication strengthened, never weakened; targeted probe confirmed effective `local all all scram-sha-256` despite stale initdb warning text); `UruMWWVE` failed on an over-strict new dead-letter assertion (`TypeError` from the deliberately mis-signed transport stub is expected); `mdEv5lw5` passed functionally but recorded entrypoint-broadened `socket_dir_mode=3775`, leading to post-readiness re-hardening with permission-bit-masked assertions. The 2 warnings are the known FastAPI/Starlette TestClient httpx shim and AnyIO `BlockingPortal` alias deprecations in locked test dependencies: classified deferred, not suppressed, locks unchanged. M2 regression not required: shared bootstrap/harness (`roles.sh`, `migrate.sh`, `run_isolated_proof.sh`) and migrations 0001–0004 untouched by this pass; the pre-existing `manifest.tsv` modification predates it. No logging was added as a test target; no production claim, deployment, tracker transition, or next-milestone work occurred. |
 
+### M3-E009: Documentation Whitespace Correction
+
+| Field | Value |
+|---|---|
+| Command | `git diff --check`; targeted edit of three Markdown hard-break lines; `git diff --cached --check` under `set -euo pipefail` |
+| Timestamp | 2026-09-11 UTC |
+| Commit | Preceded by acceptance commit `fa9dec6285590b8b3f4f5f00a70c79f727aaba43`; this note records the follow-up |
+| Exit code | 0 |
+| Result | PASS: the M3 acceptance commit proceeded after `git diff --cached --check` reported three documentation whitespace defects because the multi-command shell did not stop on the earlier failure. The defects were formatting-only (Markdown hard-break trailing spaces in the report metadata header). This follow-up removes them with normal Markdown paragraph breaks. No M3 executable behavior, test, migration, harness, dependency, Dockerfile, deployment workflow, tracker state, or proof result changed. |
+| Evidence location | `docs/reports/M3_CORE_IMPLEMENTATION_REPORT.md`, this record |
+| Redactions | None |
+| Operator/automation | GitHub Copilot |
+| Notes | Gate weakness recorded honestly: future staged checks must run under `set -euo pipefail` or as separately verified commands. M4 remains unbegun. |
+
 ### M3-E008: Pre-Commit Acceptance Audit and M4 Handoff
 
 | Field | Value |
