@@ -2,7 +2,7 @@
 
 ## Evidence Policy
 
-- Current verdict: **BLOCKED FOR PRODUCTION — M2 DATABASE IMPLEMENTATION COMPLETE IN A DISPOSABLE ENVIRONMENT**.
+- Current verdict: **BLOCKED FOR PRODUCTION — M3 DETERMINISTIC CORE COMPLETE IN DISPOSABLE TEST ENVIRONMENTS**.
 - This file distinguishes read-only discovery evidence from executable test evidence.
 - Historical repository counts are not current results.
 - No application, SQL, integration, build, lint, security, container, or database test was executed during M0 discovery.
@@ -676,3 +676,125 @@ These commands validate the documentation diff and working-tree inventory. They 
 | Redactions | No credentials, authorization values, production identifiers, personal data or real operational/payment data recorded |
 | Operator/automation | GitHub Copilot |
 | Notes | Application assertions ran as `zippy_m2_app_login`, read-only assertions as `zippy_m2_readonly_login`, and owner-force-RLS assertions as `zippy_migrator`. Ordinary down removed database-local objects and preserved roles; the independent guarded teardown removed exactly six managed roles while leaving the disposable superuser until container removal. PostgreSQL 15 was not separately run; PostgreSQL 16.15 is within the approved 15+ target. No production system was accessed. |
+
+## M3 Deterministic Core Evidence
+
+### M3-E001: Python Contracts and Static Analysis
+
+| Field | Value |
+|---|---|
+| Command | `/tmp/zippy-m3-venv/bin/python -m pytest api/tests -q`; focused `ruff check`; `mypy --strict` over eight production modules; `python3 -m py_compile` |
+| Timestamp | 2026-09-10 UTC |
+| Commit | Baseline `a5b7048277a39336f0b7904702186736fc9f5ce9`; M3 changes uncommitted |
+| Environment | Python 3.12.3; disposable virtual environment |
+| Exit code | 0 |
+| Result | PASS: 18 host tests passed and 2 database-only tests skipped by explicit environment guard; Ruff passed; strict mypy passed; production modules compiled |
+| Evidence location | `api/tests/`, `docs/reports/M3_CORE_IMPLEMENTATION_REPORT.md` |
+| Redactions | No tokens, database URLs or generated credentials recorded |
+| Operator/automation | GitHub Copilot |
+| Notes | Coverage includes validation, Decimal pricing, canonical fingerprints, signed-subject auth, fail-closed configuration, API errors, readiness and retry timing. |
+
+### M3-E002: Restricted-Login End-to-End Proof
+
+| Field | Value |
+|---|---|
+| Command | `db/zippy/scripts/run_m3_core_proof.sh` |
+| Timestamp | 2026-09-10 UTC |
+| Commit | Baseline `a5b7048277a39336f0b7904702186736fc9f5ce9`; M3 changes uncommitted |
+| Environment | PostgreSQL 16.15; immutable image `postgres@sha256:f1c3376c26f2609ab9f29f71f824103fe2fcd8ee0346485cb6122a4f93df6f94`; Docker network `none`; no published port; private temporary Unix socket; restricted `zippy_m2_app_login` |
+| Exit code | 0 |
+| Result | PASS: all 20 tests passed; order intake, replay/conflict, authorization, transitions, task/outbox success and terminal failures passed; migration down, role teardown, network isolation and cleanup passed |
+| Evidence location | `db/zippy/scripts/run_m3_core_proof.sh`, `db/zippy/tests/setup_m3.sql`, `api/tests/test_postgres_integration.py`, `docs/reports/M3_CORE_IMPLEMENTATION_REPORT.md` |
+| Redactions | Random ephemeral passwords and Unix-socket database URL omitted |
+| Operator/automation | GitHub Copilot |
+| Notes | Synthetic `.invalid` identities only. Failed harness attempts retained diagnostically: custom socket bootstrap mismatch, bootstrap/final-server readiness race and API/worker pool-lifecycle test mismatch; each failed run cleaned its disposable artifacts and was not counted as passing evidence. |
+
+### M3-E003: Dependency and Image Reproducibility
+
+| Field | Value |
+|---|---|
+| Command | Fresh virtual-environment `pip install --require-hashes -r requirements-api.lock`; corresponding dev-lock install; direct import checks; `docker build -f Dockerfile.api -t zippy-api:m3-proof .` |
+| Timestamp | 2026-09-10 UTC |
+| Commit | Baseline `a5b7048277a39336f0b7904702186736fc9f5ce9`; M3 changes uncommitted |
+| Environment | Fresh disposable Python 3.12 environments; local Docker builder |
+| Exit code | 0 |
+| Result | PASS: runtime and development lock graphs installed with SHA-256 enforcement and imported; API image built from pinned Python base and runtime lock |
+| Evidence location | `requirements-api.txt`, `requirements-api.lock`, `requirements-api-dev.txt`, `requirements-api-dev.lock`, `Dockerfile.api` |
+| Redactions | No package credentials or private index configuration used or recorded |
+| Operator/automation | GitHub Copilot |
+| Notes | Runtime lock SHA-256 `851d4200ac029aa7dbb104328a2208efec6cc5e2631a11b5e6c8efa8cad65b2d`; dev lock SHA-256 `7ffdeb9ba3219af6030933961445707f0e71dbcd8823b3d92e0d21c8f8bf133a`; pinned base digest `78387bc3881b8273120a12ebe6c1ab22b018ccc2c9adf565ae1ac9b536e184ea`. Image was not pushed or deployed. |
+
+### M3-E004: M2 Regression and Scope Boundary
+
+| Field | Value |
+|---|---|
+| Command | `db/zippy/scripts/run_isolated_proof.sh`; Git diff/status/hygiene and host residue checks |
+| Timestamp | 2026-09-10 UTC |
+| Commit | Baseline `a5b7048277a39336f0b7904702186736fc9f5ce9`; M3 changes uncommitted |
+| Environment | Same immutable PostgreSQL 16.15 image and network-isolated disposable controls as M2 |
+| Exit code | 0 |
+| Result | PASS: fresh up, restricted application/read-only controls, behavior, concurrency, stale lease, runner rejection, down/reapply, separate role teardown and cleanup passed with migration 0005 |
+| Evidence location | `db/zippy/scripts/run_isolated_proof.sh`, `docs/reports/M3_CORE_IMPLEMENTATION_REPORT.md` |
+| Redactions | Generated credentials omitted |
+| Operator/automation | GitHub Copilot |
+| Notes | No production/external system was accessed. M4 remains blocked and no task was activated. |
+
+### M3-E005: Exit-Status Correction and Single Fresh Proof
+
+| Field | Value |
+|---|---|
+| Command | `bash -n db/zippy/scripts/run_m3_core_proof_logged.sh`; wrapper `--self-test`; repeat harmless probe with exported `tail` returning `88`; exactly one `bash db/zippy/scripts/run_m3_core_proof_logged.sh`, observed through a read-only inotify monitor; exact Docker inventory membership and socket absence checks |
+| Timestamp | Real proof: `2026-09-10T12:46:46.278618+00:00` through `2026-09-10T12:46:54.613978+00:00` |
+| Commit | `a5b7048277a39336f0b7904702186736fc9f5ce9`, `master`; existing M3 changes preserved and correction uncommitted |
+| Environment | Existing isolated M3 harness; network `none`, no published ports, original restricted-login/migration/cleanup controls unchanged |
+| Preconditions | Owner authorized only wrapper, deployment prevention and evidence correction; baseline and complete Git status verified; existing proof interpreter present |
+| Exit code | Harmless failure: expected/observed `37`; with tail failure `88`: wrapper still `37`; real harness `0`, observed wrapper `0` |
+| Result | PASS: 20 passed, 2 warnings; nine harness PASS markers; exact cleanup checks passed. Warning details were not classified. No real-proof retry occurred. |
+| Evidence location | `db/zippy/scripts/run_m3_core_proof_logged.sh`; `docs/reports/M3_CORE_IMPLEMENTATION_REPORT.md`; private temporary log `/tmp/zippy-m3-proof-log.O2xfnOs1/proof.log`, SHA-256 `3b7b209bd5460ef9b0e129e399e69f6b5ab1b41ee9e339eb8b133925d5fe183b` |
+| Redactions | Only allowlisted status/count diagnostics displayed; no credential values or raw failure payloads published; log directory `700`, log `600`, tracing disabled |
+| Operator/automation | GitHub Copilot |
+| Notes | Container `zippy-m3-disposable-20260910124646-e9b43df5`, volume `zippy_m3_disposable_20260910124646_e9b43df5_data`, socket `/tmp/zippy-m3-socket-20260910124646_e9b43df5.vEe6rH` all absent after exit. Prior attempts and the earlier 19-versus-20 count discrepancy are retained; this record is fresh evidence. The initial strict summary filter missed the warnings-bearing summary, so safe count extraction was used without rerunning tests. Temporary logs are not durable archives. |
+
+### M3-E006: Static Local Deployment Block
+
+| Field | Value |
+|---|---|
+| Command | Parse `.github/workflows/deploy-hostinger.yml` with PyYAML; assert sole job `deploy` and unconditional `if: ${{ false }}` on every job; inspect all steps for local script/action invocation; editor diagnostics; `git diff --check` |
+| Timestamp | 2026-09-10 UTC |
+| Commit | `a5b7048277a39336f0b7904702186736fc9f5ce9`; local uncommitted correction |
+| Exit code | 0 for YAML parse/gate assertions and whitespace validation |
+| Result | PASS: deployment job cannot execute under the local workflow definition; YAML remains valid; existing deployment definition retained |
+| Evidence location | `.github/workflows/deploy-hostinger.yml`; `docs/reports/M3_CORE_IMPLEMENTATION_REPORT.md` |
+| Notes | No local deployment scripts/actions are invoked. Production Compose reference retained; no Compose file created or workflow commands executed. External GitHub environment protection/required reviewers remain NOT VERIFIED. This local change does not protect the remote branch until committed and pushed; neither was performed. No ServerAvatar call, secret change, deployment or tracker transition occurred. |
+
+### M3-E007: Hardening Corrections (Non-Root Image, Socket, Cleanup Status, Redaction)
+
+| Field | Value |
+|---|---|
+| Command | Host unit suite via `/tmp/zippy-m3-venv/bin/python -m pytest api/tests -q`; `docker build -f Dockerfile.api -t zippy-api:m3-hardening .`; isolated `docker run --rm --network none --entrypoint id zippy-api:m3-hardening`; `verify_m3_cleanup.sh --self-test`; wrapper `--self-test` including tail-failure variant; exactly one passing real proof via `bash db/zippy/scripts/run_m3_core_proof_logged.sh`; targeted disposable pg_hba probe on the pinned image/env; exact residue checks |
+| Timestamp | 2026-09-10 UTC (passing proof resources timestamped `20260910132938`); evidence entry recorded 2026-09-11 after an interrupted session |
+| Commit | `a5b7048277a39336f0b7904702186736fc9f5ce9`, `master`; hardening changes uncommitted; pre-existing M3 work preserved |
+| Environment | Disposable PostgreSQL 16.15, pinned image, Docker network `none`, no published ports, hardened private Unix socket, synthetic `.invalid` identities only |
+| Preconditions | Owner authorized the hardening scope; baseline/branch/status verified before edits; no host account, SSH user, or filesystem-ownership changes |
+| Exit code | Host unit suite `0`; image build `0`; isolated identity check `0`; cleanup probe matrix `0` (all four combinations matched expected statuses); real proof `harness_exit_code=0`, `final_exit_code=0`, `cleanup-verification=PASS` |
+| Result | PASS: 23 host tests passed with 2 isolated-DB skips, including 5 new output-redaction tests; API image configured and runs as `uid=10001(zippy) gid=10001(zippy)` in the isolated check; hardened proof passed with pytest `25 passed, 2 warnings` and `socket_hardening=PASS`; effective `socket_dir_mode=2700` (`rwx------` permission bits plus access-neutral setgid preserved by this filesystem), `socket_file_mode=777`, `password_encryption=scram-sha-256`, `pg_hba_local_auth=scram-sha-256`; `negative_local_user=PASS` (uid 65534 `nobody` via `setpriv`, no account changes); exact container `zippy-m3-disposable-20260910132938-1f21aa54`, volume `zippy_m3_disposable_20260910132938_1f21aa54_data`, and socket `/tmp/zippy-m3-socket-20260910132938_1f21aa54.cffp31` all absent after the run; zero `zippy` containers/volumes remain |
+| Evidence location | `Dockerfile.api`; `db/zippy/scripts/run_m3_core_proof.sh`; `db/zippy/scripts/run_m3_core_proof_logged.sh`; `db/zippy/scripts/verify_m3_cleanup.sh`; `api/tests/test_output_redaction.py`; `api/tests/test_postgres_integration.py`; private log `/tmp/zippy-m3-proof-log.nMP56NHB/proof.log` (mode 600), SHA-256 `9217f3483147b40b95492d18fae604d055975b45cf7ab9469a0034140f344786`; `docs/reports/M3_CORE_IMPLEMENTATION_REPORT.md` |
+| Redactions | Generated ephemeral passwords and full socket database URLs never printed or recorded; only allowlisted status/mode/auth lines surfaced from the private log |
+| Operator/automation | GitHub Copilot |
+| Notes | Retained failed attempts (not passing evidence, no blind retries): `mwACrOfD` failed on the trust-auth assertion, root-causing the image default `local ... trust` initdb behavior and leading to `POSTGRES_INITDB_ARGS=--auth-local=scram-sha-256` (authentication strengthened, never weakened; targeted probe confirmed effective `local all all scram-sha-256` despite stale initdb warning text); `UruMWWVE` failed on an over-strict new dead-letter assertion (`TypeError` from the deliberately mis-signed transport stub is expected); `mdEv5lw5` passed functionally but recorded entrypoint-broadened `socket_dir_mode=3775`, leading to post-readiness re-hardening with permission-bit-masked assertions. The 2 warnings are the known FastAPI/Starlette TestClient httpx shim and AnyIO `BlockingPortal` alias deprecations in locked test dependencies: classified deferred, not suppressed, locks unchanged. M2 regression not required: shared bootstrap/harness (`roles.sh`, `migrate.sh`, `run_isolated_proof.sh`) and migrations 0001–0004 untouched by this pass; the pre-existing `manifest.tsv` modification predates it. No logging was added as a test target; no production claim, deployment, tracker transition, or next-milestone work occurred. |
+
+### M3-E008: Pre-Commit Acceptance Audit and M4 Handoff
+
+| Field | Value |
+|---|---|
+| Command | Complete reads of controlling documents; full Git status/diff inventory; symlink, legacy-tree, migration-immutability and manifest checksum checks; static security assertions (auth claim scope, server-side role resolution, fail-closed idempotency, non-root image, network isolation, socket mode, scram-sha-256, negative probe, deployment gate); lock pin/hash verification; added-content sensitive-material scans; proof-log checksum and marker validation; executable-file drift check against the passing proof; `git diff --check`; Bash/Python/YAML static checks; disposable residue checks |
+| Timestamp | 2026-09-11 UTC |
+| Commit | Baseline `a5b7048277a39336f0b7904702186736fc9f5ce9`; this entry is included in the acceptance commit |
+| Environment | Repository workspace only; no test, container, database, or service execution during the audit |
+| Preconditions | Owner authorized the acceptance audit and, only if all gates pass, staging, one normal commit, and a normal push to `origin/master` |
+| Exit code | 0 for all audit gates |
+| Result | PASS: every changed path accounted for by M3 purpose; legacy Supabase/Paperclip/migration trees untouched; migrations 0001–0004 byte-identical to HEAD; manifest 0005 checksums match file SHA-256 values; no symlinks, artifacts, logs, caches, or credentials in scope; no drift after the passing proof (no rerun required); `user_metadata.role` cannot influence authorization; JWT requires `sub`/`aud`/`exp` with `zippy-api` audience; deployment job carries job-level `if: ${{ false }}`; missing production Compose reference unchanged; tracker invariant satisfied |
+| Evidence location | `docs/reports/M3_CORE_IMPLEMENTATION_REPORT.md`, `docs/EXECUTION_TRACKER.md`, this record; private log checksum `9217f3483147b40b95492d18fae604d055975b45cf7ab9469a0034140f344786` revalidated |
+| Redactions | No credentials or secret values read or printed |
+| Operator/automation | GitHub Copilot |
+| Notes | Tracker handoff follows the established convention: `M4-OPERATIONS-FINANCE` is the sole `IN_PROGRESS` task and is explicitly not begun; its authorized scope remains empty and product, finance, and Odoo owner approvals remain required. No task implementation began; no production readiness is claimed. |

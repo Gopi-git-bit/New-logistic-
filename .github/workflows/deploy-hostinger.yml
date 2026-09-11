@@ -19,6 +19,8 @@ env:
 
 jobs:
   deploy:
+    # Production deployment is not authorized; retain this definition for reviewed future work.
+    if: ${{ false }}
     name: Resolve ServerAvatar target and deploy
     runs-on: ubuntu-latest
     environment: production

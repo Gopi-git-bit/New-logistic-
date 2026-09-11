@@ -214,6 +214,9 @@ SELECT pg_temp.assert_true(
     has_function_privilege(current_user, 'zippy.transition_order(uuid,uuid,zippy.order_status,zippy.order_status,uuid,text,text,text,uuid)', 'EXECUTE')
     AND has_function_privilege(current_user, 'zippy.claim_durable_tasks(uuid,text,text,integer,integer)', 'EXECUTE')
     AND has_function_privilege(current_user, 'zippy.fail_durable_task(uuid,uuid,text,text,timestamptz)', 'EXECUTE')
+    AND has_function_privilege(current_user, 'zippy.claim_outbox_events(uuid,text,integer,integer)', 'EXECUTE')
+    AND has_function_privilege(current_user, 'zippy.complete_outbox_event(uuid,uuid,text)', 'EXECUTE')
+    AND has_function_privilege(current_user, 'zippy.fail_outbox_event(uuid,uuid,text,text,timestamptz)', 'EXECUTE')
     AND NOT has_function_privilege(current_user, 'zippy.set_account_status(uuid,uuid,uuid,zippy.account_status,text,text,uuid)', 'EXECUTE'),
     'application function execution is explicitly allowlisted'
 );

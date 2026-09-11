@@ -35,7 +35,7 @@ SELECT pg_temp.assert_true(
 );
 SELECT pg_temp.assert_true(current_database() LIKE 'zippy_m2_disposable_%', 'database is disposable');
 SELECT pg_temp.assert_true(
-    (SELECT count(*) FROM zippy.schema_migrations) = 4,
+    (SELECT count(*) FROM zippy.schema_migrations) = 5,
     'all canonical migrations are recorded'
 );
 SELECT pg_temp.assert_true(
