@@ -212,6 +212,23 @@ class CoreRepository:
         if accepted_row is None:
             raise RuntimeError("order persistence failed")
         accepted_at = accepted_row["created_at"]
+        # ORD-INV-003: capture the dispatch body-type requirement once, here,
+        # through this authenticated server-side intake path only. It is
+        # never accepted again later (e.g. at offer-acceptance time).
+        connection.execute(
+            """
+            INSERT INTO zippy.dispatch_requirements (
+                platform_id, order_id, required_body_type, created_by_account_id, correlation_id
+            ) VALUES (%s, %s, %s, %s, %s)
+            """,
+            (
+                identity.platform_id,
+                order_id,
+                order.service.body_type,
+                identity.account_id,
+                correlation_id,
+            ),
+        )
         for sequence, kind, stop in (
             (1, "pickup", order.pickup),
             (2, "delivery", order.delivery),

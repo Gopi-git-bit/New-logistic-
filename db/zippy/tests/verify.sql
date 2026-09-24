@@ -35,7 +35,7 @@ SELECT pg_temp.assert_true(
 );
 SELECT pg_temp.assert_true(current_database() LIKE 'zippy_m2_disposable_%', 'database is disposable');
 SELECT pg_temp.assert_true(
-    (SELECT count(*) FROM zippy.schema_migrations) = 5,
+    (SELECT count(*) FROM zippy.schema_migrations) = 6,
     'all canonical migrations are recorded'
 );
 SELECT pg_temp.assert_true(
@@ -80,8 +80,8 @@ SELECT pg_temp.assert_true(
     'least-privilege role grants are enforced'
 );
 SELECT pg_temp.assert_true(
-    (SELECT count(*) FROM pg_policies WHERE schemaname = 'zippy' AND policyname = 'platform_isolation') = 45,
-    'all 45 tenant-scoped tables have platform policies'
+    (SELECT count(*) FROM pg_policies WHERE schemaname = 'zippy' AND policyname = 'platform_isolation') = 47,
+    'all 47 tenant-scoped tables have platform policies'
 );
 SELECT pg_temp.assert_true(
     EXISTS (

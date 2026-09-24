@@ -70,7 +70,9 @@ INSERT INTO expected_table_security (table_name, classification) VALUES
     ('notification_attempts', 'INTERNAL WORKER'),
     ('order_transition_rules', 'JUSTIFIED EXEMPT'),
     ('order_state_transitions', 'IMMUTABLE AUDIT'),
-    ('operational_events', 'IMMUTABLE AUDIT');
+    ('operational_events', 'IMMUTABLE AUDIT'),
+    ('payment_intents', 'RLS REQUIRED'),
+    ('dispatch_requirements', 'RLS REQUIRED');
 
 SELECT pg_temp.assert_true(session_user = :'expected_session_user', 'security suite uses the restricted application LOGIN');
 SELECT pg_temp.assert_true(current_user = :'expected_session_user', 'security suite does not impersonate the object owner');
@@ -113,7 +115,7 @@ SELECT pg_temp.assert_true(
         AND NOT rolbypassrls) = 3,
     'all disposable LOGIN roles are non-privileged'
 );
-SELECT pg_temp.assert_true((SELECT count(*) FROM expected_table_security) = 48, 'all 48 tables are classified exactly once');
+SELECT pg_temp.assert_true((SELECT count(*) FROM expected_table_security) = 50, 'all 50 tables are classified exactly once');
 SELECT pg_temp.assert_true(
     NOT EXISTS (
         SELECT table_name FROM expected_table_security
@@ -128,7 +130,7 @@ SELECT pg_temp.assert_true(
     'classification and catalog table membership match exactly'
 );
 SELECT pg_temp.assert_true(
-    (SELECT count(*) FROM expected_table_security WHERE classification = 'RLS REQUIRED') = 28
+    (SELECT count(*) FROM expected_table_security WHERE classification = 'RLS REQUIRED') = 30
     AND (SELECT count(*) FROM expected_table_security WHERE classification = 'INTERNAL WORKER') = 7
     AND (SELECT count(*) FROM expected_table_security WHERE classification = 'IMMUTABLE AUDIT') = 10
     AND (SELECT count(*) FROM expected_table_security WHERE classification = 'MIGRATION METADATA') = 1
@@ -144,11 +146,11 @@ SELECT pg_temp.assert_true(
          WHERE expected.classification NOT IN ('MIGRATION METADATA', 'JUSTIFIED EXEMPT')
            AND (NOT relation.relrowsecurity OR NOT relation.relforcerowsecurity)
     ),
-    'all 45 tenant-scoped internal, audit, and operational tables have enabled and forced RLS'
+    'all 47 tenant-scoped internal, audit, and operational tables have enabled and forced RLS'
 );
 SELECT pg_temp.assert_true(
-    (SELECT count(*) FROM pg_policies WHERE schemaname = 'zippy' AND policyname = 'platform_isolation') = 45,
-    'all 45 tenant-scoped tables have a platform isolation policy'
+    (SELECT count(*) FROM pg_policies WHERE schemaname = 'zippy' AND policyname = 'platform_isolation') = 47,
+    'all 47 tenant-scoped tables have a platform isolation policy'
 );
 SELECT pg_temp.assert_true(
     EXISTS (

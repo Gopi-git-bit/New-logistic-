@@ -3,17 +3,20 @@
 from __future__ import annotations
 
 import os
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from decimal import Decimal, InvalidOperation
 from uuid import UUID
 
 
 @dataclass(frozen=True)
 class Settings:
-    database_url: str
+    # repr=False on every secret-bearing field: the default dataclass repr()
+    # (used implicitly by pytest failure output, str(), and logging of this
+    # object) must never print a connection string or webhook/JWT secret.
+    database_url: str = field(repr=False)
     app_env: str
     auth_mode: str
-    auth_jwt_secret: str
+    auth_jwt_secret: str = field(repr=False)
     platform_id: UUID
     pricing_policy_version: str
     pricing_currency: str
@@ -24,6 +27,7 @@ class Settings:
     task_lease_seconds: int = 30
     retry_base_seconds: int = 5
     retry_max_seconds: int = 300
+    razorpay_webhook_secret: str = field(default="", repr=False)
 
 
 def _decimal(name: str) -> Decimal:
@@ -52,6 +56,7 @@ def load_settings() -> Settings:
         pricing_base_amount=_decimal("M3_PRICING_BASE_AMOUNT"),
         pricing_per_km=_decimal("M3_PRICING_PER_KM"),
         pricing_per_kg=_decimal("M3_PRICING_PER_KG"),
+        razorpay_webhook_secret=os.environ.get("RAZORPAY_WEBHOOK_SECRET", ""),
     )
     validate_settings(settings)
     return settings

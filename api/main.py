@@ -31,6 +31,10 @@ from .repositories import (
     ForbiddenError,
     canonical_fingerprint,
 )
+from .repositories_dispatch import DispatchRepository
+from .repositories_finance import FinanceRepository
+from .routes_dispatch import register_dispatch_routes
+from .routes_finance import register_finance_routes
 
 
 def _correlation_id(request: Request) -> UUID:
@@ -60,6 +64,8 @@ def create_app(
     settings: Settings | None = None,
     database: Database | None = None,
     repository: CoreRepository | None = None,
+    finance_repository: FinanceRepository | None = None,
+    dispatch_repository: DispatchRepository | None = None,
 ) -> FastAPI:
     @asynccontextmanager
     async def lifespan(application: FastAPI) -> AsyncIterator[None]:
@@ -68,6 +74,8 @@ def create_app(
         application.state.settings = selected_settings
         application.state.database = selected_database
         application.state.repository = repository or CoreRepository()
+        application.state.finance_repository = finance_repository or FinanceRepository()
+        application.state.dispatch_repository = dispatch_repository or DispatchRepository()
         selected_database.open()
         yield
         selected_database.close()
@@ -286,6 +294,9 @@ def create_app(
                 status_code=403,
                 detail={"code": "FORBIDDEN", "message": str(exc), "retryable": False},
             ) from exc
+
+    register_finance_routes(application, subject_dependency, _correlation_id)
+    register_dispatch_routes(application, subject_dependency, _correlation_id)
 
     return application
 

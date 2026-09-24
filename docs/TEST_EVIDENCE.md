@@ -797,6 +797,177 @@ These commands validate the documentation diff and working-tree inventory. They 
 | Operator/automation | GitHub Copilot |
 | Notes | Gate weakness recorded honestly: future staged checks must run under `set -euo pipefail` or as separately verified commands. M4 remains unbegun. |
 
+### M4-E001: M4-OPERATIONS-FINANCE Owner Approval
+
+| Field | Value |
+|---|---|
+| Command | Preflight baseline/remote/identity/worktree/tracker verification; complete reads of controlling documents, canonical migrations, and current API/worker code; verbatim approval recorded as D-26 |
+| Timestamp | 2026-09-11 UTC |
+| Commit | Baseline `2c5225b5edfcbac1739bb829c937e41bceee0eca`; approval documentation uncommitted |
+| Environment | Repository workspace only |
+| Preconditions | M3-CORE COMPLETE; M4-OPERATIONS-FINANCE sole IN_PROGRESS and not begun; local and `origin/master` matched the expected baseline; Git identity `Gopinathan <gopinathdisp@gmail.com>` |
+| Exit code | 0 |
+| Result | PASS: Gopinathan approved M4 implementation on 2026-09-11 as product, finance, and initial Odoo owner. D-26 records FastAPI as the Razorpay webhook ingress, sandbox-only payment scope, operational-projection-only payment updates, refund.processed as reconciliation-only against recorded manual approval, manual approval for every refund at every amount, manual settlement release, and a draft-only Odoo adapter with fake-server tests |
+| Evidence location | `docs/DECISIONS.md` (D-26), this record |
+| Redactions | No secrets or credentials recorded |
+| Operator/automation | GitHub Copilot |
+| Notes | The approval explicitly does not authorize live keys/payments, live Odoo credentials, autonomous posting/payment/reconciliation, direct Odoo database access, production deployment, automatic refunds or settlements, unrestricted n8n/Paperclip execution, or accounting-authority changes. M4 remains IN_PROGRESS; completion requires a separate acceptance audit. |
+
+### M4-E002: Implementation Validation and Isolated Proofs
+
+| Field | Value |
+|---|---|
+| Command | Host suite `/tmp/zippy-m3-venv/bin/python -m pytest api/tests api/tests_m4 -q`; focused `ruff check`; strict `mypy` over six new modules; manifest SHA-256 verification; exactly one passing `bash db/zippy/scripts/run_m4_finance_proof.sh` with private-log capture and original-status preservation; `bash db/zippy/scripts/run_isolated_proof.sh` for M2 regression plus 0006 up/down/reapply; exact residue checks |
+| Timestamp | 2026-09-11 UTC |
+| Commit | Baseline `2c5225b5edfcbac1739bb829c937e41bceee0eca`; M4 changes uncommitted |
+| Environment | Disposable PostgreSQL 16.15 pinned image; Docker network `none`; no published ports; hardened private Unix socket; scram-sha-256 local auth; restricted logins; synthetic `.invalid` identities |
+| Preconditions | D-26 owner approval recorded; preflight verified baseline, identity, clean worktree, tracker invariant |
+| Exit code | Host suite `0`; focused ruff `0`; strict mypy `0`; M4 proof `0`; M2 regression `0` |
+| Result | PASS: host suite 42 passed / 14 skipped / 2 known deferred dependency warnings; M4 proof 56 passed / 2 warnings with all harness markers PASS (webhook ingress, idempotency, authorization, POD settlement gate, manual refund, draft-only Odoo, reconciliation, M3 regression, network isolation, cleanup, socket hardening, negative local-user probe); M2 regression all 11 markers PASS including 0006 reapply and the PUBLIC-privilege catalog assertion |
+| Evidence location | Private logs `/tmp/zippy-m4-proof-log.O5UuiYGu/proof.log` (SHA-256 `133c847f048f5f7fd3253301561cef377038cc9a6e2f857632bfc8458fe4c0e6`, mode 600) and `/tmp/zippy-m2-regression-log.TDszzz8i/proof.log`; `docs/reports/M4_OPERATIONS_FINANCE_IMPLEMENTATION_REPORT.md` |
+| Redactions | No secrets, signatures, raw webhook bodies, or generated passwords printed or recorded |
+| Operator/automation | GitHub Copilot |
+| Notes | Retained failures (never counted as passing): M4 proof run 1 (`p4vCYNhy`) exposed four test defects (pool reopen after TestClient lifespan, refund-execution replay ordering, write helper misuse) — fixed and rerun once; M2 regression run 1 exposed the stale canonical-chain count (updated 5 to 6 per established milestone pattern); run 2 exposed default PUBLIC EXECUTE on the new 0006 function (REVOKE added, manifest checksum refreshed). The passing M4 proof predates the REVOKE; the delta is privilege-hardening only and is covered by the final M2 regression. Exact cleanup verified: M4 container `zippy-m4-disposable-20260911113226-99df5942`, volume `zippy_m4_disposable_20260911113226_99df5942_data`, socket `/tmp/zippy-m4-socket-20260911113226_99df5942.uoryZQ` all absent; zero zippy containers/volumes remain. |
+
+### M4-E003: Scope Hygiene Correction During Implementation
+
+| Field | Value |
+|---|---|
+| Command | `git status --short --untracked-files=all`; `git diff` of three legacy files; `git checkout --` limited to those files |
+| Timestamp | 2026-09-11 UTC |
+| Commit | Baseline `2c5225b5edfcbac1739bb829c937e41bceee0eca` |
+| Exit code | 0 |
+| Result | PASS: a directory-wide `ruff --fix` during lint remediation applied unintended pyupgrade-style edits to legacy `api/pod_lifecycle.py`, `api/services/hermes.py`, and `api/services/paperclip.py`; the diffs were verified to be mechanical import/type-annotation rewrites only and were reverted to HEAD. Final scope contains only intended M4 paths. |
+| Evidence location | This record; final `git status` |
+| Notes | Recorded honestly as a process defect: future lint fixes must run on explicit file lists, never directory-wide with `--fix`. No user work existed in those files; no behavior changed. |
+
+### M4-E004: Payment-Contract and Amount-Semantics Correction
+
+| Field | Value |
+|---|---|
+| Command | Read-only trace of the webhook→order linkage; design and implementation of an authoritative provider-reference mapping (`zippy.external_references` + new `zippy.payment_intents` in 0006) and explicit minor-unit amount validation; focused `ruff check` and strict `mypy` over the changed modules; new/updated regression tests |
+| Timestamp | 2026-09-23 UTC |
+| Commit | Baseline `2c5225b5edfcbac1739bb829c937e41bceee0eca`; correction uncommitted, preserving the pre-existing uncommitted M4 implementation |
+| Environment | Repository workspace only (no database access for this step) |
+| Preconditions | `git status`/`git rev-parse HEAD`/`origin/master` confirmed the expected baseline with the M4 in-progress worktree intact; `M4-OPERATIONS-FINANCE` confirmed sole `IN_PROGRESS` |
+| Exit code | Focused ruff `0`; strict mypy `0` |
+| Result | PASS: `notes.zippy_order_id` no longer participates in order resolution under any condition, including a valid signature; the webhook resolves the order only via `payload.payment.entity.order_id` through the tenant-scoped, provider+external-id-unique `zippy.external_references` mapping, extended with a new `zippy.payment_intents` table (0006) carrying the expected minor-unit amount/currency the existing schema could not express; the mapping is created only by `FinanceRepository.prepare_payment_intent` (the approved server-side payment-intent/order-preparation path) or its synthetic test fixture; amounts are validated as integer minor units (`_minor_units`, `MAX_AMOUNT_MINOR_UNITS = 999_999_999_999`), rejecting booleans, floats, strings, non-positive, and oversized values; minor↔major conversions use `Decimal` exact arithmetic only |
+| Evidence location | `api/gateway.py`, `api/repositories_finance.py`, `db/zippy/migrations/0006_operations_finance.up.sql`/`.down.sql`, this record |
+| Redactions | No secrets, signatures, or credentials involved (design/implementation step only) |
+| Operator/automation | GitHub Copilot |
+| Notes | No live Razorpay order creation or payment execution occurred or is authorized; `prepare_payment_intent` is invoked only by test fixtures in this change. |
+
+### M4-E005: Regression Test Coverage for the Payment-Contract Correction
+
+| Field | Value |
+|---|---|
+| Command | Host suite `PYTHONPATH="$PWD" /tmp/zippy-m3-venv/bin/python -m pytest api/tests api/tests_m4 -q` |
+| Timestamp | 2026-09-23 UTC |
+| Commit | Baseline `2c5225b5edfcbac1739bb829c937e41bceee0eca`; changes uncommitted |
+| Environment | Recreated host Python venv (`/tmp/zippy-m3-venv`, ephemeral) from `requirements-api.txt`/`requirements-api-dev.txt`; DB-gated tests skip without `ZIPPY_M4_TEST_DATABASE_URL`/`ZIPPY_M3_TEST_DATABASE_URL` |
+| Preconditions | M4-E004 changes present; focused ruff/mypy already PASS |
+| Exit code | 0 |
+| Result | PASS: **52 passed, 25 skipped**, 1 known deferred dependency warning. Focused new/changed test counts: 11 gateway unit tests (`api/tests/test_gateway.py`, including parametrized amount-validation cases) and 17 M4 integration tests (`api/tests_m4/test_finance_integration.py`, DB-gated, executed only inside the isolated M4 proof below). New/updated integration coverage proves: valid signature + authoritative mapping updates the compatible projection; valid signature + notes-only creates no order link; missing mapping creates no trusted projection; conflicting same-order-different-reference and different-order-already-bound-reference mappings are rejected (`ConflictError`); a mapping registered under a second synthetic platform is invisible to platform 1's resolution (cross-tenant); provider identifier / duplicate webhook replay stays idempotent (both payment and refund paths); amount and currency match succeeds; amount mismatch, currency mismatch, and unsafe amounts (bool/float/string/negative/zero/oversized, parametrized) never create a trusted projection; `refund.processed` without a manually approved matching execution remains evidence-only; a matching manually approved refund reconciles exactly once; a mismatched amount against an executed refund stays evidence-only; no automatic refund, settlement, or Odoo action occurs anywhere in the new tests |
+| Evidence location | `api/tests/test_gateway.py`, `api/tests_m4/test_finance_integration.py`, `api/tests_m4/conftest.py` (`prepare_payment_intent` fixture, `ORDER_C`/`ORDER_D`/`CROSS_TENANT_*` fixtures), `db/zippy/tests/setup_m4.sql` (cross-tenant and dedicated conflict-fixture orders), this record |
+| Redactions | No secrets; all identities remain synthetic/`.invalid` |
+| Operator/automation | GitHub Copilot |
+| Notes | Host run only proves collection/parsing and non-DB unit behavior; DB-gated M4 integration assertions are proven by the isolated proof in `M4-E006`. |
+
+### M4-E006: Final M4 Disposable Proof and Subsequent M2 Regression
+
+| Field | Value |
+|---|---|
+| Command | Exactly one `bash db/zippy/scripts/run_m4_finance_proof.sh` against the final application code, tests, 0006 up/down migration, and refreshed manifest checksum, captured via a private-log wrapper (`mktemp -d`, `umask 077`, output redirected, exit code appended, log `chmod 600`); followed by exactly one `bash db/zippy/scripts/run_isolated_proof.sh` (M2 regression, applies the full migration chain including 0006 and a down/up/down/reapply cycle) |
+| Timestamp | 2026-09-23 UTC |
+| Commit | Baseline `2c5225b5edfcbac1739bb829c937e41bceee0eca`; M4 correction uncommitted |
+| Environment | Disposable PostgreSQL 16.15 pinned image (`postgres@sha256:f1c337…f6f94`); Docker network `none`; no published ports; hardened private Unix socket; scram-sha-256 local auth; restricted logins; synthetic `.invalid` identities |
+| Preconditions | M4-E004/M4-E005 complete; baseline/branch/HEAD/origin verified unchanged; nothing staged |
+| Exit code | Final M4 proof `0`; M2 regression `0` (both after retained, non-passing first attempts — see Notes) |
+| Result | PASS: **final M4 proof — pytest `77 passed, 1 warning`**, all harness markers `PASS` (`m4_unit_contracts`, `m4_webhook_ingress`, `m4_idempotency`, `m4_authorization`, `m4_pod_settlement_gate`, `m4_manual_refund`, `m4_odoo_draft_only`, `m4_reconciliation`, `m3_regression`, `network_isolation`, `cleanup`, `socket_hardening`), `socket_dir_mode=2700`, `socket_file_mode=777`, `password_encryption=scram-sha-256`, `pg_hba_local_auth=scram-sha-256`, `negative_local_user=PASS`; **M2 regression — all 11 markers `PASS`** (`fresh_up`, `restricted_app_rls_and_privileges`, `restricted_readonly`, `behavioral_assertions`, `concurrent_claim`, `stale_lease_recovery`, `runner_rejections`, `schema_down_roles_preserved`, `reapply_assertions`, `separate_role_teardown`, `cleanup`), including the 0006 down/up/reapply and the PUBLIC-privilege catalog assertion |
+| Evidence location | Private logs (mode 600, not committed): final M4 proof `/tmp/zippy-m4-proof-log.xVe8arOt/proof.log` (SHA-256 `fcac88de93c69f14ff93a759beb8d2bc590b680a74eb0acb52bff1edaaf6670f`); final M2 regression `/tmp/zippy-m2-regression-log.bogmnHKC/proof.log` (SHA-256 `43b85805bdbdeb8c1c15d0462c23d789515021406cbe79bfd7f7ebe0c7c35d5f`); `docs/reports/M4_OPERATIONS_FINANCE_IMPLEMENTATION_REPORT.md` |
+| Redactions | No secrets, signatures, raw webhook bodies, or generated passwords printed or recorded |
+| Operator/automation | GitHub Copilot |
+| Notes | **Retained failures (never counted as passing):** (1) M4 proof attempt `2zIomoO3` (exit 1, `2 failed, 75 passed`, SHA-256 `cbcab9ffdccc5d12d8a394a64656acac72f69b84663e6d102fc797d6c9167498`) — `prepare_payment_intent`'s `INSERT ... ON CONFLICT` only arbitrated the `(external_system, external_model, external_id)` constraint, so a same-order rebind to a different provider reference raised an uncaught `psycopg.errors.UniqueViolation` instead of `ConflictError`; the same gap corrupted the shared `ORDER_B` fixture used by another test. Fixed with an explicit order-scoped pre-check plus dedicated `ORDER_C`/`ORDER_D` conflict fixtures; rerun once, passing. (2) M2 regression attempt `lyovExzs` (exit 3, SHA-256 `cc96555d315c1e5e5d3b58536b8bf9c3545457a5f4fbf2fcdec91feea28d4e51`) — `verify_security.sql`'s hardcoded table-classification catalog and its `RLS REQUIRED`/`platform_isolation`-policy counts (48/28/45) had not been updated for the new `zippy.payment_intents` table; fixed by adding the table to the catalog and bumping the counts to 49/29/46 (matching `verify.sql`'s already-updated 46); rerun once, passing. **Exact cleanup verified:** zero `zippy*` Docker containers or volumes remain after either proof; no leftover private socket directories under `/tmp`; port 5432 not listening on the host. **Confirms the correction notice in `docs/reports/M4_OPERATIONS_FINANCE_IMPLEMENTATION_REPORT.md`:** the 2026-09-11 M4 proof in `M4-E002` predated both the 0006 privilege (`REVOKE`) correction and this payment-contract correction and was never used as final acceptance evidence; this entry and `M4-E004`/`M4-E005` are the final-artifact proof for this update. `M4-OPERATIONS-FINANCE` remains `IN_PROGRESS` and is **not** marked `COMPLETE`. |
+
+### M4-E007: Pre-Commit Acceptance Audit Finding Dispatch Incomplete (No Stage/Commit)
+
+| Field | Value |
+|---|---|
+| Command | Full 13-step pre-commit acceptance audit (inventory, D-26 verification, Razorpay linkage/amount/refund/Odoo checks, migration/evidence/static-acceptance audits, and an exhaustive repo-wide `grep` for dispatch implementation across `api/`, `workers/`, `apps/`) |
+| Timestamp | 2026-09-23 UTC |
+| Commit | Baseline `2c5225b5edfcbac1739bb829c937e41bceee0eca`; all M4 work uncommitted throughout |
+| Environment | Repository workspace only (read-only audit; disposable-proof re-verification for evidence-integrity checks) |
+| Exit code | 0 (audit completed; no stage/commit occurred by design) |
+| Result | 9 of 10 audit gates PASS. Gate 7 (operations coverage) **FAILED**: `zippy.dispatch_offers`/`zippy.trip_assignments` had database schema only (from M2) and zero application-layer implementation anywhere in the repository; POD was already fully implemented and evidenced. Per the audit's own decision rule, `M4-OPERATIONS-FINANCE` was left as sole `IN_PROGRESS`; nothing was staged, committed, or pushed |
+| Evidence location | This record; conversation transcript of the audit |
+| Redactions | No secrets involved (read-only audit) |
+| Operator/automation | GitHub Copilot |
+| Notes | This finding is the direct trigger for the dispatch implementation recorded in `M4-E008`/`M4-E009` below. An important architecture note surfaced during this audit: the API is single-tenant-per-process (`Settings.platform_id` comes from the `ZIPPY_PLATFORM_ID` environment variable at startup, never from request content), which is why the payment-webhook cross-tenant-mapping-ambiguity concern raised by the audit does not apply to the current deployment model. |
+
+### M4-E008: Dispatch Implementation, Secret-Redaction Fix, and Payment-Intent Privilege Correction
+
+| Field | Value |
+|---|---|
+| Command | Schema inspection (`zippy.dispatch_offers`, `trip_assignments`, `trips`, `vehicles`, `vehicle_models`, `vehicle_documents`, `driver_profiles`, `driver_associations`, `vendor_profiles`, `company_memberships`, `transaction_participants`, `order_transition_rules`, `transition_order`, `operational_events`, `event_outbox`); implementation of `api/repositories_dispatch.py`, `api/routes_dispatch.py`, `api/models/dispatch.py`; `Settings` `repr=False` secret-redaction fix (`api/config.py`); 0006 `payment_intents` grant correction (`SELECT, INSERT` only); focused `ruff`/strict `mypy` |
+| Timestamp | 2026-09-23 UTC |
+| Commit | Baseline `2c5225b5edfcbac1739bb829c937e41bceee0eca`; uncommitted, preserving all prior uncommitted M4 work |
+| Environment | Repository workspace only for this step (no database access) |
+| Preconditions | M4-E007 audit finding recorded; nothing staged; HEAD/origin/branch verified unchanged |
+| Exit code | Focused ruff `0`; strict mypy `0` (`api/config.py`, `api/repositories_dispatch.py`, `api/models/dispatch.py`, `api/routes_dispatch.py`, `api/main.py`, plus the six modules from `M4-E004`) |
+| Result | PASS: dispatch offer creation validates one caller-named vendor/vehicle/driver candidate (no automatic search/scoring/ranking) against order status, hazardous/ambiguous special-handling, vendor/vehicle/driver approval, driver-vendor association, vehicle capacity, verified+unexpired fitness/insurance documents, and vehicle/driver availability, using only existing canonical tables — **zero schema change was required for dispatch**; one schema blocker was identified and reported rather than worked around (vehicle/body-type compatibility has no canonical `zippy.orders` field). Atomic accept locks the order row first, uses the pre-existing `dispatch_one_accepted_offer_idx` partial unique index, and transitions the order only via the existing `zippy.transition_order` RPC. `Settings` now excludes `database_url`, `auth_jwt_secret`, and `razorpay_webhook_secret` from `repr()`/`str()` via `dataclasses.field(repr=False)`. `zippy.payment_intents` runtime grants corrected to `SELECT, INSERT` only (no `UPDATE`/`DELETE`) — a grant-only change; no table/RLS/FK/uniqueness definition changed |
+| Evidence location | `api/repositories_dispatch.py`, `api/routes_dispatch.py`, `api/models/dispatch.py`, `api/config.py`, `db/zippy/migrations/0006_operations_finance.up.sql`, `docs/reports/M4_OPERATIONS_FINANCE_IMPLEMENTATION_REPORT.md`, this record |
+| Redactions | No secrets involved (implementation step) |
+| Operator/automation | GitHub Copilot |
+| Notes | No live network code exists anywhere in the dispatch module (confirmed by inspection and by a later test that patches `socket.socket.connect`). Dispatch never broadcasts/contacts drivers, vendors, or transport companies, and invents no radius/timeout/ranking/escalation values. |
+
+### M4-E009: Focused Tests, Final M4 Proof, and M2 Regression for the Dispatch/Redaction/Privilege Correction
+
+| Field | Value |
+|---|---|
+| Command | (1) Focused unit tests `pytest api/tests/test_config_redaction.py -q`; (2) focused PostgreSQL integration development iteration via `bash db/zippy/scripts/run_m4_finance_proof.sh` (repeated locally until stable, defects fixed in-place — see Notes; intermediate logs not individually retained since these predate the final gated proof); (3) complete host suite `PYTHONPATH="$PWD" pytest api/tests api/tests_m4 -q` with direct, unmasked exit-code capture; (4) exactly one final `bash db/zippy/scripts/run_m4_finance_proof.sh`, captured via the private-log wrapper (`mktemp -d`, `umask 077`, output redirected, exit code appended, `chmod 600`); (5) exactly one `bash db/zippy/scripts/run_isolated_proof.sh` (M2 regression, required because 0006's grants changed), same private-log wrapper; (6) independent post-proof cleanup verification (`docker ps`, `docker volume ls`, socket-directory glob, `ss -lntH` for port 5432) |
+| Timestamp | 2026-09-23 UTC |
+| Commit | Baseline `2c5225b5edfcbac1739bb829c937e41bceee0eca`; all changes uncommitted |
+| Environment | Recreated host Python venv (`/tmp/zippy-m3-venv`); disposable PostgreSQL 16.15 pinned image (`postgres@sha256:f1c337…f6f94`); Docker network `none`; hardened private Unix socket; scram-sha-256 local auth; synthetic `.invalid` identities |
+| Preconditions | M4-E008 implementation complete; focused ruff/mypy already PASS |
+| Exit code | Focused unit tests `0`; complete host suite `0`; final M4 proof `0`; M2 regression `0` |
+| Result | PASS: focused unit tests **4 passed** (secret-redaction); complete host suite **56 passed, 51 skipped**, 1 known deferred dependency warning, exit `0` (captured directly, never piped through `tail`); final M4 proof **107 passed, 1 warning**, exit `0`, all harness markers `PASS` (`m4_unit_contracts`, `m4_webhook_ingress`, `m4_idempotency`, `m4_authorization`, `m4_pod_settlement_gate`, `m4_manual_refund`, `m4_odoo_draft_only`, `m4_reconciliation`, `m3_regression`, `network_isolation`, `cleanup`, `socket_hardening`), `socket_dir_mode=2700`, `socket_file_mode=777`, `password_encryption=scram-sha-256`, `pg_hba_local_auth=scram-sha-256`, `negative_local_user=PASS`; M2 regression all 11 markers `PASS` (`fresh_up`, `restricted_app_rls_and_privileges`, `restricted_readonly`, `behavioral_assertions`, `concurrent_claim`, `stale_lease_recovery`, `runner_rejections`, `schema_down_roles_preserved`, `reapply_assertions`, `separate_role_teardown`, `cleanup`); independent post-proof cleanup check: zero `zippy*` containers/volumes, no leftover socket directories, port 5432 not listening. The 107-passed total includes 20 new dispatch tests (`api/tests_m4/test_dispatch_integration.py`, covering eligible creation+accept, capacity/document/driver/availability/hazardous/ambiguous/cross-tenant/order-status manual-review and rejection paths, unauthorized/expired/declined/cancelled-offer denial, idempotent replay, concurrent competing acceptance with exactly one resulting assignment, transactional rollback on an injected order-status conflict, absence of raw network calls, and secret-free error text) and 4 new payment-intent privilege tests (`api/tests_m4/test_payment_intent_privileges.py`) |
+| Evidence location | Private logs (mode 600, not committed): final M4 proof `/tmp/zippy-m4-final-proof.SBBPRUZW/proof.log` (SHA-256 `aaa151afe294ea8871b65a17bf683c56f146b042de749332215d0af295641604`); final M2 regression `/tmp/zippy-m2-final-regression.3DR4xnvV/proof.log` (SHA-256 `d83595da1624eb1c8c9160e6b66091b3eba75e4c605a0a0d0a7d5ccc70f9375c`); `docs/reports/M4_OPERATIONS_FINANCE_IMPLEMENTATION_REPORT.md` |
+| Redactions | No secrets, signatures, raw webhook bodies, connection strings, or generated passwords printed or recorded in either log (independently grepped) |
+| Operator/automation | GitHub Copilot |
+| Notes | **Development-iteration defects found and fixed before the final gated proof (not retained as individual logs; see the implementation report for detail):** (1) an outbox idempotency-key collision between `transition_order`'s own outbox row and the dispatch-specific one (fixed by suffixing the key); (2) test fixture cross-contamination from reusing shared baseline vehicle/driver/order fixtures across multiple tests that perform a real, permanent accept (fixed with dedicated per-test fresh fixtures); (3) an attempt to persist an `'expired'` status transition inside the same transaction as the `ConflictError` that then rolled it back (fixed by extracting `expire_if_due` into its own committed transaction, called before the accept attempt). **The final M4 proof and M2 regression both passed on their first run after these fixes — no additional gated-attempt failures occurred for this update.** `M4-OPERATIONS-FINANCE` remains `IN_PROGRESS`; `docs/EXECUTION_TRACKER.md` was not modified; production remains blocked; `deploy-hostinger.yml` remains disabled (`if: ${{ false }}`, job-level). |
+
+### M4-E010: ORD-INV-003 Body-Type Compatibility Correction (Trusted `dispatch_requirements`)
+
+| Field | Value |
+|---|---|
+| Command | (1) Read-only recovery after a power-cut interruption: `git status`/`rev-parse`/`diff --check`, Docker/volume/socket/port inventories, and per-file consistency inspection of the interrupted edits; (2) py_compile + Ruff + strict mypy on `api/repositories_dispatch.py`, `api/repositories.py`, `api/tests_m4/test_dispatch_integration.py`; (3) host suite `PYTHONPATH="$PWD" pytest api/tests api/tests_m4 -q` with direct exit capture; (4) `bash db/zippy/scripts/run_m4_finance_proof.sh > log 2>&1` (exit 1 — retained); (5) after test-fixture fixes, exactly one fresh `run_m4_finance_proof.sh` and one `run_isolated_proof.sh` (M2 regression, required because 0006/manifest/grants/security SQL changed), each captured to a `install -m 600` log without piping through `tail`; (6) independent cleanup verification |
+| Timestamp | 2026-09-24 UTC |
+| Commit | Baseline `2c5225b5edfcbac1739bb829c937e41bceee0eca` (HEAD, origin/master, and remote all equal); all changes uncommitted; nothing staged |
+| Environment | Recreated host Python venv (`/tmp/zippy-m3-venv`); disposable PostgreSQL 16.15 pinned image (`postgres@sha256:f1c337…f6f94`); Docker network `none`; hardened private Unix socket (mode 0700 dir, scram-sha-256 local auth); synthetic `.invalid` identities |
+| Preconditions | Interrupted M4 pass recovered from filesystem; the `zippy.dispatch_requirements` schema (0006), gate logic, verify counts (47 policies / 50 tables / 30 RLS-required), RLS, and grants were found already present and internally consistent; only the focused body-type tests and evidence docs were unfinished |
+| Exit code | py_compile `0`; Ruff `0`; mypy `0`; host suite `0` (**56 passed, 60 skipped**); first M4 proof **`1` (10 failed, 106 passed — retained, not counted)**; final M4 proof `0` (**116 passed, 1 warning**); M2 regression `0` (all 11 markers PASS) |
+| Result | PASS. ORD-INV-003 trusted body-type compatibility is now enforced: matching body type permits eligibility; explicit known-vs-known mismatch rejects (`VEHICLE_BODY_TYPE_MISMATCH`, no offer created); missing requirement → `DISPATCH_BODY_TYPE_REQUIREMENT_MISSING`; unknown/unvocabularied requirement → `DISPATCH_BODY_TYPE_UNKNOWN`; hazardous/ambiguous special handling still fails closed; the offer-accept request has no body-type field and cannot override the stored requirement; cross-tenant requirement rows are RLS-denied on insert and invisible on read; the requirement row is immutable to the runtime role (`SELECT, INSERT` only — UPDATE/DELETE raise SQLSTATE 42501 before and after an offer/assignment exists); capacity and body compatibility must both pass; rejection creates no offer/assignment/order transition; idempotency and single-assignment concurrency behavior unchanged (all pre-existing dispatch tests still pass). Manifest: only 0006 up/down SHA-256 refreshed; 0001–0005 byte-identical to HEAD. |
+| Evidence location | Private logs (mode 600, not committed): final M4 proof `/tmp/zippy-m4-proof-bodytype-r2.log` (SHA-256 `7e241b377196f6348312948d474fcf82325bd3a427aa6b23359f7626658dd986`); final M2 regression `/tmp/zippy-m2-regression-bodytype.log` (SHA-256 `34361b04ab0627b7d337bbaa4753a0029c5c463764cfaeec8e6aad73c9a92f4b`); **retained failed attempt (not counted)** `/tmp/zippy-m4-proof-bodytype.log` (SHA-256 `2b35d1d6d2ee4198a0d5606e9086c1be7e1ed6ab2552515409bd824c8ad45399`); `docs/reports/M4_OPERATIONS_FINANCE_IMPLEMENTATION_REPORT.md` |
+| Redactions | No secrets, connection strings, or generated passwords recorded in any log (independently grepped); the redacted `postgres@sha256:f1c337…f6f94` digest abbreviation is the image identity, not a secret |
+| Operator/automation | GitHub Copilot |
+| Notes | **Root cause of the retained failed proof (classified B/C — test-fixture / incorrect-expectation defects, not a production or migration defect):** (1) the new immutability test performed a real accept against the *shared* `VEHICLE_1`/`DRIVER_PROFILE_1` fixtures, permanently consuming them and cascading `VEHICLE_UNAVAILABLE`→`manual_review`→`dispatch_offer_id=None` into 7 later lifecycle tests — fixed with dedicated fresh vehicle/driver (the file's own documented anti-pattern); (2) the mismatch/override/no-assignment tests used a requirement (`closed-box`) absent from `vehicle_models`, so the gate's `body_type_known` check correctly returned `DISPATCH_BODY_TYPE_UNKNOWN` instead of `VEHICLE_BODY_TYPE_MISMATCH` — fixed by cataloguing a `closed` model (`_catalogue_closed_model()`); (3) the cross-tenant test attempted an app-role INSERT of a platform-2 row, which forced-RLS `WITH CHECK` correctly rejected — fixed to assert the RLS denial and the missing-requirement fallback. **No production code or migration was changed by the fix; only test fixtures/expectations.** No canonical body-type taxonomy exists anywhere (PRD/DECISIONS/schema all leave `vehicle_models.body_type` free text); this correction deliberately does not invent one and treats the platform's own `vehicle_models` set as the recognized vocabulary, failing closed otherwise. `M4-OPERATIONS-FINANCE` remains `IN_PROGRESS`; `docs/EXECUTION_TRACKER.md` was not modified; production remains blocked; `deploy-hostinger.yml` remains disabled. |
+
+### M4-E011: Final Acceptance Audit (M4 → COMPLETE)
+
+| Field | Value |
+|---|---|
+| Command | Full read-only acceptance audit: baseline/branch/HEAD/origin equality; complete worktree inventory with per-path M4 classification; immutability checks (0001–0005, lockfiles, `docker-compose.yml`, production config, `deploy-hostinger.yml`, legacy paths); D-26 single-occurrence/2026-09-11 Gopinathan approval verification; static gates (`git diff --check`, Ruff, `py_compile`, strict mypy, Bash `-n`, workflow YAML parse, manifest full-SHA-256 validation, focused secret scan, prohibited-authority scan); code/test security audit (webhook HMAC, refund reconcile-only, POD gate, Odoo draft-only allowlist, redaction, dispatch network-free); evidence-log validation (existence, mode 600, secret-clean, expected totals) and artifact-drift check; independent cleanup verification |
+| Timestamp | 2026-09-24 UTC |
+| Commit | Baseline `2c5225b5edfcbac1739bb829c937e41bceee0eca` (HEAD = origin/master = remote master); acceptance edits then committed as the single reviewed M4 commit |
+| Environment | Repository workspace + read-only validation; no test/container/database/service execution during the audit (proofs reused, not rerun — see Notes) |
+| Preconditions | All M4 implementation, body-type correction, proofs, and regression complete; nothing staged |
+| Exit code | `0` for every audit gate |
+| Result | PASS on all gates. Strict mypy claim re-verified by real execution: `mypy --strict` exit `0` over 12 modules. Static gates all PASS. Security invariants confirmed from code/tests. Evidence logs valid and artifacts un-drifted, so the expensive full proofs were not rerun. Retained failed body-type proof exit `1` (`10 failed, 106 passed`, SHA-256 `2b35d1d6d2ee4198a0d5606e9086c1be7e1ed6ab2552515409bd824c8ad45399`); final M4 proof exit `0` (`116 passed, 1 warning`, all markers PASS, SHA-256 `7e241b377196f6348312948d474fcf82325bd3a427aa6b23359f7626658dd986`); final M2 regression exit `0` (11 markers PASS, SHA-256 `34361b04ab0627b7d337bbaa4753a0029c5c463764cfaeec8e6aad73c9a92f4b`); host suite exit `0` (`56 passed, 60 skipped`). Cleanup independently confirmed: zero `zippy*` containers/volumes, no socket directories, port 5432 free. |
+| Evidence location | `docs/reports/M4_OPERATIONS_FINANCE_IMPLEMENTATION_REPORT.md`, this record, and the three private mode-600 logs above (not committed) |
+| Redactions | No credentials, signatures, authorization headers, private keys, or connection strings read or recorded |
+| Operator/automation | GitHub Copilot |
+| Notes | **Outcome: `M4-OPERATIONS-FINANCE` transitioned to COMPLETE; `M5-PAPERCLIP` transitioned to the sole IN_PROGRESS task and is explicitly not begun — it has no implementation authority until its own separate governance/owner approval.** Production remains BLOCKED; `deploy-hostinger.yml` remains disabled at job level (`if: ${{ false }}`); the absent `docker-compose.production.yml` reference was not invoked or created. No deployment, live payment, live Odoo call, production database operation, or M5/Paperclip implementation occurred. `/opt/paperclip` was not modified. Remaining NOT VERIFIED external behavior (unchanged): live Razorpay sandbox/production payload compatibility, live Odoo 18 API behavior and custom-field availability, live regulatory-registry validation of driver/vehicle documents, canonical hazardous-cargo enum, production ingress/credentials. |
+
 ### M3-E008: Pre-Commit Acceptance Audit and M4 Handoff
 
 | Field | Value |

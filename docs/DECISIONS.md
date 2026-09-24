@@ -298,6 +298,23 @@ n8n must not independently:
 - When consequential agents are introduced, the required order remains: action request -> Paperclip authorization/grant -> allowlisted execution -> recorded result.
 - n8n cannot bypass this order.
 
+### D-26: M4 Operations-Finance Implementation Approval and Boundaries
+
+**Owner-approval status:** OWNER APPROVED — 2026-09-11 — Gopinathan (product owner, finance owner, and initial Odoo owner).
+
+Verbatim approval:
+
+> I, Gopinathan, acting as product owner, finance owner, and initial Odoo owner, approve M4-OPERATIONS-FINANCE implementation on 2026-09-11. I approve FastAPI as the Razorpay webhook ingress into the canonical Zippy PostgreSQL evidence path. Initial payment work is limited to Razorpay sandbox and synthetic tests; no live keys or live payment execution are authorized. Verified authorized, captured, and failed gateway events may update only compatible operational payment projections. A refund.processed event may reconcile evidence only for a refund that already has recorded manual approval; it may not create, approve, initiate, or automatically execute a refund. Every refund requires manual approval at every amount. Settlement release remains manual. I approve a draft-only Odoo adapter using supported API/ORM methods and fake-server tests; no live Odoo credentials, autonomous posting, payment, reconciliation, or direct database access are authorized. Production deployment, automatic refunds or settlements, unrestricted n8n/Paperclip execution, and changes to accounting authority remain prohibited.
+
+#### Binding Boundaries
+
+- FastAPI owns Razorpay webhook validation and canonical persistence into `webhook_receipts`, `gateway_events`, and `payment_projections`.
+- Razorpay work is sandbox-only with synthetic test payloads; live keys and live payment execution remain unauthorized.
+- `payment.authorized`, `payment.captured`, and `payment.failed` map only to compatible operational projections (`pending`, `evidence_verified`, `failed`); `refund.processed` reconciles evidence only for an existing refund execution backed by a recorded manual approval and never creates, approves, initiates, or executes a refund.
+- Every refund requires recorded manual approval at every amount; requester self-approval is rejected; settlement release stays manual; settlement eligibility is an operational projection only.
+- Odoo integration is draft-only (`res.partner` find/create, draft customer invoice, draft vendor bill, immutable external references) through supported JSON-RPC/API methods with fake-server tests; `action_post`, payment registration/reconciliation, settlement release, direct SQL, and cross-database constraints are prohibited.
+- No live Odoo credentials, production deployment, automatic refunds or settlements, unrestricted n8n/Paperclip execution, or change to accounting authority is authorized.
+
 ## Owner-Approved MVP Technical Directions
 
 These directions are **OWNER APPROVED** by Gopinathan on 2026-09-08. Implementation remains governed by the assigned milestone, validation evidence, and applicable go-live gates.
