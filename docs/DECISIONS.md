@@ -328,3 +328,31 @@ These directions are **OWNER APPROVED** by Gopinathan on 2026-09-08. Implementat
 | Odoo MVP integration depth | Limit to partner synchronization, draft customer invoice, draft vendor bill, and read-only accounting/payment-status synchronization. Do not automatically post, settle, reconcile, or refund. | OWNER APPROVED — 2026-09-08 — Gopinathan |
 | AI provider/model policy | No LLM is mandatory for deterministic MVP core; defer AI provider/model selection and keep any future selection configurable. | OWNER APPROVED — 2026-09-08 — Gopinathan |
 | Apache/ServerAvatar routing | Preserve ServerAvatar/Apache and use a same-origin responsive web application with an approved `/api` reverse-proxy route. Do not replace Apache or redesign infrastructure during M1. | OWNER APPROVED — 2026-09-08 — Gopinathan |
+
+### D-27: Minimal MVP M5 Paperclip Governance Boundary
+
+**Owner approval status:** OWNER APPROVED — 2026-09-25 — Gopinathan
+
+> I, Gopinathan, acting as product owner and initial governance owner, approve the Minimal MVP M5-PAPERCLIP governance boundary on 2026-09-25. The unverified `/opt/paperclip` directory is preserved as reference-only and is not an authoritative or deployable source. The authoritative implementation must be tracked in the `new-logistic` repository and use an isolated Paperclip PostgreSQL database with separate roles and credentials. M5 is limited to disposable development and synthetic tests; production deployment and live external integrations are not authorized.
+>
+> Paperclip may evaluate proposals and issue governance grants, but it may not own or mutate orders, trips, tracking, payments, refunds, settlements, invoices, balances, accounting records, or Odoo records. Every refund, settlement release, Odoo posting or reconciliation, financial adjustment, policy change, permission change, and production-related action requires manual approval by Gopinathan. Agents and proposal creators may not approve their own actions.
+>
+> Each execution grant must be tenant-bound, actor-bound, action-bound, target-bound, payload-hash-bound, revocable, non-replayable, atomically consumed, and expire after five minutes. Governance must fail closed when policy or approval is missing, a grant is invalid or expired, the governance service is unavailable, a budget is exhausted, or a loop guard is triggered. During M5, external-agent spending is zero and budget behavior must use synthetic tests. Three equivalent proposals within ten minutes trigger the loop guard. Governance decisions, approvals, grants, attempts, audit events, and outbox evidence must be immutable and retained for at least 365 days.
+>
+> This approval authorizes documentation, isolated schema and migration implementation, least-privilege roles, RLS, governance service code, and disposable security/concurrency/rollback proofs only. It does not authorize production deployment, live credentials, live Odoo or Razorpay access, autonomous business mutations, automatic refunds or settlements, unrestricted n8n/Paperclip execution, or changes to Zippy or Odoo data ownership.
+
+#### Derived Controls
+
+- `/opt/paperclip` is reference-only and immutable during M5.
+- Authoritative M5 source belongs in `new-logistic`.
+- Paperclip PostgreSQL must be isolated from Zippy PostgreSQL and Odoo.
+- Separate database roles and credentials are mandatory.
+- No cross-database foreign keys or direct access to Zippy or Odoo tables.
+- Grant TTL is five minutes; grant consumption is atomic and single-use.
+- Three equivalent proposals within ten minutes trigger the loop guard.
+- External-agent budget during M5 is zero.
+- Governance evidence retention is at least 365 days.
+- Gopinathan is the single Minimal MVP human approver; self-approval is prohibited.
+- All approved high-risk action classes require manual approval.
+- Missing, invalid, expired, unavailable, exhausted, or looped conditions fail closed.
+- Only disposable development and synthetic proof execution is authorized.

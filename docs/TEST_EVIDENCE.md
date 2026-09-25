@@ -983,3 +983,21 @@ These commands validate the documentation diff and working-tree inventory. They 
 | Redactions | No credentials or secret values read or printed |
 | Operator/automation | GitHub Copilot |
 | Notes | Tracker handoff follows the established convention: `M4-OPERATIONS-FINANCE` is the sole `IN_PROGRESS` task and is explicitly not begun; its authorized scope remains empty and product, finance, and Odoo owner approvals remain required. No task implementation began; no production readiness is claimed. |
+
+## M5 Paperclip Governance Evidence
+
+### M5-E001: Read-Only Discovery and Owner-Approved Minimal MVP Boundary
+
+| Field | Value |
+|---|---|
+| Command | Read-only baseline, tracker, workflow-gate, and `/opt/paperclip` inventory verification; complete governance-document/source review; documentation-only owner-boundary recording and validation |
+| Timestamp | 2026-09-25 UTC |
+| Commit | Baseline `588c46a44aa9d18b144eef0313dc0f44ff7b56c6`; documentation approval changes uncommitted at evidence capture |
+| Environment | `/opt/new-logistic` documentation workspace and read-only `/opt/paperclip` inspection |
+| Preconditions | `master`; local, `origin/master`, and remote `master` at the baseline; empty index; M4 complete; M5 sole `IN_PROGRESS`; deployment job disabled |
+| Exit code | 0 for completed read-only validation groups |
+| Result | PASS: read-only discovery completed. `/opt/paperclip` remains reference-only with inventory SHA-256 `dc3d4355e502d4fc678b6b3b43a4e70deb86b09109fd4c0aeccd29a055fdad4`; it is not Git-backed, so its commit/origin provenance is unavailable. D-27 records the owner-approved Minimal MVP boundary. |
+| Evidence location | `docs/reports/M5_PAPERCLIP_DISCOVERY_REVIEW.md`, `docs/DECISIONS.md` (D-27), `docs/EXECUTION_TRACKER.md`, this record |
+| Redactions | No secret values, credentials, connection strings, tokens, keys, cookies, certificates, or environment values recorded |
+| Operator/automation | GitHub Copilot |
+| Notes | Exact documentation scope is these four paths only: `docs/DECISIONS.md`, `docs/EXECUTION_TRACKER.md`, `docs/TEST_EVIDENCE.md`, and `docs/reports/M5_PAPERCLIP_DISCOVERY_REVIEW.md`. M5 remains the sole `IN_PROGRESS` task and implementation has not begun. D-27 authorizes only isolated schema/migration, least-privilege/RLS, governance service, and disposable synthetic security/concurrency/rollback proof work after a separate exact preflight. No database, container, service, migration, deployment, network integration, external API, dependency, application-code, or `/opt/paperclip` operation occurred; production remains prohibited. |
