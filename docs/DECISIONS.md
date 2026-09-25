@@ -356,3 +356,32 @@ These directions are **OWNER APPROVED** by Gopinathan on 2026-09-08. Implementat
 - All approved high-risk action classes require manual approval.
 - Missing, invalid, expired, unavailable, exhausted, or looped conditions fail closed.
 - Only disposable development and synthetic proof execution is authorized.
+
+### D-28: M5 Paperclip Privileged Function Boundary
+
+**Status:** OWNER APPROVED — 2026-09-25 — Gopinathan
+
+> I, Gopinathan, acting as product owner and initial governance owner, approve a narrowly scoped PostgreSQL `SECURITY DEFINER` boundary for M5-PAPERCLIP on 2026-09-25. This approval applies only to the isolated Paperclip governance database and only to functions implementing proposal creation, invariant recording, decision-lock acquisition and release, human approval or rejection, execution-grant issuance, atomic grant consumption, grant revocation, execution-attempt recording, heartbeat recording, token-cost and budget enforcement, and loop-guard evaluation.
+>
+> Every approved function must be owned by a dedicated `NOLOGIN` Paperclip function-owner role that is neither superuser nor `BYPASSRLS`. It must use a fixed safe `search_path`, schema-qualified objects, typed and validated inputs, tenant checks, least-privilege table grants, and concurrency-safe transactions. Dynamic SQL, arbitrary relation names, generic table mutation, cross-database access, and secret access are prohibited.
+>
+> Execute permission must be revoked from `PUBLIC` and granted only to explicitly approved Paperclip application roles. Application roles must retain no unrestricted direct mutation authority, schema creation authority, role-management authority, ownership authority, or permission to create or replace privileged functions. Paperclip and public schemas must not be writable by untrusted roles.
+>
+> The implementation must prove function ownership, fixed `search_path`, absence of public execution, denial of direct table writes, forced RLS, tenant isolation, resistance to temporary-object and search-path shadowing, denial of unauthorized functions and arguments, atomic single-use grant consumption, and complete governance evidence. Governance failures must remain fail-closed.
+>
+> This exception does not authorize production deployment, production database changes, live credentials, external integrations, business-data ownership, autonomous financial execution, unrestricted Paperclip execution, or modification of `/opt/paperclip`. It authorizes only repository-tracked migrations and disposable synthetic PostgreSQL proofs under D-27.
+
+#### Structured Controls
+
+- Scope: isolated Paperclip database only.
+- Function owner: dedicated `NOLOGIN`, `NOSUPERUSER`, `NOBYPASSRLS` role.
+- Safe fixed `search_path` and schema-qualified objects are mandatory.
+- Dynamic SQL is prohibited.
+- `PUBLIC` execute is prohibited.
+- Direct application-role table mutation is prohibited.
+- Schema creation and privileged-function replacement are prohibited.
+- Tenant validation and forced RLS are mandatory.
+- Least-privilege per-function execution grants are mandatory.
+- Concurrency-safe transitions are mandatory.
+- Search-path and temporary-object shadowing tests are mandatory.
+- Production and external integration remain prohibited.

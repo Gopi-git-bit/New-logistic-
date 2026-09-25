@@ -1001,3 +1001,19 @@ These commands validate the documentation diff and working-tree inventory. They 
 | Redactions | No secret values, credentials, connection strings, tokens, keys, cookies, certificates, or environment values recorded |
 | Operator/automation | GitHub Copilot |
 | Notes | Exact documentation scope is these four paths only: `docs/DECISIONS.md`, `docs/EXECUTION_TRACKER.md`, `docs/TEST_EVIDENCE.md`, and `docs/reports/M5_PAPERCLIP_DISCOVERY_REVIEW.md`. M5 remains the sole `IN_PROGRESS` task and implementation has not begun. D-27 authorizes only isolated schema/migration, least-privilege/RLS, governance service, and disposable synthetic security/concurrency/rollback proof work after a separate exact preflight. No database, container, service, migration, deployment, network integration, external API, dependency, application-code, or `/opt/paperclip` operation occurred; production remains prohibited. |
+
+### M5-E002: Owner Approval of Privileged Function Boundary
+
+| Field | Value |
+|---|---|
+| Command | Read-only baseline, D-27/D-28 sequence, tracker, deployment-gate, and `/opt/paperclip` inventory verification; documentation-only D-28 recording and validation |
+| Timestamp | 2026-09-25 UTC |
+| Commit | Baseline `d2ba98cca5eefe48cc6c31b0e84d57449031bed2`; documentation approval changes uncommitted at evidence capture |
+| Environment | `/opt/new-logistic` documentation workspace only |
+| Preconditions | Clean `master`; D-27 present; D-28 absent; M5 sole `IN_PROGRESS`; deployment job disabled; preserved-source inventory unchanged |
+| Result | PASS: D-28 authorizes a fixed allowlist of M5 governance transitions through narrowly scoped PostgreSQL `SECURITY DEFINER` functions because direct application-role table mutation is prohibited. |
+| Controls | Dedicated `NOLOGIN`, `NOSUPERUSER`, `NOBYPASSRLS` function owner; fixed safe `search_path`; schema-qualified objects; no dynamic SQL; `PUBLIC` execution denied; only explicit application-role execute grants; forced RLS, tenant validation, direct-write denial, shadowing resistance, atomic single-use grant consumption, and complete governance evidence required. |
+| Evidence location | `docs/DECISIONS.md` (D-28), this record |
+| Redactions | No secret values, credentials, connection strings, tokens, keys, cookies, certificates, or environment values recorded |
+| Operator/automation | GitHub Copilot |
+| Notes | No implementation, migration, database, container, service, network, external API, credential, or `/opt/paperclip` operation occurred. Production and external integrations remain prohibited. |
