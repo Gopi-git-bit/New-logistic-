@@ -996,7 +996,7 @@ These commands validate the documentation diff and working-tree inventory. They 
 | Environment | `/opt/new-logistic` documentation workspace and read-only `/opt/paperclip` inspection |
 | Preconditions | `master`; local, `origin/master`, and remote `master` at the baseline; empty index; M4 complete; M5 sole `IN_PROGRESS`; deployment job disabled |
 | Exit code | 0 for completed read-only validation groups |
-| Result | PASS: read-only discovery completed. `/opt/paperclip` remains reference-only with inventory SHA-256 `dc3d4355e502d4fc678b6b3b43a4e70deb86b09109fd4c0aeccd29a055fdad4`; it is not Git-backed, so its commit/origin provenance is unavailable. D-27 records the owner-approved Minimal MVP boundary. |
+| Result | PASS: read-only discovery completed. `/opt/paperclip` remains reference-only with inventory SHA-256 `dc3d4355e502d4fc678b6b3b43a4e70deb86b09109fd4c0aeccd29a055fdad44`; it is not Git-backed, so its commit/origin provenance is unavailable. D-27 records the owner-approved Minimal MVP boundary. |
 | Evidence location | `docs/reports/M5_PAPERCLIP_DISCOVERY_REVIEW.md`, `docs/DECISIONS.md` (D-27), `docs/EXECUTION_TRACKER.md`, this record |
 | Redactions | No secret values, credentials, connection strings, tokens, keys, cookies, certificates, or environment values recorded |
 | Operator/automation | GitHub Copilot |
@@ -1017,3 +1017,99 @@ These commands validate the documentation diff and working-tree inventory. They 
 | Redactions | No secret values, credentials, connection strings, tokens, keys, cookies, certificates, or environment values recorded |
 | Operator/automation | GitHub Copilot |
 | Notes | No implementation, migration, database, container, service, network, external API, credential, or `/opt/paperclip` operation occurred. Production and external integrations remain prohibited. |
+
+### M5-E003: Disposable Governance Database Proof Attempt (M5-A-F012)
+
+| Field | Value |
+|---|---|
+| Command | `bash db/paperclip/scripts/run_m5_proof.sh` |
+| Timestamp | 2026-09-26 UTC |
+| Commit | Baseline `f7c8d9019cea7a68191552ea35d3ab7fa3b73c15`; M5-A work uncommitted |
+| Environment | PostgreSQL 16.15 from pinned `postgres@sha256:f1c3376c26f2609ab9f29f71f824103fe2fcd8ee0346485cb6122a4f93df6f94`; Docker `--network none`; no published ports; private mode-0700 Unix socket directory; SCRAM-SHA-256 local authentication; restricted login roles |
+| Preconditions | D-27 and D-28 owner approvals recorded; clean baseline; `M5-PAPERCLIP` sole active `IN_PROGRESS` task |
+| Exit code | 3 |
+| Result | RETAINED FAILURE (M5-A-F012): `socket_isolation`, `migrate_up`, `lifecycle`, `budget_fail_closed` passed; failed at `db/paperclip/tests/verify.sql:156` on `null value in column "action_taken" of relation "loop_guard_events" violates not-null constraint`. Execution stopped immediately without automatic retry. Exact cleanup verified (zero containers, zero volumes, zero socket directories). |
+| Evidence location | `docs/reports/M5_PAPERCLIP_DATABASE_IMPLEMENTATION_REPORT.md`, private mode-0600 log `/tmp/m5-proof-run.pBSI0M` (SHA-256 `874349b4c11558de45a1368ba7d57d9d9e91678ce7655aeebe1b30132107d6d7`), this record |
+| Redactions | Ephemeral generated passwords and connection strings omitted; log contains no secret values |
+| Operator/automation | GitHub Copilot |
+| Notes | Retained diagnostically per established protocol. `M5-PAPERCLIP` remains the sole `IN_PROGRESS` task and is not marked complete. No production system or external service was accessed; `/opt/paperclip` was not modified. |
+
+### M5-E004: Disposable Governance Database Proof Attempt (M5-A-F013)
+
+| Field | Value |
+|---|---|
+| Command | `bash db/paperclip/scripts/run_m5_proof.sh` |
+| Timestamp | 2026-09-26 UTC |
+| Commit | Baseline `f7c8d9019cea7a68191552ea35d3ab7fa3b73c15`; M5-A work uncommitted |
+| Environment | PostgreSQL 16.15 from pinned `postgres@sha256:f1c3376c26f2609ab9f29f71f824103fe2fcd8ee0346485cb6122a4f93df6f94`; Docker `--network none`; no published ports; private mode-0700 Unix socket directory; SCRAM-SHA-256 local authentication; restricted login roles |
+| Preconditions | D-27 and D-28 owner approvals recorded; clean baseline; `M5-PAPERCLIP` sole active `IN_PROGRESS` task |
+| Exit code | 3 |
+| Result | RETAINED FAILURE (M5-A-F013): `socket_isolation`, `migrate_up`, `lifecycle`, `budget_fail_closed`, `loop_guard`, `policy_checksum_fail_closed`, `heartbeat`, `verify`, `catalog_security`, `unauthorized_role_denied`, `tenant_context_fail_closed`, `direct_write_and_ddl_denied` passed; failed at `db/paperclip/tests/verify_security.sql:186` on `permission denied for function acquire_decision_lock` under `paperclip_migrator`. Execution stopped immediately without automatic retry. Exact cleanup verified (zero containers, zero volumes, zero socket directories). |
+| Evidence location | `docs/reports/M5_PAPERCLIP_DATABASE_IMPLEMENTATION_REPORT.md`, private mode-0600 log `/tmp/m5-proof-run.tSrGyJ` (SHA-256 `aca30cd7d1d8c93e9ff2721cf0afa155f20e8943206a95bcc8202dd3ec904460`), this record |
+| Redactions | Ephemeral generated passwords and connection strings omitted; log contains no secret values |
+| Operator/automation | GitHub Copilot |
+| Notes | Retained diagnostically per established protocol. `M5-PAPERCLIP` remains the sole `IN_PROGRESS` task and is not marked complete. No production system or external service was accessed; `/opt/paperclip` was not modified. |
+
+### M5-E005: Disposable Governance Database Proof Attempt (M5-A-F014)
+
+| Field | Value |
+|---|---|
+| Command | `bash db/paperclip/scripts/run_m5_proof.sh` |
+| Timestamp | 2026-09-26 UTC |
+| Commit | Baseline `f7c8d9019cea7a68191552ea35d3ab7fa3b73c15`; M5-A work uncommitted |
+| Environment | PostgreSQL 16.15 from pinned `postgres@sha256:f1c3376c26f2609ab9f29f71f824103fe2fcd8ee0346485cb6122a4f93df6f94`; Docker `--network none`; no published ports; private mode-0700 Unix socket directory; SCRAM-SHA-256 local authentication; restricted login roles |
+| Preconditions | D-27 and D-28 owner approvals recorded; clean baseline; `M5-PAPERCLIP` sole active `IN_PROGRESS` task |
+| Exit code | 3 |
+| Result | RETAINED FAILURE (M5-A-F014): `socket_isolation`, `migrate_up`, `lifecycle`, `budget_fail_closed`, `loop_guard`, `policy_checksum_fail_closed`, `heartbeat`, `verify`, `catalog_security`, `unauthorized_role_denied`, `tenant_context_fail_closed`, `direct_write_and_ddl_denied` passed; failed at `db/paperclip/tests/verify_security.sql:197` on `syntax error at or near ":"` due to psql composite variable interpolation in `DO $$`. Execution stopped immediately without automatic retry. Exact cleanup verified (zero containers, zero volumes, zero socket directories, zero env files). |
+| Evidence location | `docs/reports/M5_PAPERCLIP_DATABASE_IMPLEMENTATION_REPORT.md`, private mode-0600 log `/tmp/m5-proof-run.zmfIeH` (SHA-256 `6b68a3ae771de63122ef4d329e0e84d4fe7cc28fb30cecce90319609f4e6771f`), this record |
+| Redactions | Ephemeral generated passwords and connection strings omitted; log contains no secret values |
+| Operator/automation | GitHub Copilot |
+| Notes | Retained diagnostically per established protocol. `M5-PAPERCLIP` remains the sole `IN_PROGRESS` task and is not marked complete. No production system or external service was accessed; `/opt/paperclip` was not modified. |
+
+### M5-E006: Disposable Governance Database Proof Attempt (M5-A-F015)
+
+| Field | Value |
+|---|---|
+| Command | `bash db/paperclip/scripts/run_m5_proof.sh proof` |
+| Timestamp | 2026-09-26 UTC |
+| Commit | Baseline `f7c8d9019cea7a68191552ea35d3ab7fa3b73c15`; M5-A work uncommitted |
+| Environment | PostgreSQL 16.15 from pinned `postgres@sha256:f1c3376c26f2609ab9f29f71f824103fe2fcd8ee0346485cb6122a4f93df6f94`; Docker `--network none`; no published ports; private mode-0700 Unix socket directory; SCRAM-SHA-256 local authentication; restricted login roles |
+| Preconditions | D-27 and D-28 owner approvals recorded; clean baseline; `M5-PAPERCLIP` sole active `IN_PROGRESS` task; F014 psql-DO interpolation removed |
+| Exit code | 3 |
+| Result | RETAINED FAILURE (M5-A-F015): `socket_isolation`, `migrate_up`, `lifecycle`, `budget_fail_closed`, `loop_guard`, `policy_checksum_fail_closed`, `heartbeat`, `verify`, `catalog_security`, `unauthorized_role_denied`, `tenant_context_fail_closed`, `direct_write_and_ddl_denied` passed; failed at `db/paperclip/tests/verify_security.sql:198` on `column "t" does not exist` because the `\gset` boolean value was interpolated unquoted into the assertion `SELECT`. Execution stopped immediately without automatic retry. Exact cleanup verified (zero containers, zero volumes, zero socket directories, zero env files). |
+| Evidence location | `docs/reports/M5_PAPERCLIP_DATABASE_IMPLEMENTATION_REPORT.md`, private mode-0600 log `/tmp/m5-proof-run.28df9629a943` (SHA-256 `d261b680dbb98c85706306ebc6012752a940c3b2386135f1d6819f0bc8dc4f5a`), this record |
+| Redactions | Ephemeral generated passwords and connection strings omitted; log contains no secret values |
+| Operator/automation | GitHub Copilot |
+| Notes | Retained diagnostically per established protocol. A surgical correction was applied after the run: scalar `\gset` booleans are now quoted and cast (`:'acquire_lock_allowed'::boolean`, `:'revoke_allowed'::boolean`). No additional disposable proof was executed per the stop-on-failure rule. `M5-PAPERCLIP` remains the sole `IN_PROGRESS` task and is not marked complete. No production system or external service was accessed; `/opt/paperclip` was not modified. |
+
+### M5-E007: Disposable Governance Database Proof Attempt (M5-A-F016)
+
+| Field | Value |
+|---|---|
+| Command | `bash db/paperclip/scripts/run_m5_proof.sh proof` |
+| Timestamp | 2026-09-26 UTC |
+| Commit | Baseline `f7c8d9019cea7a68191552ea35d3ab7fa3b73c15`; M5-A work uncommitted |
+| Environment | PostgreSQL 16.15 from pinned `postgres@sha256:f1c3376c26f2609ab9f29f71f824103fe2fcd8ee0346485cb6122a4f93df6f94`; Docker `--network none`; no published ports; private mode-0700 Unix socket directory; SCRAM-SHA-256 local authentication; restricted login roles |
+| Preconditions | D-27 and D-28 owner approvals recorded; clean baseline; `M5-PAPERCLIP` sole active `IN_PROGRESS` task; F015 scalar boolean interpolation corrected |
+| Exit code | 3 |
+| Result | RETAINED FAILURE (M5-A-F016): `socket_isolation`, `migrate_up`, `lifecycle`, `budget_fail_closed`, `loop_guard`, `policy_checksum_fail_closed`, `heartbeat`, `verify`, `catalog_security`, `unauthorized_role_denied`, `tenant_context_fail_closed`, `direct_write_and_ddl_denied`, `governance_denials_issue_no_grant`, `grant_binding_revocation_expiry_replay` passed; failed at `db/paperclip/tests/verify_security.sql:276` on `UNEXPECTED_SUCCESS malformed payload hash` because `consume_grant(..., 'abc')` returned a graceful `GRANT_CONSUMPTION_DENIED` denial instead of raising an exception. Execution stopped immediately without automatic retry. Exact cleanup verified (zero containers, zero volumes, zero socket directories, zero env files). |
+| Evidence location | `docs/reports/M5_PAPERCLIP_DATABASE_IMPLEMENTATION_REPORT.md`, private mode-0600 log `/tmp/m5-proof-run.7ede80b111f1` (SHA-256 `0faf53138749b7aadf1271f4274e20820c27227e54125c2fec081629863dd1f3`), this record |
+| Redactions | Ephemeral generated passwords and connection strings omitted; log contains no secret values |
+| Operator/automation | GitHub Copilot |
+| Notes | Retained diagnostically per established protocol. No code change was applied after the run per the stop-on-failure rule. `M5-PAPERCLIP` remains the sole `IN_PROGRESS` task and is not marked complete. No production system or external service was accessed; `/opt/paperclip` was not modified.
+
+### M5-E008: Disposable Governance Database Proof — M5-A Complete
+
+| Field | Value |
+|---|---|
+| Command | `bash db/paperclip/scripts/run_m5_proof.sh proof` |
+| Timestamp | 2026-09-26 UTC |
+| Commit | Baseline `f7c8d9019cea7a68191552ea35d3ab7fa3b73c15`; M5-A work uncommitted |
+| Environment | PostgreSQL 16.15 from pinned `postgres@sha256:f1c3376c26f2609ab9f29f71f824103fe2fcd8ee0346485cb6122a4f93df6f94`; Docker `--network none`; no published ports; private mode-0700 Unix socket directory; SCRAM-SHA-256 local authentication; restricted login roles |
+| Preconditions | D-27 and D-28 owner approvals recorded; clean baseline; `M5-PAPERCLIP` sole active `IN_PROGRESS` task; F016 malformed-argument reconciliation applied; F017 tenant-two fixture assertion corrected |
+| Exit code | 0 |
+| Result | PASS (M5-A complete): `socket_isolation`, `migrate_up`, `lifecycle`, `budget_fail_closed`, `loop_guard`, `policy_checksum_fail_closed`, `heartbeat`, `verify`, `catalog_security`, `unauthorized_role_denied`, `tenant_context_fail_closed`, `direct_write_and_ddl_denied`, `governance_denials_issue_no_grant`, `grant_binding_revocation_expiry_replay`, `malformed_arguments_denied`, `shadowing_resisted`, `cross_tenant_arguments_denied`, `append_only_evidence`, `durable_state_and_evidence`, `security`, `concurrency` (successes=1, attempts=1), `fresh_up_and_verify`, `rollback`, and `reapply` all passed. |
+| Evidence location | `docs/reports/M5_PAPERCLIP_DATABASE_IMPLEMENTATION_REPORT.md`, private mode-0600 log `/tmp/m5-proof-run.f86cb61a7d90` (SHA-256 `9a7e25059e261de6093f196b862079329932f2ad6031b07690d941f6bcc009d9`), this record |
+| Redactions | Ephemeral generated passwords and connection strings omitted; log contains no secret values |
+| Operator/automation | GitHub Copilot |
+| Notes | First complete passing disposable M5-A proof. `M5-PAPERCLIP` remains the sole `IN_PROGRESS` task; M5-B (authenticated service contract and narrow executor integration) is not begun. No production system or external service was accessed; `/opt/paperclip` was not modified. |
