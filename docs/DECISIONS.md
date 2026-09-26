@@ -385,3 +385,34 @@ These directions are **OWNER APPROVED** by Gopinathan on 2026-09-08. Implementat
 - Concurrency-safe transitions are mandatory.
 - Search-path and temporary-object shadowing tests are mandatory.
 - Production and external integration remain prohibited.
+
+### D-29: Minimal MVP M5-B Authenticated Governance Service Boundary
+
+**Owner approval status:** OWNER APPROVED — 2026-09-26 — Gopinathan
+
+> I, Gopinathan, acting as product owner and initial governance owner, approve the Minimal MVP M5-B authenticated governance service boundary on 2026-09-26.
+>
+> The corrected canonical reference-only `/opt/paperclip` inventory digest is `dc3d4355e502d4fc678b6b3b43a4e70deb86b09109fd4c0aeccd29a055fdad44`, calculated using the documented exclusions for `.git`, `node_modules`, and `.next`. The earlier 63-character value was a transcription defect and is not a valid SHA-256 digest.
+>
+> M5-B must use only the twelve privileged Paperclip functions already authorized by D-28 and proven by M5-A. Read-only proposal or grant status retrieval is excluded from M5-B. No new privileged function, role, table grant, schema mutation, or direct table access is authorized.
+>
+> The authenticated subject, tenant, Paperclip agent UUID, policy UUID, owner-approver identity, and synthetic-executor identity must be resolved from server-controlled configuration or trusted repository logic. Clients may not select or override agent IDs, policy IDs, tenant IDs, approval identities, executor identities, roles, payload hashes, or policy checksums. JWT roles, `user_metadata`, request metadata, and other client-editable claims must not grant authority.
+>
+> Manual approval and rejection are authorized only when the authenticated subject exactly matches the configured Gopinathan owner subject and also holds the server-resolved admin role. Proposal creators, agents, executors, and other subjects may not approve their own proposals.
+>
+> M5-B may implement FastAPI models, routes, a separate Paperclip database pool, a repository that invokes only the approved functions, server-controlled synthetic identity mappings, redaction controls, and a fake executor for disposable tests. The service must fail closed on missing mappings, missing approval, invalid policy checksum, exhausted budget, loop guard, unavailable governance database, invalid or expired grant, identity mismatch, or uncertain authorization.
+>
+> M5-B remains limited to disposable development and synthetic tests. It must not modify `/opt/paperclip`, `docker-compose.yml`, production configuration, deployment workflows, Zippy business data, Odoo data, payment data, accounting records, or external systems. It does not authorize live credentials, live integrations, production deployment, autonomous financial execution, automatic refunds or settlements, or unrestricted Paperclip execution.
+
+#### Enforceable Constraints
+
+- Only the twelve existing D-28 functions may be called.
+- No GET/read-status endpoint is authorized.
+- No Paperclip schema, role, grant or migration change is authorized.
+- Agent, policy, approver and executor identities are server-controlled.
+- Client-provided identity or authority fields are prohibited.
+- `user_metadata` and JWT role claims provide no authorization.
+- Owner decisions require both the configured exact owner subject and server-resolved `admin`.
+- The synthetic executor cannot call Zippy, Odoo, Razorpay or another external system.
+- `docker-compose.yml`, deployment configuration and `/opt/paperclip` remain untouched.
+- All errors and governance uncertainty fail closed.

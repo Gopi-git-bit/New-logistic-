@@ -1113,3 +1113,21 @@ These commands validate the documentation diff and working-tree inventory. They 
 | Redactions | Ephemeral generated passwords and connection strings omitted; log contains no secret values |
 | Operator/automation | GitHub Copilot |
 | Notes | First complete passing disposable M5-A proof. `M5-PAPERCLIP` remains the sole `IN_PROGRESS` task; M5-B (authenticated service contract and narrow executor integration) is not begun. No production system or external service was accessed; `/opt/paperclip` was not modified. |
+
+### M5-E009: M5-B Owner Boundary Approval
+
+| Field | Value |
+|---|---|
+| Date | 2026-09-26 |
+| Result | PASS |
+| Owner | Gopinathan |
+| Decision | D-29 |
+| Approved baseline | `520e8f48003e98166c029366943798e08bc042a3` |
+| M5-A commit and proof | Unchanged; M5-A remains complete and committed with evidence `M5-E008` |
+| M5-B implementation status | Not started |
+| Runtime / database / container / external operation | None occurred |
+| Production / live integration / deployment | Remained disabled and prohibited |
+| `/opt/paperclip` status | Remained reference-only; corrected canonical inventory digest `dc3d4355e502d4fc678b6b3b43a4e70deb86b09109fd4c0aeccd29a055fdad44` |
+| Evidence location | `docs/DECISIONS.md` (D-29), `docs/EXECUTION_TRACKER.md`, this record |
+| Operator/automation | GitHub Copilot |
+| Notes | Documentation-only owner boundary approval. No code, migration, dependency, service, container, credential, or `/opt/paperclip` change occurred. M5-B is authorized to use only the twelve D-28 privileged functions; read-only status endpoints are excluded. |
