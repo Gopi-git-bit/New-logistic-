@@ -1131,3 +1131,41 @@ These commands validate the documentation diff and working-tree inventory. They 
 | Evidence location | `docs/DECISIONS.md` (D-29), `docs/EXECUTION_TRACKER.md`, this record |
 | Operator/automation | GitHub Copilot |
 | Notes | Documentation-only owner boundary approval. No code, migration, dependency, service, container, credential, or `/opt/paperclip` change occurred. M5-B is authorized to use only the twelve D-28 privileged functions; read-only status endpoints are excluded. |
+
+### M5-E010: M5-B Host Validation — PARTIAL, NOT ACCEPTANCE
+
+| Field | Value |
+|---|---|
+| Baseline | `cd786b91e40598a9d1e66c7501669e0ec28ac0cb`; uncommitted implementation |
+| Date | 2026-09-27 (recovery inventory) |
+| Tests | `74 passed, 3 skipped` |
+| Skipped tests | `api/tests/test_postgres_integration.py::test_order_transition_and_worker_flow` — requires the isolated M3 PostgreSQL proof; `api/tests/test_postgres_integration.py::test_task_and_outbox_terminal_failures_create_evidence` — requires the isolated M3 PostgreSQL proof; `api/tests_m5/test_integration.py::*` — requires the private M5-B disposable PostgreSQL proof |
+| Ruff | Passed |
+| `git diff --check` | Passed |
+| Disposable database proof | Was not run |
+| Status | M5-B remained incomplete; this is not final or passing implementation evidence |
+| Safety | No production or live database operation occurred; no live integration was authorized or required |
+| Follow-up | M5-E011 reserved for a future successful disposable proof; M6 remains unstarted |
+
+### M5-E011: M5-B Disposable Service Proof
+
+| Field | Value |
+|---|---|
+| Baseline | `cd786b91e40598a9d1e66c7501669e0ec28ac0cb`; uncommitted implementation |
+| Date | 2026-09-27 |
+| Harness | `db/paperclip/scripts/run_m5b_service_proof.sh` |
+| Exit status | `0` |
+| Proof log | `/tmp/m5b-proof.Ceyqku` |
+| Log mode | `0600` |
+| Log bytes | `24551` |
+| Log SHA-256 | `7a33b36dd7513011006c5176fc48df70610417a9d0d2f2fe2ec24b6b4039463f` |
+| Host tests | `90 passed, 14 skipped, 1 warning` (`api/tests/` 56 passed + 2 skipped; `api/tests_m5/` 34 passed + 12 skipped) |
+| Disposable tests | `46 passed, 0 skipped, 1 warning` (all M5-B integration/security/concurrency tests) |
+| Markers | `network_isolation=PASS`; `socket_scram=PASS`; `m5a_security_regression=PASS`; `bootstrap_and_fixture_reset=PASS`; `m5b_tests=PASS count=46 skipped=0`; `m5b_integration_security=PASS`; `m5b_concurrency=PASS successes=1 denials=1`; `security=PASS`; `rollback=PASS`; `reapply=PASS`; `host_port_5432=PASS`; `exact_cleanup=PASS`; `secret_scan=PASS` |
+| M5-A regression | `verify.sql` PASS, `verify_security.sql` PASS, `verify_concurrency.sql` PASS |
+| Concurrency | Exactly one successful grant consumer; one denial; one execution attempt recorded |
+| Secret scan | `secret_pattern_matches=0`; no password, token, database URL, or connection string in log |
+| Cleanup | Zero disposable containers, volumes, socket directories, environment files; no host port-5432 listener |
+| Safety | No production or live database operation occurred; no live integration was authorized or required; `--network none` and Unix-socket-only connection used |
+| Limitations | M5-B remains limited to disposable synthetic validation per D-29; live executor integration with Zippy/Odoo/Razorpay is not authorized; production deployment remains prohibited |
+| Status | `PROOF PASSED — FINAL ACCEPTANCE PENDING`; M5 remains `IN_PROGRESS`; M6 remains unstarted |

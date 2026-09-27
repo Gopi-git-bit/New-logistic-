@@ -7,7 +7,7 @@ from uuid import UUID
 import jwt
 import pytest
 
-from api.config import Settings
+from api.config import SecretStr, Settings
 
 PLATFORM_ID = UUID("10000000-0000-0000-0000-000000000001")
 JWT_SECRET = "m3-test-secret-that-is-at-least-32-bytes"
@@ -17,6 +17,12 @@ JWT_SECRET = "m3-test-secret-that-is-at-least-32-bytes"
 def settings() -> Settings:
     return Settings(
         database_url="postgresql://unused",
+        paperclip_database_url=SecretStr("postgresql://unused-paperclip"),
+        paperclip_owner_subject="paperclip-owner-test",
+        paperclip_executor_subject="paperclip-executor-test",
+        paperclip_policy_id=UUID("30000000-0000-0000-0000-000000000001"),
+        paperclip_agent_bindings={"paperclip-agent-test": UUID("20000000-0000-0000-0000-000000000001")},
+        paperclip_envelope_signing_key=SecretStr("paperclip-test-signing-key-32-bytes"),
         app_env="test",
         auth_mode="test_jwt",
         auth_jwt_secret=JWT_SECRET,

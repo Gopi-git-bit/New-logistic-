@@ -67,7 +67,32 @@ class StubRepository:
 
 
 def _client(settings, database: StubDatabase, repository: StubRepository) -> TestClient:
-    return TestClient(create_app(settings, database, repository))
+    return TestClient(
+        create_app(
+            settings,
+            database,
+            repository,
+            paperclip_database=StubPaperclipDatabase(ready=True),
+        )
+    )
+
+
+class StubPaperclipDatabase:
+    def __init__(self, ready: bool = True) -> None:
+        self.is_ready = ready
+
+    def open(self) -> None:
+        pass
+
+    def close(self) -> None:
+        pass
+
+    def ready(self) -> bool:
+        return self.is_ready
+
+    @contextmanager
+    def transaction(self, tenant_id):
+        yield object()
 
 
 def test_health_and_readiness(settings):

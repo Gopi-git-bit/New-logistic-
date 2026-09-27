@@ -16,7 +16,7 @@ from psycopg import OperationalError
 
 from .auth import AuthenticatedSubject, authenticate_subject, security
 from .config import Settings, load_settings
-from .database import Database
+from .database import Database, PaperclipDatabase
 from .models.core import (
     ErrorEnvelope,
     OrderAccepted,
@@ -35,6 +35,7 @@ from .repositories_dispatch import DispatchRepository
 from .repositories_finance import FinanceRepository
 from .routes_dispatch import register_dispatch_routes
 from .routes_finance import register_finance_routes
+from .routes_paperclip import register_paperclip_routes
 
 
 def _correlation_id(request: Request) -> UUID:
@@ -66,18 +67,25 @@ def create_app(
     repository: CoreRepository | None = None,
     finance_repository: FinanceRepository | None = None,
     dispatch_repository: DispatchRepository | None = None,
+    paperclip_database: PaperclipDatabase | None = None,
 ) -> FastAPI:
     @asynccontextmanager
     async def lifespan(application: FastAPI) -> AsyncIterator[None]:
         selected_settings = settings or load_settings()
         selected_database = database or Database(selected_settings.database_url)
+        selected_paperclip_database = paperclip_database or PaperclipDatabase(
+            selected_settings.paperclip_database_url.reveal()
+        )
         application.state.settings = selected_settings
         application.state.database = selected_database
+        application.state.paperclip_database = selected_paperclip_database
         application.state.repository = repository or CoreRepository()
         application.state.finance_repository = finance_repository or FinanceRepository()
         application.state.dispatch_repository = dispatch_repository or DispatchRepository()
         selected_database.open()
+        selected_paperclip_database.open()
         yield
+        selected_paperclip_database.close()
         selected_database.close()
 
     application = FastAPI(
@@ -100,6 +108,26 @@ def create_app(
             f"{int((time.monotonic() - started) * 1000)}ms"
         )
         return response
+
+    @application.get("/api/v1/health")
+    def health() -> dict[str, str]:
+        return {"status": "ok"}
+
+    @application.get("/api/v1/ready", response_model=None)
+    def ready(request: Request) -> dict[str, str] | JSONResponse:
+        selected_database = cast(Database, request.app.state.database)
+        selected_paperclip_database = cast(
+            PaperclipDatabase, request.app.state.paperclip_database
+        )
+        if not selected_database.ready() or not selected_paperclip_database.ready():
+            return _error(
+                503,
+                "NOT_READY",
+                "The service is not ready",
+                _correlation_id(request),
+                True,
+            )
+        return {"status": "ready"}
 
     @application.exception_handler(RequestValidationError)
     async def validation_error(
@@ -160,23 +188,6 @@ def create_app(
             _correlation_id(request),
             True,
         )
-
-    @application.get("/api/v1/health")
-    def health() -> dict[str, str]:
-        return {"status": "ok"}
-
-    @application.get("/api/v1/ready", response_model=None)
-    def ready(request: Request) -> dict[str, str] | JSONResponse:
-        selected_database = cast(Database, request.app.state.database)
-        if not selected_database.ready():
-            return _error(
-                503,
-                "NOT_READY",
-                "The service is not ready",
-                _correlation_id(request),
-                True,
-            )
-        return {"status": "ready"}
 
     def subject_dependency(
         request: Request,
@@ -297,6 +308,7 @@ def create_app(
 
     register_finance_routes(application, subject_dependency, _correlation_id)
     register_dispatch_routes(application, subject_dependency, _correlation_id)
+    register_paperclip_routes(application, subject_dependency, _correlation_id)
 
     return application
 

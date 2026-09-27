@@ -1,4 +1,4 @@
-"""PostgreSQL connection pool with transaction-local request context."""
+"""PostgreSQL connection pools with transaction-local request context."""
 
 from __future__ import annotations
 
@@ -50,5 +50,46 @@ class Database:
             connection.execute(
                 "SELECT set_config('zippy.account_id', %s, true)",
                 (str(account_id) if account_id else "",),
+            )
+            yield connection
+
+
+class PaperclipDatabase:
+    """Isolated connection pool for the Paperclip governance database."""
+
+    def __init__(self, database_url: str) -> None:
+        self._pool = cast(
+            ConnectionPool[Connection[dict[str, Any]]],
+            ConnectionPool(
+                database_url,
+                min_size=1,
+                max_size=4,
+                open=False,
+                kwargs={"row_factory": dict_row},
+            ),
+        )
+
+    def open(self) -> None:
+        self._pool.open()
+
+    def close(self) -> None:
+        self._pool.close()
+
+    def ready(self) -> bool:
+        try:
+            with self._pool.connection(timeout=2) as connection:
+                connection.execute("SELECT 1")
+            return True
+        except Exception:  # noqa: BLE001
+            return False
+
+    @contextmanager
+    def transaction(
+        self, tenant_id: UUID
+    ) -> Iterator[Connection[dict[str, Any]]]:
+        with self._pool.connection() as connection, connection.transaction():
+            connection.execute(
+                "SELECT set_config('paperclip.tenant_id', %s, true)",
+                (str(tenant_id),),
             )
             yield connection
