@@ -1,8 +1,14 @@
 # M6-LANGFUSE Discovery and Boundary Review
 
-**Status:** `DISCOVERY COMPLETE — OWNER BOUNDARY APPROVAL REQUIRED`
+**Status:** `BOUNDARY APPROVED — IMPLEMENTATION NOT STARTED`
 
 **Baseline commit:** `d2b3e837e66f6995379aac3333d5130ce618d59e` (`docs: accept M5 and begin M6 discovery`)
+
+**Boundary approval:** D-31 (`docs/DECISIONS.md`), evidence `M6-E002`, 2026-09-27, owner Gopinathan
+
+**Discovery date:** 2026-09-27
+
+**Scope:** Read-only repository inspection and official Langfuse documentation review. No implementation, dependency installation, credential configuration, container start, telemetry export, external request, deployment, staging, commit, or push occurred.
 
 **Discovery date:** 2026-09-27
 
@@ -371,6 +377,22 @@ If owner approval is granted, the following files are prospective targets (no ch
 
 ---
 
-## 15. Conclusion
+## 15. Owner Resolution
 
-M6-LANGFUSE discovery is complete. The repository already declares Langfuse as a worker dependency and includes a minimal fail-open span emitter, but lacks redaction, tenant pseudonymization, classification, tests, and production controls. The recommended boundary is an isolated self-hosted Langfuse instance on Hostinger with telemetry disabled by default, workers-only emission, strict redaction before export, and separate environments. All implementation decisions remain pending owner approval.
+On 2026-09-27, owner Gopinathan approved the Minimal MVP M6-A telemetry boundary under `D-31` (`docs/DECISIONS.md`), recorded as `M6-E002` (`docs/TEST_EVIDENCE.md`).
+
+The approved M6-A scope is limited to:
+
+- repository-tracked telemetry contracts,
+- redaction controls,
+- a disabled-by-default adapter,
+- a fake in-memory collector, and
+- disposable synthetic tests.
+
+The approval explicitly does **not** authorize Langfuse Cloud, a self-hosted Langfuse deployment, live credentials, external telemetry transmission, production telemetry, paid services, or production deployment. External spending during M6-A must remain ₹0.
+
+Implementation has not started at this documentation checkpoint.
+
+## 16. Conclusion
+
+M6-LANGFUSE discovery is complete and the M6-A boundary is owner-approved. The repository already declares Langfuse as a worker dependency and includes a minimal fail-open span emitter, but lacks redaction, tenant pseudonymization, classification, tests, and production controls. The recommended boundary is an isolated self-hosted Langfuse instance on Hostinger with telemetry disabled by default, workers-only emission, strict redaction before export, and separate environments. Production hosting, data residency, retention, sampling, live emitters, credentials, and deployment remain deferred and require separate owner approval.

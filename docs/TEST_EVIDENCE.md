@@ -1218,3 +1218,42 @@ These commands validate the documentation diff and working-tree inventory. They 
 | Evidence location | `docs/reports/M6_LANGFUSE_DISCOVERY_REVIEW.md`, this record |
 | Operator/automation | GitHub Copilot |
 | Notes | Read-only discovery and boundary review per D-30. No code, migration, dependency, service, container, credential, live telemetry, or `/opt/paperclip` change occurred. The existing minimal `workers/src/zippy_workers/tracing.py` fail-open span emitter was inspected but not modified. All prospective implementation decisions remain pending owner approval. |
+
+### M6-E002: Owner Approval of Minimal MVP Telemetry Boundary
+
+| Field | Value |
+|---|---|
+| Evidence ID | M6-E002 |
+| Date | 2026-09-27 |
+| Owner | Gopinathan |
+| Decision | D-31 (`docs/DECISIONS.md`) |
+| Discovery commit | `f09c7993f6ce2649e85b74639d07517644fedd71` (`docs: record M6 Langfuse discovery`) |
+| Approved scope | Minimal MVP M6-A: repository-tracked telemetry contracts, redaction controls, disabled-by-default adapter, fake in-memory collector, and disposable synthetic tests |
+| Not authorized | Langfuse Cloud; self-hosted Langfuse deployment; live credentials; external telemetry transmission; production telemetry; paid services; production deployment; new infrastructure |
+| External spending limit | ₹0 during M6-A |
+| Default telemetry state | Disabled by default |
+| Default sampling | 0% outside disposable tests; 100% only for synthetic test events |
+| Permitted emitters | Worker/agent execution boundary only |
+| Prohibited emitters | FastAPI business routes, Paperclip governance, Zippy PostgreSQL, Odoo, payment systems, external integrations |
+| Permitted data classes | Server-generated trace/correlation IDs; pseudonymous synthetic tenant/actor identifiers; service/operation names; non-sensitive event types; model/provider aliases; timestamps; latency; input/output token counts; estimated cost; confidence; success/failure codes; policy outcome codes; redacted exception class names |
+| Prohibited data classes | Raw prompts; model responses; system instructions; customer/driver personal data; email; phone; address; exact order/trip/vehicle identifiers; payment/refund/settlement/invoice/accounting/Odoo data; governance grants; approval payloads; payload contents; database records; stack traces; request/response bodies; JWTs; API keys; passwords; database URLs; webhook secrets; other credentials |
+| Identity authority | Client-provided identifiers/metadata may not establish telemetry identity or authority; tenant/actor/workflow/correlation IDs must be server-generated or resolved by trusted server logic; test identifiers must be synthetic and pseudonymized |
+| Delivery behavior | Fail open: telemetry/collector unavailability must not block, change, retry, falsely succeed, or corrupt business/governance operations |
+| Redaction behavior | Fail closed at telemetry boundary: unclassifiable events must be dropped; underlying business operation continues normally |
+| Proof rule | Fake local collector and synthetic inputs only; test artifacts private, temporary, prohibited-data-free, removed on cleanup; repository evidence retains only counts, markers, and hashes—not payloads |
+| Administrator | Gopinathan only |
+| Deferred decisions | Cloud vs. self-hosted Langfuse; data residency; production retention; production sampling; live emitters; production credentials; production deployment |
+| Langfuse authority | Observability only; may not become source of truth, authorization system, governance authority, workflow engine, retry controller, business database, or financial/accounting system; may not write to Zippy, Paperclip, or Odoo or alter operational outcomes |
+| Files updated | `docs/DECISIONS.md` (D-31); `docs/EXECUTION_TRACKER.md`; `docs/HEARTBEAT.md`; `docs/TEST_EVIDENCE.md` (this record); `docs/reports/M6_LANGFUSE_DISCOVERY_REVIEW.md` |
+| Implementation | None occurred during this documentation checkpoint |
+| Dependency installation | None occurred |
+| Credential configuration | None occurred |
+| Container start | None occurred |
+| Telemetry export | None occurred |
+| External request | None occurred |
+| Deployment / staging | None occurred |
+| Commit / push | None occurred during this evidence record |
+| `/opt/paperclip` modification | None occurred |
+| Evidence location | `docs/DECISIONS.md` (D-31), `docs/EXECUTION_TRACKER.md`, `docs/HEARTBEAT.md`, `docs/reports/M6_LANGFUSE_DISCOVERY_REVIEW.md`, this record |
+| Operator/automation | GitHub Copilot |
+| Notes | Documentation-only owner boundary approval per D-30. M6-A implementation is authorized but has not started. No runtime, infrastructure, credential, or external change occurred. |

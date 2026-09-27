@@ -430,3 +430,29 @@ These directions are **OWNER APPROVED** by Gopinathan on 2026-09-08. Implementat
 > M5 remains subject to D-27, D-28, and D-29. This acceptance does not authorize production deployment, live credentials, live integrations, autonomous financial execution, changes to Zippy or Odoo data ownership, unrestricted Paperclip execution, or modification of `/opt/paperclip`.
 >
 > I authorize a documentation-only milestone transition marking `M5-PAPERCLIP` complete and making `M6-LANGFUSE` the sole `IN_PROGRESS` task. This transition authorizes M6 discovery and boundary definition only. It does not authorize M6 production deployment, live telemetry export, live credentials, or implementation beyond an owner-approved M6 scope.
+
+### D-31: Minimal MVP M6-A Langfuse Telemetry Boundary
+
+**Owner approval status:** OWNER APPROVED — 2026-09-27 — Gopinathan
+
+> I, Gopinathan, acting as product owner and observability owner, approve the Minimal MVP M6-A Langfuse telemetry boundary on 2026-09-27.
+>
+> This approval is based on the M6 discovery checkpoint committed as `f09c7993f6ce2649e85b74639d07517644fedd71`. M6-A is limited to repository-tracked telemetry contracts, redaction controls, a disabled-by-default adapter, a fake in-memory collector, and disposable synthetic tests. It does not authorize Langfuse Cloud, a self-hosted Langfuse deployment, live credentials, external telemetry transmission, production telemetry, or paid services. External spending during M6-A must remain ₹0.
+>
+> Telemetry must be disabled by default. Sampling must be 0% outside disposable tests and may be 100% only for synthetic test events. During M6-A, only the worker/agent execution boundary may emit telemetry. FastAPI business routes, Paperclip governance, Zippy PostgreSQL, Odoo, payment systems, and external integrations must not emit live telemetry.
+>
+> Permitted telemetry fields are limited to server-generated trace and correlation identifiers, pseudonymous synthetic tenant and actor identifiers, service and operation names, non-sensitive event types, model and provider aliases, timestamps, latency, input/output token counts, estimated cost, confidence where applicable, success or failure codes, policy outcome codes, and redacted exception class names.
+>
+> Raw prompts, model responses, system instructions, customer or driver personal data, email addresses, phone numbers, addresses, exact order/trip/vehicle identifiers, payment, refund, settlement, invoice, accounting or Odoo data, governance grants, approval payloads, payload contents, database records, stack traces, request or response bodies, JWTs, API keys, passwords, database URLs, webhook secrets, and other credentials are prohibited.
+>
+> Client-provided identifiers or metadata may not establish telemetry identity or authority. Tenant, actor, workflow, and correlation identifiers must be generated or resolved by trusted server logic. Any identifiers used in tests must be synthetic and pseudonymized.
+>
+> Telemetry delivery must fail open: Langfuse or collector unavailability must not block, change, retry, falsely succeed, or corrupt a business or governance operation. Redaction must fail closed at the telemetry boundary: if an event cannot be proven safe, that telemetry event must be dropped while the underlying business operation continues normally.
+>
+> The M6-A proof must use a fake local collector and synthetic inputs only. Test artifacts must be private, temporary, contain no prohibited data, and be removed during cleanup. Repository evidence may retain only test counts, markers, and cryptographic hashes—not telemetry payloads.
+>
+> Gopinathan is the only approved initial observability administrator. Cloud versus self-hosted Langfuse, data residency, production retention, production sampling, live emitters, production credentials, and production deployment remain deferred and require separate owner approval.
+>
+> Langfuse remains an observability system only. It may not become a source of truth, authorization system, governance authority, workflow engine, retry controller, business database, or financial/accounting system. It may not write to Zippy, Paperclip, or Odoo databases or alter any operational outcome.
+>
+> This approval authorizes M6-A implementation and disposable synthetic proof only. It does not authorize production deployment, live telemetry export, new infrastructure, changes to accounting or governance authority, autonomous financial execution, or unrestricted external-agent activity.
