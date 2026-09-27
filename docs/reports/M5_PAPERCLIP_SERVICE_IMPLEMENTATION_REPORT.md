@@ -1,6 +1,6 @@
 # M5-B Paperclip Governance Service Implementation Report
 
-**Status: PROOF PASSED — FINAL ACCEPTANCE PENDING**
+**Status: ACCEPTED — COMPLETE**
 
 ## Scope
 
@@ -160,8 +160,21 @@ After the two failure records were captured, the defects were corrected and a fi
 ## Evidence IDs
 
 - M5-E009: D-29 M5-B owner boundary approval (pre-existing).
-- M5-E010: M5-B Host Validation — PARTIAL, NOT ACCEPTANCE.
+- M5-E010: M5-B Host Validation.
 - M5-E011: M5-B Disposable Service Proof — PASSED.
+- M5-E012: Owner Acceptance and M6 Discovery Handoff.
+
+## Acceptance
+
+M5-PAPERCLIP was owner-accepted on 2026-09-27 by Gopinathan under `D-30` (`docs/DECISIONS.md`).
+The accepted scope includes:
+
+- M5-A isolated governance database (`520e8f48003e98166c029366943798e08bc042a3`, evidence `M5-E008`).
+- M5-B authenticated governance service (`e3a96d97ec9c04a88d8561e69397ae8c7b896ea7`, host evidence `M5-E010`, disposable proof `M5-E011`).
+
+The disposable proof passed with `46 passed, 0 skipped, 1 warning`, proof-log SHA-256 `7a33b36dd7513011006c5176fc48df70610417a9d0d2f2fe2ec24b6b4039463f`, successful single-use concurrency enforcement, M5-A security regression, rollback, reapply, secret scanning, network/socket isolation, and exact cleanup. Host validation result: `90 passed, 14 skipped, 1 warning`.
+
+This acceptance does not authorize production deployment, live credentials, live integrations, autonomous financial execution, unrestricted Paperclip execution, changes to Zippy or Odoo data ownership, or modification of `/opt/paperclip`. `M6-LANGFUSE` is the sole `IN_PROGRESS` task, restricted to discovery and boundary definition only.
 
 ## Operator
 
@@ -176,6 +189,16 @@ Nothing staged; no unrelated user changes identified. All changed and untracked 
 - `docs/HEARTBEAT.md`: no working-tree changes; it remains at its committed state. Note: HEAD currently records M6 as complete, which is inconsistent with the recovery state that M6 has not begun; this file was left unchanged per instruction to restore only M5-B-induced edits.
 
 Current host test collection: `api/tests/` 58 (56 pass, 2 skipped); `api/tests_m5/` 46 (34 pass on host, 12 skipped pending disposable proof). With the disposable proof active, all 46 `api/tests_m5` tests pass. Overall host result: `90 passed, 14 skipped, 1 warning`.
+
+## M5-A Regression (Verified During M5-B Disposable Proof)
+
+During the successful M5-E011 disposable proof, the M5-A security and concurrency regression passed:
+
+- `verify.sql` PASS
+- `verify_security.sql` PASS
+- `verify_concurrency.sql` PASS (successes=1, attempts=1)
+
+This confirms M5-B repository changes did not regress the M5-A governance database guarantees.
 
 Skipped tests and exact reasons:
 

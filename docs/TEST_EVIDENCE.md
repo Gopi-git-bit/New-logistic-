@@ -1168,4 +1168,24 @@ These commands validate the documentation diff and working-tree inventory. They 
 | Cleanup | Zero disposable containers, volumes, socket directories, environment files; no host port-5432 listener |
 | Safety | No production or live database operation occurred; no live integration was authorized or required; `--network none` and Unix-socket-only connection used |
 | Limitations | M5-B remains limited to disposable synthetic validation per D-29; live executor integration with Zippy/Odoo/Razorpay is not authorized; production deployment remains prohibited |
-| Status | `PROOF PASSED — FINAL ACCEPTANCE PENDING`; M5 remains `IN_PROGRESS`; M6 remains unstarted |
+| Status | `PROOF PASSED — ACCEPTED AS PART OF COMPLETE M5-PAPERCLIP`; M5 complete per D-30/M5-E012; M6 discovery-only `IN_PROGRESS` |
+
+### M5-E012: Owner Acceptance and M6 Discovery Handoff
+
+| Field | Value |
+|---|---|
+| Evidence ID | M5-E012 |
+| Date | 2026-09-27 |
+| Owner | Gopinathan |
+| Decision | D-30 (`docs/DECISIONS.md`) |
+| Accepted commits | `520e8f48003e98166c029366943798e08bc042a3` (M5-A); `e3a96d97ec9c04a88d8561e69397ae8c7b896ea7` (M5-B) |
+| Accepted evidence | M5-E008 (M5-A proof); M5-E010 (M5-B host validation); M5-E011 (M5-B disposable proof) |
+| Accepted proof result | Disposable proof exit status `0`; `46 passed, 0 skipped, 1 warning`; proof-log SHA-256 `7a33b36dd7513011006c5176fc48df70610417a9d0d2f2fe2ec24b6b4039463f` |
+| Milestone transition | `M5-PAPERCLIP` → `COMPLETE`; `M6-LANGFUSE` → sole `IN_PROGRESS` (discovery and boundary definition only) |
+| M6 authorization | Documentation-only. No implementation, live telemetry, credentials, production deployment, or external transmission is authorized. |
+| Runtime / database / container / external operation | None occurred for this evidence record |
+| Production / live integration / deployment | Remained disabled and prohibited |
+| `/opt/paperclip` status | Remained reference-only; not modified or deployed |
+| Evidence location | `docs/DECISIONS.md` (D-30), `docs/EXECUTION_TRACKER.md`, `docs/HEARTBEAT.md`, this record |
+| Operator/automation | GitHub Copilot |
+| Notes | Documentation-only owner acceptance and milestone handoff. No code, migration, dependency, service, container, credential, or `/opt/paperclip` change occurred. Any contradictory M6-complete claim in historical files is superseded by this record and the current tracker/heartbeat. |
