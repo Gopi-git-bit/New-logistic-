@@ -18,6 +18,12 @@ class WorkerSettings(BaseSettings):
     langfuse_secret_key: str | None = None
     langfuse_host: str = "https://us.cloud.langfuse.com"
 
+    # M6-A telemetry controls (disabled by default, D-31)
+    telemetry_enabled: bool = False
+    telemetry_sampling_rate: float = 0.0
+    telemetry_pepper: str = ""
+    telemetry_environment: str = "local"
+
     # Supabase access for the kernel (service role required for RPCs)
     supabase_url: str | None = None
     supabase_service_role_key: str | None = None

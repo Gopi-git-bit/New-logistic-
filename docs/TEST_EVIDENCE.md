@@ -1257,3 +1257,34 @@ These commands validate the documentation diff and working-tree inventory. They 
 | Evidence location | `docs/DECISIONS.md` (D-31), `docs/EXECUTION_TRACKER.md`, `docs/HEARTBEAT.md`, `docs/reports/M6_LANGFUSE_DISCOVERY_REVIEW.md`, this record |
 | Operator/automation | GitHub Copilot |
 | Notes | Documentation-only owner boundary approval per D-30. M6-A implementation is authorized but has not started. No runtime, infrastructure, credential, or external change occurred. |
+### M6-E003: Minimal MVP Telemetry Implementation and Synthetic Proof
+
+| Field | Value |
+|---|---|
+| Evidence ID | M6-E003 |
+| Date | 2026-09-27 |
+| Owner approval | D-31 (`docs/DECISIONS.md`) |
+| Baseline commit | `9ef10ddc2dd11f1e1b6f650ae90a625611d8125e` |
+| Implementation paths | `workers/src/zippy_workers/config.py`; `workers/src/zippy_workers/telemetry_contract.py`; `workers/src/zippy_workers/telemetry_redaction.py`; `workers/src/zippy_workers/telemetry_pseudonym.py`; `workers/src/zippy_workers/telemetry_adapter.py`; `workers/tests/test_m6_telemetry.py`; `workers/scripts/run_m6a_telemetry_proof.sh` |
+| Implementation report | `docs/reports/M6_LANGFUSE_IMPLEMENTATION_REPORT.md` |
+| Dependency delta (venv only) | `pydantic-settings==2.6.0`; `python-dotenv==1.2.3` |
+| Environment | `/opt/new-logistic/.venv/bin/python` |
+| Focused telemetry tests | `62 passed, 1 warning` |
+| Worker regression tests | `122 passed, 1 warning` |
+| Ruff lint | PASS |
+| Ruff format check | PASS |
+| Proof exit status | `0` |
+| Proof log | `/tmp/m6a-proof.vYDFZu` |
+| Proof log mode | `0600` |
+| Proof log bytes | `1627` |
+| Proof log SHA-256 | `ba77a1f079bff8e61253bb060ce3cc89f41fd94baaa6ff515c67ec14c6003cf8` |
+| Required markers | `telemetry_disabled_default=PASS`; `sampling_zero_default=PASS`; `sampling_default_zero=PASS`; `synthetic_sampling=PASS`; `typed_allowlist=PASS`; `prohibited_fields_dropped=PASS`; `pseudonymization=PASS`; `raw_identifiers_absent=PASS`; `redaction_fail_closed=PASS`; `sink_failure_fail_open=PASS`; `business_result_unchanged=PASS`; `focused_tests count=62=PASS`; `worker_regression=PASS`; `ruff=PASS`; `secret_scan=PASS`; `no_live_credentials=PASS`; `network_isolation=PASS`; `cleanup=PASS`; `m6a_proof=PASS` |
+| Earlier failed attempts | (1) `/tmp/m6a-proof.8bUSLu` (mode `600`, 356 bytes, SHA-256 `16febbd55842b6b0a5a1c93a4a8c7de8b4404689f52399dedb7a8327e6bf75de`) — failed due to missing `pydantic_settings` and harness `mark_fail()` unbound-variable bug. (2) `/tmp/m6a-proof.6oCaTS` (mode `600`, 374 bytes, SHA-256 `b5c0c4bc2f6059660f6af1a0159b4c57fbf32ef1ac7e12a113db3a8d128b9768`) — same root cause as attempt 1. (3) `/tmp/m6a-proof.WA2h8l` (mode `600`, 2076 bytes, SHA-256 `774ace454b49d1decf3d595858c05b051d0f7fc1033d8bc3cfced4d446f3acd0`) — executed after installing `pydantic-settings` and fixing `mark_fail()`; failed because fail-closed redaction did not drop events containing prohibited fields (`prohibited_fields_dropped`, `raw_identifiers_absent`, and `redaction_fail_closed` markers failed). Exit status not independently retained; harness emitted `m6a_proof=FAIL`. |
+| Secret scan | No live credentials or prohibited payload values in source, tests, or proof log |
+| Cleanup | Zero temporary payload directories remaining; no Docker containers/volumes; no M6-A network listeners |
+| Not authorized | Langfuse Cloud/self-hosting; live credentials; external transmission; production telemetry; paid services; production deployment; integration with FastAPI routes, Paperclip governance, Zippy PostgreSQL, Odoo, payment systems |
+| External spending | ₹0 |
+| Status | `PRE-COMMIT AUDIT PASSED — IMPLEMENTATION COMMIT PENDING` |
+| Owner acceptance | M6-E004 has **not** occurred |
+| Operator/automation | GitHub Copilot |
+| Notes | M6 remains the sole `IN_PROGRESS` tracker task. All telemetry is disabled by default. No runtime integration outside the worker boundary. Four harness executions are recorded: two environment-failure attempts (`/tmp/m6a-proof.8bUSLu`, `/tmp/m6a-proof.6oCaTS`), one redaction-failure attempt (`/tmp/m6a-proof.WA2h8l`), and one final passing execution (`/tmp/m6a-proof.vYDFZu`). The passing execution occurred after correcting the environment, harness, and fail-closed redaction behavior. |
