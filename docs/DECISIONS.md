@@ -456,3 +456,25 @@ These directions are **OWNER APPROVED** by Gopinathan on 2026-09-08. Implementat
 > Langfuse remains an observability system only. It may not become a source of truth, authorization system, governance authority, workflow engine, retry controller, business database, or financial/accounting system. It may not write to Zippy, Paperclip, or Odoo databases or alter any operational outcome.
 >
 > This approval authorizes M6-A implementation and disposable synthetic proof only. It does not authorize production deployment, live telemetry export, new infrastructure, changes to accounting or governance authority, autonomous financial execution, or unrestricted external-agent activity.
+
+### D-32: Minimal MVP M6-A Langfuse Telemetry Acceptance
+
+**Owner acceptance status:** OWNER ACCEPTED — 2026-09-27 — Gopinathan
+
+> I, Gopinathan, acting as product owner and observability owner, accept completion of the Minimal MVP M6-A Langfuse telemetry boundary on 2026-09-27.
+> I accept the repository-tracked implementation committed as `7cef6e54929a3bd5328bcb2ec8dcf0be2177e61c` with subject `feat(observability): implement M6-A telemetry boundary`.
+> I accept M6-E003 and the final disposable synthetic proof recorded in `/tmp/m6a-proof.vYDFZu`, with exit status `0`, mode `0600`, SHA-256 `ba77a1f079bff8e61253bb060ce3cc89f41fd94baaa6ff515c67ec14c6003cf8`, `62 passed` focused telemetry tests, `122 passed` worker regression tests, successful cleanup, and `m6a_proof=PASS`. I accept `focused_tests count=62=PASS` as semantically equivalent to `focused_tests=PASS count=62`.
+> I acknowledge the complete proof history: two environment/harness failures, one fail-closed redaction failure, and the final passing execution. These retained failures do not invalidate the corrected passing implementation or proof.
+> I accept the disabled-by-default telemetry configuration, zero default sampling, strict telemetry allowlist, HMAC pseudonymization, fail-closed redaction, fail-open delivery, fake in-memory collector, synthetic-only tests, worker-boundary-only scope, absence of live Langfuse integration, and ₹0 external spending.
+> This acceptance remains subject to D-31. It does not authorize Langfuse Cloud, self-hosted Langfuse, live credentials, external telemetry transmission, production telemetry, production sampling, paid services, production deployment, runtime instrumentation outside the approved worker boundary, or any change to Zippy, Paperclip, Odoo, payment, accounting, governance, or operational authority.
+> I authorize a documentation-only M6-E004 acceptance record for M6-A. M6-LANGFUSE must remain `IN_PROGRESS` until I separately approve its completion or the next milestone transition. No M7 implementation or production action is authorized by this acceptance.
+
+#### Enforceable Constraints
+
+- M6-A implementation and proof are owner-accepted as implemented in commit `7cef6e54929a3bd5328bcb2ec8dcf0be2177e61c`.
+- `M6-LANGFUSE` remains the sole `IN_PROGRESS` milestone task; no milestone transition occurred.
+- `M7-AGENTS` remains `BLOCKED`; no M7 implementation is authorized.
+- All D-31 prohibitions remain active: Langfuse Cloud, self-hosted Langfuse, live credentials, external telemetry transmission, production telemetry, paid services, production deployment, and runtime instrumentation outside the approved worker boundary.
+- This acceptance changed only the five authorized documents; no code, tests, proof scripts, dependencies, workflows, Docker files, production configuration, or retained proof logs were modified.
+- No test, proof, installation, deployment, live credential use, external telemetry transmission, or production action occurred during this acceptance.
+- External spending during and after M6-A acceptance remains ₹0.

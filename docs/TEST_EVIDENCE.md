@@ -1288,3 +1288,33 @@ These commands validate the documentation diff and working-tree inventory. They 
 | Owner acceptance | M6-E004 has **not** occurred |
 | Operator/automation | GitHub Copilot |
 | Notes | M6 remains the sole `IN_PROGRESS` tracker task. All telemetry is disabled by default. No runtime integration outside the worker boundary. Four harness executions are recorded: two environment-failure attempts (`/tmp/m6a-proof.8bUSLu`, `/tmp/m6a-proof.6oCaTS`), one redaction-failure attempt (`/tmp/m6a-proof.WA2h8l`), and one final passing execution (`/tmp/m6a-proof.vYDFZu`). The passing execution occurred after correcting the environment, harness, and fail-closed redaction behavior. |
+
+### M6-E004: M6-A Owner Acceptance
+
+| Field | Value |
+|---|---|
+| Evidence ID | M6-E004 |
+| Date | 2026-09-27 |
+| Owner | Gopinathan |
+| Roles | product owner and observability owner |
+| Controlling decisions | D-31 (`docs/DECISIONS.md`); D-32 (`docs/DECISIONS.md`) |
+| Accepted implementation commit | `7cef6e54929a3bd5328bcb2ec8dcf0be2177e61c` (`feat(observability): implement M6-A telemetry boundary`) |
+| Accepted implementation evidence | M6-E003 |
+| Final proof log | `/tmp/m6a-proof.vYDFZu` |
+| Final proof SHA-256 | `ba77a1f079bff8e61253bb060ce3cc89f41fd94baaa6ff515c67ec14c6003cf8` |
+| Focused telemetry tests | `62 passed` |
+| Worker regression tests | `122 passed` |
+| Final marker | `m6a_proof=PASS` |
+| Proof history | Four attempts retained and disclosed: `/tmp/m6a-proof.8bUSLu` (environment/harness failure), `/tmp/m6a-proof.6oCaTS` (environment/harness failure), `/tmp/m6a-proof.WA2h8l` (fail-closed redaction failure), `/tmp/m6a-proof.vYDFZu` (passing) |
+| Accepted marker equivalence | `focused_tests count=62=PASS` accepted as semantically equivalent to `focused_tests=PASS count=62` because the proof log contains the pytest summary `62 passed` |
+| M6-A status | Accepted |
+| M6 milestone status | Remains `IN_PROGRESS` |
+| M7 status | Remains `BLOCKED` |
+| Production/live telemetry | Unauthorized and prohibited |
+| External spending | ₹0 |
+| Files changed for acceptance | `docs/DECISIONS.md`; `docs/EXECUTION_TRACKER.md`; `docs/HEARTBEAT.md`; `docs/TEST_EVIDENCE.md`; `docs/reports/M6_LANGFUSE_IMPLEMENTATION_REPORT.md` |
+| Code/test/proof/dependency changes | None occurred |
+| Runtime/deployment/credential/external-telemetry action | None occurred |
+| Evidence location | `docs/DECISIONS.md` (D-32), `docs/EXECUTION_TRACKER.md`, `docs/HEARTBEAT.md`, this record, `docs/reports/M6_LANGFUSE_IMPLEMENTATION_REPORT.md` |
+| Operator/automation | GitHub Copilot |
+| Notes | Documentation-only owner acceptance per D-32. Acceptance relies on M6-E003, the retained disposable proof `/tmp/m6a-proof.vYDFZu`, and the reviewed pre-commit audit. No GitHub CI checks are claimed. No code, runtime, deployment, credential, infrastructure, or external telemetry action occurred during acceptance. |

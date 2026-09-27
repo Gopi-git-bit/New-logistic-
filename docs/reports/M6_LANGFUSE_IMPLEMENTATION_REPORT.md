@@ -2,7 +2,7 @@
 
 ## Status
 
-`PRE-COMMIT AUDIT PASSED — IMPLEMENTATION COMMIT PENDING`
+`ACCEPTED — M6-A COMPLETE; M6 MILESTONE REMAINS IN_PROGRESS`
 
 The final harness execution exited `0` and emitted `m6a_proof=PASS`. The harness marker `focused_tests count=62=PASS` is accepted under D-31 as semantically equivalent to `focused_tests=PASS count=62` because the same log contains the pytest summary `62 passed`. The marker-format interpretation was applied without modifying the harness or rerunning the proof. All repository-quality gates passed. No production, live telemetry, or deployment is authorized.
 
@@ -145,6 +145,28 @@ The following remain deferred and require separate owner approval:
 - Live emitters and production credentials
 - Production deployment and integration
 
+## Owner acceptance
+
+M6-A was owner-accepted on 2026-09-27 by Gopinathan under D-32 and recorded as M6-E004.
+
+| Field | Value |
+|---|---|
+| Acceptance decision | D-32 (`docs/DECISIONS.md`) |
+| Acceptance evidence | M6-E004 (`docs/TEST_EVIDENCE.md`) |
+| Accepted implementation commit | `7cef6e54929a3bd5328bcb2ec8dcf0be2177e61c` (`feat(observability): implement M6-A telemetry boundary`) |
+| Accepted proof log | `/tmp/m6a-proof.vYDFZu` |
+| Accepted proof SHA-256 | `ba77a1f079bff8e61253bb060ce3cc89f41fd94baaa6ff515c67ec14c6003cf8` |
+| Accepted proof result | Exit status `0`; `62 passed` focused telemetry tests; `122 passed` worker regression tests; `m6a_proof=PASS` |
+| Marker equivalence | `focused_tests count=62=PASS` accepted as semantically equivalent to `focused_tests=PASS count=62` because the log contains the pytest summary `62 passed` |
+| Complete proof history | Four attempts retained and disclosed: two environment/harness failures, one fail-closed redaction failure, and one final passing execution |
+| M6 milestone status | Remains `IN_PROGRESS` |
+| M7 status | Remains `BLOCKED` |
+| D-31 prohibitions | Remain active: Langfuse Cloud, self-hosted Langfuse, live credentials, external telemetry transmission, production telemetry, production sampling, paid services, production deployment |
+| External spending | ₹0 |
+| Acceptance changes | Documentation-only; changed only `docs/DECISIONS.md`, `docs/EXECUTION_TRACKER.md`, `docs/HEARTBEAT.md`, `docs/TEST_EVIDENCE.md`, and `docs/reports/M6_LANGFUSE_IMPLEMENTATION_REPORT.md` |
+
+No code, test, proof script, dependency, workflow, Docker file, production configuration, retained proof log, runtime action, deployment, live credential, external telemetry transmission, or M7 implementation occurred during acceptance.
+
 ## Evidence reference
 
-M6-E003 records this implementation and proof in `docs/TEST_EVIDENCE.md`. Owner acceptance (M6-E004) has **not** occurred. M6 remains the sole `IN_PROGRESS` tracker task.
+M6-E003 records this implementation and proof in `docs/TEST_EVIDENCE.md`. M6-E004 records the owner acceptance. M6 remains the sole `IN_PROGRESS` tracker task; M7-AGENTS remains `BLOCKED`.
