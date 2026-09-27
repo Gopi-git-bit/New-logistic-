@@ -1189,3 +1189,32 @@ These commands validate the documentation diff and working-tree inventory. They 
 | Evidence location | `docs/DECISIONS.md` (D-30), `docs/EXECUTION_TRACKER.md`, `docs/HEARTBEAT.md`, this record |
 | Operator/automation | GitHub Copilot |
 | Notes | Documentation-only owner acceptance and milestone handoff. No code, migration, dependency, service, container, credential, or `/opt/paperclip` change occurred. Any contradictory M6-complete claim in historical files is superseded by this record and the current tracker/heartbeat. |
+
+### M6-E001: Langfuse Discovery and Boundary Review
+
+| Field | Value |
+|---|---|
+| Evidence ID | M6-E001 |
+| Date | 2026-09-27 |
+| Baseline commit | `d2b3e837e66f6995379aac3333d5130ce618d59e` (`docs: accept M5 and begin M6 discovery`) |
+| Author | `Gopinathan <gopinathdisp@gmail.com>` |
+| Scope | M6-LANGFUSE discovery and boundary definition only |
+| Commands used | `git status --short`; `git rev-parse HEAD`; `git rev-parse origin/master`; `git ls-remote origin master`; `git log -1 --pretty=%s`; `git config user.name`; `git config user.email`; `grep -c "D-30" docs/DECISIONS.md`; `grep -c "^### M5-E012" docs/TEST_EVIDENCE.md`; `grep` of `M5-PAPERCLIP`/`M6-LANGFUSE` in `docs/EXECUTION_TRACKER.md`; `grep -R "if: \${{ false }}" .github/workflows/`; `ls -la /opt/paperclip`; `find . -type f`; `grep -RI` inventories for `langfuse`, `telemetry`, `trace`, `span`, `observation`, `prompt`, `completion`, `token`, `cost`, `opentelemetry`, `otel`, `sentry`, `prometheus`, `grafana`, `logging`, `logger`, `loguru`, `redact`; read-only file reads of listed controlling documents and source files. |
+| External sources | Official Langfuse documentation pages retrieved read-only: `https://langfuse.com/docs`, `https://langfuse.com/self-hosting`, `https://langfuse.com/self-hosting/deployment/docker-compose`, `https://langfuse.com/docs/observability/features/masking`, `https://langfuse.com/docs/administration/data-retention`, `https://langfuse.com/docs/data-security-privacy`. |
+| Exit code | N/A (read-only discovery) |
+| Result | DISCOVERY COMPLETE — OWNER BOUNDARY APPROVAL REQUIRED |
+| Files created | `docs/reports/M6_LANGFUSE_DISCOVERY_REVIEW.md` |
+| Files updated | `docs/TEST_EVIDENCE.md` (this record) |
+| Implementation | None occurred |
+| Dependency installation | None occurred |
+| Credential configuration | None occurred |
+| Container start | None occurred |
+| Telemetry export | None occurred |
+| External request (beyond read-only doc fetch) | None occurred |
+| Deployment / staging | None occurred |
+| Commit / push | None occurred |
+| `/opt/paperclip` modification | None occurred |
+| Tracker / HEARTBEAT modification | None occurred |
+| Evidence location | `docs/reports/M6_LANGFUSE_DISCOVERY_REVIEW.md`, this record |
+| Operator/automation | GitHub Copilot |
+| Notes | Read-only discovery and boundary review per D-30. No code, migration, dependency, service, container, credential, live telemetry, or `/opt/paperclip` change occurred. The existing minimal `workers/src/zippy_workers/tracing.py` fail-open span emitter was inspected but not modified. All prospective implementation decisions remain pending owner approval. |
