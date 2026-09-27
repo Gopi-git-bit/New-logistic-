@@ -35,7 +35,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install fastapi pydantic pydantic-settings httpx pytest pyjwt
+      - run: pip install fastapi pydantic pydantic-settings httpx pytest pyjwt psycopg[binary,pool]==3.3.5
       - name: Run API security tests
         env:
           DATABASE_URL: postgresql://localhost/test
