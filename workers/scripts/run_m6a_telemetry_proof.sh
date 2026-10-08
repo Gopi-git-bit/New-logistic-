@@ -300,10 +300,7 @@ PROHIBITED_FOUND=0
 if grep -R -hE '\b(sk_live|pk_live|rzp_live|whsec_|eyJ[A-Za-z0-9_-]*\.eyJ|AIza[0-9A-Za-z_-]{35}|ghp_[A-Za-z0-9]{36}|xox[baprs]-[0-9a-zA-Z]{10,})\b' \
     "${REPO_ROOT}/workers/src/zippy_workers/telemetry_"*.py \
     "${REPO_ROOT}/workers/tests/test_m6_telemetry.py" 2>/dev/null | grep -vE 'HIGH_ENTROPY_SECRET|re\.compile|test_.*secret' >"${TMPDIR}/prohibited_scan.txt"; then
-    # Allow synthetic test values used to verify redaction.
-    if grep -vE 'pk_live_abc123def456ghi789jkl012mno345|sk_live_abc123def456' "${TMPDIR}/prohibited_scan.txt" >/dev/null 2>&1; then
-        PROHIBITED_FOUND=1
-    fi
+    PROHIBITED_FOUND=1
 fi
 
 if [[ "$PROHIBITED_FOUND" -eq 0 ]]; then
