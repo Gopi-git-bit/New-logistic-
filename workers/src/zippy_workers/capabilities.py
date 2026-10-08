@@ -17,7 +17,7 @@ class UnauthorizedCapability(Exception):
 class Capability:
     read: frozenset[str]
     write: frozenset[str]
-    external: frozenset[str]          # e.g. {"mapbox", "razorpay", "odoo"}
+    external: frozenset[str]          # e.g. {"mapbox", "razorpay"}
     financial: bool = False           # may move money / alter ledgers
     forbidden: tuple[str, ...] = field(default_factory=tuple)  # hard denials
 
@@ -32,7 +32,7 @@ _MATRIX: dict[str, Capability] = {
     "order_management": Capability(
         read=frozenset({"orders", "vehicles", "drivers", "companies", "pricing"}),
         write=frozenset({"orders", "order_events", "quotes"}),
-        external=frozenset({"mapbox", "odoo"}),
+        external=frozenset({"mapbox"}),
         forbidden=("payments_capture",),
     ),
     "transportation": Capability(
@@ -44,7 +44,7 @@ _MATRIX: dict[str, Capability] = {
     "resource_management": Capability(
         read=frozenset({"vehicles", "drivers", "companies", "orders"}),
         write=frozenset({"vehicle_status", "driver_status", "assignments"}),
-        external=frozenset({"odoo"}),
+        external=frozenset(),
         forbidden=("payments_any",),
     ),
     "payment_settlement": Capability(

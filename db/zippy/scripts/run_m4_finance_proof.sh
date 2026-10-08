@@ -193,6 +193,6 @@ trap - EXIT
 [[ -z "$(docker volume ls --format '{{.Name}}' | grep -Fx "$volume" || true)" ]]
 [[ "$(ss -lntH | awk '{print $4}' | grep -Ec '(^|:)(5432)$' || true)" == 0 ]]
 
-printf 'm4_unit_contracts=PASS\nm4_webhook_ingress=PASS\nm4_idempotency=PASS\nm4_authorization=PASS\nm4_pod_settlement_gate=PASS\nm4_manual_refund=PASS\nm4_odoo_draft_only=PASS\nm4_reconciliation=PASS\nm3_regression=PASS\nnetwork_isolation=PASS\ncleanup=PASS\nsocket_hardening=PASS\nsocket_dir_mode=%s\nsocket_file_mode=%s\npassword_encryption=%s\npg_hba_local_auth=%s\nnegative_local_user=%s\nresource_container=%s\nresource_volume=%s\nresource_socket=%s\npostgres_version=%s\nimage=%s\n' \
+printf 'm4_unit_contracts=PASS\nm4_webhook_ingress=PASS\nm4_idempotency=PASS\nm4_authorization=PASS\nm4_pod_settlement_gate=PASS\nm4_manual_refund=PASS\nm6r1_odoo_unavailable=PASS\nm4_reconciliation=PASS\nm3_regression=PASS\nnetwork_isolation=PASS\ncleanup=PASS\nsocket_hardening=PASS\nsocket_dir_mode=%s\nsocket_file_mode=%s\npassword_encryption=%s\npg_hba_local_auth=%s\nnegative_local_user=%s\nresource_container=%s\nresource_volume=%s\nresource_socket=%s\npostgres_version=%s\nimage=%s\n' \
     "$socket_dir_mode" "$socket_file_mode" "$password_encryption" "$pg_hba_local_auth" \
     "$negative_local_user" "$container" "$volume" "$socket_dir" "$version" "$image"

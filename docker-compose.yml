@@ -37,6 +37,8 @@ services:
       - zippy
 
   odoo:
+    profiles:
+      - legacy-odoo
     image: odoo:18.0
     container_name: zippy-odoo
     environment:
@@ -81,11 +83,6 @@ services:
       - RAZORPAY_KEY_ID=${RAZORPAY_KEY_ID}
       - RAZORPAY_KEY_SECRET=${RAZORPAY_KEY_SECRET}
       - RAZORPAY_WEBHOOK_SECRET=${RAZORPAY_WEBHOOK_SECRET}
-      # Odoo
-      - ODOO_URL=${ODOO_URL:-http://odoo:8069}
-      - ODOO_DB=${ODOO_DB:-odoo18}
-      - ODOO_USER=${ODOO_USER:-zippy-integration}
-      - ODOO_API_KEY=${ODOO_API_KEY}
       # Paperclip
       - PAPERCLIP_URL=${PAPERCLIP_URL}
       - PAPERCLIP_API_KEY=${PAPERCLIP_API_KEY}
@@ -134,11 +131,6 @@ services:
       - RAZORPAY_KEY_ID=${RAZORPAY_KEY_ID}
       - RAZORPAY_KEY_SECRET=${RAZORPAY_KEY_SECRET}
       - RAZORPAY_WEBHOOK_SECRET=${RAZORPAY_WEBHOOK_SECRET}
-      # Odoo
-      - ODOO_URL=${ODOO_URL:-http://odoo:8069}
-      - ODOO_DB=${ODOO_DB:-odoo18}
-      - ODOO_USER=${ODOO_USER:-zippy-integration}
-      - ODOO_API_KEY=${ODOO_API_KEY}
       # Paperclip
       - PAPERCLIP_URL=${PAPERCLIP_URL}
       - PAPERCLIP_API_KEY=${PAPERCLIP_API_KEY}

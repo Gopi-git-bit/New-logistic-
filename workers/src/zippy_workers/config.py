@@ -28,12 +28,6 @@ class WorkerSettings(BaseSettings):
     supabase_url: str | None = None
     supabase_service_role_key: str | None = None
 
-    # Odoo 18 CE system of record
-    odoo_url: str | None = None
-    odoo_db: str = "odoo18"
-    odoo_user: str = "admin"
-    odoo_api_key: str | None = None
-
 
 def get_settings() -> "WorkerSettings":
     return WorkerSettings()  # cached by caller if hot-path profiling matters later

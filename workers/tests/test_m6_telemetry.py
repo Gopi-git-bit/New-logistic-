@@ -450,9 +450,11 @@ class TestFailClosed:
         adapter = TelemetryAdapter(enabled=True, sampling_rate=1.0, sink=sink, pepper="p")
         result = {"status": "ok"}
         with adapter.trace("op") as t:
-            with t.span("s", metadata={"api_key": "sk_live_abc123def456"}):
+            with t.span("s", metadata={"api_key": "synthetic-sensitive-metadata"}):
                 pass
         assert result["status"] == "ok"
+        assert sink.count == 0
+        assert adapter.dropped_redaction == 1
 
 
 class TestSecretScan:

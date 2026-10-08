@@ -27,9 +27,9 @@ from psycopg.rows import dict_row
 from api.config import Settings
 from api.database import Database
 from api.main import create_app
-from api.odoo import OdooDraftAdapter
 from api.repositories import ConflictError
 from api.repositories_finance import FinanceRepository
+from api.tests.test_api import StubPaperclipDatabase
 from api.tests_m4.conftest import (
     ADMIN,
     ADMIN2,
@@ -84,7 +84,8 @@ def create_client(settings: Settings):
     database = Database(settings.database_url)
     try:
         with TestClient(
-            create_app(settings, database), raise_server_exceptions=False
+            create_app(settings, database, paperclip_database=StubPaperclipDatabase()),
+            raise_server_exceptions=False,
         ) as client:
             yield client
     finally:
@@ -193,7 +194,7 @@ class RecordingTransport:
 # ------------------------------------------------------------------ webhook
 
 
-def test_captured_webhook_projects_and_enqueues(settings: Settings):
+def test_captured_webhook_preserves_request_without_odoo_task(settings: Settings):
     merged = _merged(settings)
     prepare_payment_intent(merged.database_url, ORDER_A, PROVIDER_REF_A, INTENT_AMOUNT_A)
     event_id = f"evt_{uuid4().hex[:12]}"
@@ -215,7 +216,22 @@ def test_captured_webhook_projects_and_enqueues(settings: Settings):
     assert counts["events"] == 1
     assert counts["projections"] == 1
     assert counts["requests"] == 1
-    assert counts["odoo_tasks"] == 1
+    assert counts["odoo_tasks"] == 0
+
+    request = _query(
+        "SELECT status, financial_request_id FROM zippy.financial_requests WHERE order_id = %s",
+        (ORDER_A,),
+    )[0]
+    assert request["status"] == "requested"
+    assert _query(
+        "SELECT count(*) AS n FROM zippy.external_references WHERE local_entity_id = %s",
+        (request["financial_request_id"],),
+    )[0]["n"] == 0
+
+    with create_client(merged) as client:
+        duplicate = _post_webhook(client, raw, _sign(raw))
+    assert duplicate.json()["duplicate"] is True
+    assert _counts(ORDER_A) == counts
 
     projection = _query(
         "SELECT operational_status, amount, currency_code FROM zippy.payment_projections WHERE order_id = %s",
@@ -779,74 +795,53 @@ def test_authorization_boundaries(settings: Settings):
 # ------------------------------------------------------------------ workers
 
 
-def test_odoo_draft_sync_success_failure_and_single_claim(settings: Settings):
+def test_existing_odoo_task_retries_and_dead_letters_without_execution(settings: Settings):
     merged = _merged(settings)
-    prepare_payment_intent(merged.database_url, ORDER_A, PROVIDER_REF_A, INTENT_AMOUNT_A)
     prepare_payment_intent(merged.database_url, ORDER_B, PROVIDER_REF_B, INTENT_AMOUNT_B)
     with create_client(merged) as client:
         raw = _payment_body(
-            "payment.captured", f"evt_{uuid4().hex[:12]}", PROVIDER_REF_A, payment_id="pay_syn_odoo"
+            "payment.captured", f"evt_{uuid4().hex[:12]}", PROVIDER_REF_B,
+            amount_minor=INTENT_AMOUNT_B, payment_id="pay_syn_retired_odoo",
         )
         response = _post_webhook(client, raw, _sign(raw))
         assert response.json()["outcome"] == "projected"
 
+    request_id = _query(
+        "SELECT financial_request_id FROM zippy.financial_requests WHERE order_id = %s",
+        (ORDER_B,),
+    )[0]["financial_request_id"]
+    task_id = uuid4()
+    _execute(
+        """
+        INSERT INTO zippy.durable_tasks (
+            durable_task_id, platform_id, task_type, aggregate_type, aggregate_id,
+            payload_reference, idempotency_key, max_attempts, correlation_id
+        ) VALUES (%s, %s, 'odoo_draft_sync', 'financial_request', %s, %s, %s, 3, %s)
+        """,
+        (task_id, PLATFORM_ID, request_id, f"financial_request:{request_id}",
+         f"synthetic-legacy-odoo:{task_id}", uuid4()),
+    )
     worker_database = Database(merged.database_url)
     worker_database.open()
     try:
         transport = RecordingTransport()
-        adapter = OdooDraftAdapter(transport)
         worker = FinanceWorker(worker_database, merged)
-        handled = worker.run_tasks(
-            "m4-odoo-worker", "odoo_draft_sync", odoo_draft_sync_handler(worker_database, merged, adapter)
-        )
-        assert handled == 1
-        called_methods = {method for _, method in transport.calls}
-        assert called_methods <= {"search", "create"}
-        assert ("res.partner", "search") in transport.calls
-        assert ("account.move", "create") in transport.calls
-        assert not {"action_post", "action_register_payment", "write", "unlink"} & called_methods
-
-        references = _query(
-            """
-            SELECT external_model, sync_status FROM zippy.external_references
-             WHERE external_system = 'odoo' ORDER BY external_model
-            """
-        )
-        assert [(r["external_model"], r["sync_status"]) for r in references] == [
-            ("account.move", "synchronized"),
-            ("res.partner", "synchronized"),
-        ]
-        request = _query(
-            "SELECT status FROM zippy.financial_requests WHERE request_type = 'draft_customer_invoice' AND order_id = %s",
-            (str(ORDER_A),),
-        )[0]
-        assert request["status"] == "acknowledged"
-
-        # a second worker run finds no work; no duplicate external effects
-        again = worker.run_tasks(
-            "m4-odoo-worker-2", "odoo_draft_sync", odoo_draft_sync_handler(worker_database, merged, adapter)
-        )
-        assert again == 0
-        moves = _query(
-            "SELECT count(*) AS n FROM zippy.external_references WHERE external_model = 'account.move'"
-        )[0]
-        assert moves["n"] == 1
-
-        # failure path: dead-letter without accounting mutation
-        with create_client(merged) as client:
-            raw = _payment_body(
-                "payment.captured", f"evt_{uuid4().hex[:12]}", PROVIDER_REF_B,
-                amount_minor=INTENT_AMOUNT_B, payment_id="pay_syn_fail",
-            )
-            response = _post_webhook(client, raw, _sign(raw))
-            assert response.json()["outcome"] == "projected"
-
-        failing = OdooDraftAdapter(RecordingTransport(fail=True))
-        for _ in range(3):
-            worker.run_tasks(
+        for attempt in range(1, 4):
+            assert worker.run_tasks(
                 "m4-odoo-worker", "odoo_draft_sync",
-                odoo_draft_sync_handler(worker_database, merged, failing),
-            )
+                odoo_draft_sync_handler(worker_database, merged, transport),
+            ) == 1
+            task = _query(
+                "SELECT status, attempt_count FROM zippy.durable_tasks WHERE durable_task_id = %s",
+                (task_id,),
+            )[0]
+            assert task["attempt_count"] == attempt
+            assert task["status"] != "succeeded"
+        assert not transport.calls
+        assert worker.run_tasks(
+            "m4-odoo-worker", "odoo_draft_sync",
+            odoo_draft_sync_handler(worker_database, merged),
+        ) == 0
         task = _query(
             """
             SELECT status, attempt_count FROM zippy.durable_tasks
