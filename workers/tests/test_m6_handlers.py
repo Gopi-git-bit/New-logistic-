@@ -141,6 +141,55 @@ def test_empty_shortlist_never_calls_agent():
     assert not agent.requests
 
 
+@pytest.mark.parametrize("late_error", [None, RuntimeError("late adapter failure")])
+def test_timeout_fallback_does_not_wait_for_suppressed_cancellation(late_error):
+    async def scenario():
+        cancellation_seen = asyncio.Event()
+        release_cleanup = asyncio.Event()
+        finished = asyncio.Event()
+        errors = []
+        asyncio.get_running_loop().set_exception_handler(
+            lambda loop, context: errors.append(context)
+        )
+
+        class SlowCancellationAgent:
+            async def rank(self, request):
+                try:
+                    await asyncio.Future()
+                except asyncio.CancelledError:
+                    cancellation_seen.set()
+                    await release_cleanup.wait()
+                    if late_error is not None:
+                        raise late_error from None
+                    return {"candidate_ids": ["candidate-1", "candidate-0"]}
+                finally:
+                    finished.set()
+
+        db = FakeM6Db()
+        db.driver_matches = [{"user_id": "driver-1"}, {"user_id": "driver-2"}]
+        before = deepcopy(vars(db))
+        try:
+            result = await asyncio.wait_for(
+                recommend_drivers(
+                    db.driver_matches, SlowCancellationAgent(), timeout_seconds=0.001
+                ),
+                timeout=0.2,
+            )
+            assert result.reason_code == "AGENT_TIMEOUT"
+            assert result.source == "deterministic"
+            assert result.candidate_ids == ("candidate-0", "candidate-1")
+            await asyncio.wait_for(cancellation_seen.wait(), timeout=0.2)
+            assert not finished.is_set()
+        finally:
+            release_cleanup.set()
+        await asyncio.wait_for(finished.wait(), timeout=0.2)
+        assert result.source == "deterministic"
+        assert vars(db) == before
+        assert not errors
+
+    asyncio.run(scenario())
+
+
 def test_recommendation_cannot_override_autonomous_assignment():
     db = FakeM6Db()
     db.orders["order-1"] = {"pickup_location": "SRID=4326;POINT(72.835 18.939)"}

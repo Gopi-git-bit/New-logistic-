@@ -53,6 +53,11 @@ def _finite_feature(value: Any) -> float | None:
     return numeric if math.isfinite(numeric) else None
 
 
+def _consume_agent_outcome(task: asyncio.Task[object]) -> None:
+    if not task.cancelled():
+        task.exception()
+
+
 async def recommend_drivers(
     candidates: Sequence[Mapping[str, Any]],
     agent: RecommendationAgent | None,
@@ -63,7 +68,8 @@ async def recommend_drivers(
 
     Candidate IDs are opaque positions scoped to this request, not provider or
     driver identities. Original shortlist order is the deterministic fallback.
-    Adapters must use cancellable async I/O and enforce their transport timeout.
+    The deadline commits to fallback without awaiting cancellation cleanup.
+    Adapters must use async I/O and bound their cleanup and transport timeouts.
     """
     if not math.isfinite(timeout_seconds) or timeout_seconds <= 0:
         raise ValueError("timeout_seconds must be finite and positive")
@@ -82,14 +88,27 @@ async def recommend_drivers(
         return RecommendationResult(fallback, "deterministic", "NO_CANDIDATES")
     if agent is None:
         return RecommendationResult(fallback, "deterministic", "AGENT_UNAVAILABLE")
+    loop = asyncio.get_running_loop()
+    deadline = loop.time() + timeout_seconds
+    task: asyncio.Task[object] | None = None
     try:
-        output = await asyncio.wait_for(agent.rank(request), timeout=timeout_seconds)
+        task = asyncio.create_task(agent.rank(request))
+        task.add_done_callback(_consume_agent_outcome)
+        completed, _ = await asyncio.wait({task}, timeout=timeout_seconds)
+        if not completed or loop.time() >= deadline:
+            return RecommendationResult(fallback, "deterministic", "AGENT_TIMEOUT")
+        if task.cancelled():
+            return RecommendationResult(fallback, "deterministic", "AGENT_FAILURE")
+        output = task.result()
     except TimeoutError:
         return RecommendationResult(fallback, "deterministic", "AGENT_TIMEOUT")
     except OSError:
         return RecommendationResult(fallback, "deterministic", "AGENT_UNAVAILABLE")
     except Exception:  # noqa: BLE001 - an advisory failure cannot affect business state
         return RecommendationResult(fallback, "deterministic", "AGENT_FAILURE")
+    finally:
+        if task is not None and not task.done():
+            task.cancel()
     try:
         ranking = AgentRanking.model_validate(output)
     except ValidationError:
