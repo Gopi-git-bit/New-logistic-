@@ -1,6 +1,208 @@
 """M6 handler tests — order lifecycle (place_order, assign_driver, update_delivery_status)."""
 
+import asyncio
+from copy import deepcopy
+from dataclasses import FrozenInstanceError, asdict
+
+import pytest
+
 from zippy_workers.handlers import assign_driver, place_order, update_delivery_status
+from zippy_workers.recommendations import AgentRanking, recommend_drivers
+
+
+class FakeRecommendationAgent:
+    def __init__(self, output=None, error=None):
+        self.output = output
+        self.error = error
+        self.requests = []
+
+    async def rank(self, request):
+        self.requests.append(request)
+        if self.error:
+            raise self.error
+        return self.output
+
+
+def test_valid_recommendation_is_read_only_and_minimized():
+    db = FakeM6Db()
+    db.driver_matches = [
+        {"user_id": "vendor-driver-1", "driver_name": "Private Name", "distance_m": 10, "score": 9},
+        {"user_id": "vendor-driver-2", "distance_m": 20, "score": 8},
+    ]
+    before = deepcopy(vars(db))
+    agent = FakeRecommendationAgent({"candidate_ids": ["candidate-1", "candidate-0"]})
+    result = asyncio.run(recommend_drivers(db.driver_matches, agent, timeout_seconds=1))
+    assert result.source == "agent"
+    assert result.reason_code == "RECOMMENDED"
+    assert result.candidate_ids == ("candidate-1", "candidate-0")
+    assert vars(db) == before
+    assert asdict(agent.requests[0]) == {
+        "candidates": (
+            {"candidate_id": "candidate-0", "distance_m": 10.0, "score": 9.0},
+            {"candidate_id": "candidate-1", "distance_m": 20.0, "score": 8.0},
+        )
+    }
+    with pytest.raises(FrozenInstanceError):
+        agent.requests[0].candidates[0].score = 100
+
+
+@pytest.mark.parametrize(
+    "output",
+    [
+        None,
+        "not structured output",
+        AgentRanking.model_construct(candidate_ids=[["candidate-0"], "candidate-1"]),
+        {"candidate_ids": ["candidate-0", "candidate-0"]},
+        {"candidate_ids": ["candidate-0"]},
+        {"candidate_ids": ["candidate-0", "invented-driver"]},
+        {"candidate_ids": [0, 1]},
+        {"candidate_ids": ["candidate-0", "candidate-1"], "assign_driver": True},
+        {"candidate_ids": ["candidate-0", "candidate-1"], "refund_approved": True},
+        {"candidate_ids": ["candidate-0", "candidate-1"], "settlement_status": "released"},
+    ],
+)
+def test_malformed_or_mutating_output_uses_deterministic_fallback(output):
+    db = FakeM6Db()
+    db.driver_matches = [{"user_id": "driver-1"}, {"user_id": "driver-2"}]
+    before = deepcopy(vars(db))
+    result = asyncio.run(
+        recommend_drivers(
+            db.driver_matches,
+            FakeRecommendationAgent(output),
+            timeout_seconds=1,
+        )
+    )
+    assert result.source == "deterministic"
+    assert result.reason_code == "MALFORMED_OUTPUT"
+    assert result.candidate_ids == ("candidate-0", "candidate-1")
+    assert vars(db) == before
+
+
+@pytest.mark.parametrize(
+    "agent,reason",
+    [
+        (None, "AGENT_UNAVAILABLE"),
+        (FakeRecommendationAgent(error=ConnectionError("unavailable")), "AGENT_UNAVAILABLE"),
+        (FakeRecommendationAgent(error=RuntimeError("failure")), "AGENT_FAILURE"),
+    ],
+)
+def test_unavailable_agent_preserves_shortlist(agent, reason):
+    result = asyncio.run(recommend_drivers([{}, {}], agent, timeout_seconds=1))
+    assert result.source == "deterministic"
+    assert result.reason_code == reason
+    assert result.candidate_ids == ("candidate-0", "candidate-1")
+
+
+@pytest.mark.parametrize(
+    "agent,source,reason",
+    [
+        (None, "deterministic", "AGENT_UNAVAILABLE"),
+        (FakeRecommendationAgent({"candidate_ids": ["candidate-0"]}), "agent", "RECOMMENDED"),
+    ],
+)
+def test_oversized_features_do_not_interrupt_recommendations(agent, source, reason):
+    db = FakeM6Db()
+    db.driver_matches = [{"distance_m": 10**1000, "score": -(10**1000)}]
+    before = deepcopy(vars(db))
+    result = asyncio.run(recommend_drivers(db.driver_matches, agent, timeout_seconds=1))
+    assert result.source == source
+    assert result.reason_code == reason
+    assert result.candidate_ids == ("candidate-0",)
+    assert vars(db) == before
+    if agent is not None:
+        assert asdict(agent.requests[0]) == {
+            "candidates": ({"candidate_id": "candidate-0", "distance_m": None, "score": None},)
+        }
+
+
+def test_agent_timeout_cancels_adapter_and_uses_deterministic_fallback():
+    class HangingAgent:
+        cancelled = False
+
+        async def rank(self, request):
+            try:
+                await asyncio.Future()
+            finally:
+                self.cancelled = True
+
+    agent = HangingAgent()
+    result = asyncio.run(recommend_drivers([{}, {}], agent, timeout_seconds=0.001))
+    assert agent.cancelled
+    assert result.reason_code == "AGENT_TIMEOUT"
+    assert result.source == "deterministic"
+    assert result.candidate_ids == ("candidate-0", "candidate-1")
+
+
+def test_empty_shortlist_never_calls_agent():
+    agent = FakeRecommendationAgent(error=AssertionError("must not be called"))
+    result = asyncio.run(recommend_drivers([], agent, timeout_seconds=1))
+    assert result.reason_code == "NO_CANDIDATES"
+    assert result.candidate_ids == ()
+    assert not agent.requests
+
+
+@pytest.mark.parametrize("late_error", [None, RuntimeError("late adapter failure")])
+def test_timeout_fallback_does_not_wait_for_suppressed_cancellation(late_error):
+    async def scenario():
+        cancellation_seen = asyncio.Event()
+        release_cleanup = asyncio.Event()
+        finished = asyncio.Event()
+        errors = []
+        asyncio.get_running_loop().set_exception_handler(
+            lambda loop, context: errors.append(context)
+        )
+
+        class SlowCancellationAgent:
+            async def rank(self, request):
+                try:
+                    await asyncio.Future()
+                except asyncio.CancelledError:
+                    cancellation_seen.set()
+                    await release_cleanup.wait()
+                    if late_error is not None:
+                        raise late_error from None
+                    return {"candidate_ids": ["candidate-1", "candidate-0"]}
+                finally:
+                    finished.set()
+
+        db = FakeM6Db()
+        db.driver_matches = [{"user_id": "driver-1"}, {"user_id": "driver-2"}]
+        before = deepcopy(vars(db))
+        try:
+            result = await asyncio.wait_for(
+                recommend_drivers(
+                    db.driver_matches, SlowCancellationAgent(), timeout_seconds=0.001
+                ),
+                timeout=0.2,
+            )
+            assert result.reason_code == "AGENT_TIMEOUT"
+            assert result.source == "deterministic"
+            assert result.candidate_ids == ("candidate-0", "candidate-1")
+            await asyncio.wait_for(cancellation_seen.wait(), timeout=0.2)
+            assert not finished.is_set()
+        finally:
+            release_cleanup.set()
+        await asyncio.wait_for(finished.wait(), timeout=0.2)
+        assert result.source == "deterministic"
+        assert vars(db) == before
+        assert not errors
+
+    asyncio.run(scenario())
+
+
+def test_recommendation_cannot_override_autonomous_assignment():
+    db = FakeM6Db()
+    db.orders["order-1"] = {"pickup_location": "SRID=4326;POINT(72.835 18.939)"}
+    db.driver_matches = [{"user_id": "driver-1"}, {"user_id": "driver-2"}]
+    agent = FakeRecommendationAgent({"candidate_ids": ["candidate-1", "candidate-0"]})
+    recommendation = asyncio.run(recommend_drivers(db.driver_matches, agent, timeout_seconds=1))
+    assert recommendation.candidate_ids[0] == "candidate-1"
+    assert not db.assignments and not db.transitions and not db.payment_validations and not db.tasks
+    result = assign_driver({"order_id": "order-1"}, db)
+    assert result.ok
+    assert db.assignments == [("order-1", "driver-1", "driver")]
+    assert db.transitions == [("order-1", "driver_assigned")]
+
 
 # ---------------------------------------------------------------------------
 # Fake Db extensions for M6

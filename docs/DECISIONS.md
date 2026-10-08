@@ -33,6 +33,24 @@
 | R5 | Permit verification API | Vahan API, SERPAPI, custom | National permit scope TBD |
 | R9 | Honcho deployment | Self-hosted vs managed | Self-hosted for control |
 
+## Bounded Development Authorizations
+
+### D-34: M7-A Provider-Neutral Recommendations Development Only
+
+**Status:** Owner-authorized development and tests only, 2026-10-08, by the current user instruction: "I authorize development and tests for agent recommendations only."
+
+This permits a limited M7-A development exception on `feat/m7-a-recommendation-contract`, in an isolated worktree based on `origin/master` at `3245cee5c9c872244c37f5c1ae7ad0f2483d783d`. Reuse existing OMS/TMS matching and transaction rules. Add only a provider-neutral, read-only ranking contract over a backend-supplied eligible shortlist, fake-adapter tests, bounded asynchronous timeout and deterministic fallback. No live provider or hosted service is authorized. Recommendations are not assignment commands, approval grants or permission to mutate state, and are not wired into the active worker registry or API.
+
+Customers book; vendors provide vehicles/drivers. A transport company can act as either role per transaction. Existing deterministic backend rules retain autonomous assignment authority and must revalidate authorization, eligibility, concurrency, idempotency and state transitions before any mutation. Agents may only suggest/rank and cannot bypass those controls. Every refund retains manual owner/finance approval and no self-approval. Existing settlement requirements and Paperclip controls remain unchanged.
+
+D-33 is already reserved for the pending combined proposal in the original user worktree and remains **Pending owner approval**; its uncommitted content is not imported or approved here. D-34 is the next unused ID across that pending work and the committed D-01 through D-32 records. This authorization does not approve D-33, Paperclip removal, cloud migration, live payments, deployment, SQL execution, M6 completion, agent activation or any unmet M6 acceptance criterion. It is not permission to merge or deploy. M6 remains `IN_PROGRESS`; M7 activation remains `BLOCKED`.
+
+Tests must prove valid recommendations, malformed or mutation-bearing output rejection, timeout, unavailable provider, deterministic fallback and absence of operational/financial mutation. Only fake agents and synthetic data are permitted. Existing staging, provider and M6 owner-handoff gates remain outstanding; passing host tests must not be recorded as staging acceptance.
+
+**Separate publication authorization, 2026-10-08:** The owner subsequently authorized committing and pushing only `workers/src/zippy_workers/recommendations.py`, `workers/tests/test_m6_handlers.py`, `docs/DECISIONS.md` and `docs/EXECUTION_TRACKER.md`, and opening a draft PR titled "M7-A: provider-neutral recommendations with deterministic fallback". This permits diff review, scoped defect fixes, host tests/lint and inspection of PR CI, with no weakened checks or scanner exceptions. It does not expand the development/activation authority above, approve D-33 or M6 completion, or permit SQL, live tools/integrations, payments, service activation, merge or deployment. The contract remains unwired into live assignment. Preserve the original worktree.
+
+**Separate foundation merge authorization, 2026-10-08:** The owner subsequently authorized merging PR #7's four-file foundation after verifying its initial head `fa20a174af236a87a73968531881e6311a8cbefb`, inspecting actual review findings, fixing scoped defects and obtaining fresh green CI for any revised head. Mark ready and merge normally with the exact final reviewed SHA only after checking effective branch requirements and merge-triggered workflows; stop if deployment would be triggered. This is repository integration permission only, not live agent activation, approval of D-33, M6 completion, SQL execution, live integrations/payments, service activation or deployment. Preserve the original worktree. D-34's development scope and all milestone/financial/governance gates remain unchanged.
+
 ## M1 MVP Draft Decisions
 
 All records below are **OWNER APPROVED** by Gopinathan on 2026-09-08. They define the MVP direction and do not by themselves authorize implementation, service activation, infrastructure changes, database migration, payment activation, or modification of legacy documents.
