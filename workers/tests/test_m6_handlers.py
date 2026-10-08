@@ -93,6 +93,28 @@ def test_unavailable_agent_preserves_shortlist(agent, reason):
     assert result.candidate_ids == ("candidate-0", "candidate-1")
 
 
+@pytest.mark.parametrize(
+    "agent,source,reason",
+    [
+        (None, "deterministic", "AGENT_UNAVAILABLE"),
+        (FakeRecommendationAgent({"candidate_ids": ["candidate-0"]}), "agent", "RECOMMENDED"),
+    ],
+)
+def test_oversized_features_do_not_interrupt_recommendations(agent, source, reason):
+    db = FakeM6Db()
+    db.driver_matches = [{"distance_m": 10**1000, "score": -(10**1000)}]
+    before = deepcopy(vars(db))
+    result = asyncio.run(recommend_drivers(db.driver_matches, agent, timeout_seconds=1))
+    assert result.source == source
+    assert result.reason_code == reason
+    assert result.candidate_ids == ("candidate-0",)
+    assert vars(db) == before
+    if agent is not None:
+        assert asdict(agent.requests[0]) == {
+            "candidates": ({"candidate_id": "candidate-0", "distance_m": None, "score": None},)
+        }
+
+
 def test_agent_timeout_cancels_adapter_and_uses_deterministic_fallback():
     class HangingAgent:
         cancelled = False
