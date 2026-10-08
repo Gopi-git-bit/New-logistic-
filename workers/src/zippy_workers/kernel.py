@@ -72,15 +72,6 @@ class SupabaseTaskSource:
             {"p_agent_name": agent, "p_task_type": task_type, "p_payload": payload},
         ).execute()
 
-    def mark_odoo_synced(self, order_id: str, sale_id: int, invoice_id: int | None = None) -> None:
-        self._client.rpc(
-            "mark_odoo_synced",
-            {"p_order_id": order_id, "p_sale_order_id": sale_id, "p_invoice_id": invoice_id},
-        ).execute()
-
-    def mark_odoo_failed(self, order_id: str, reason: str) -> None:
-        self._client.rpc("mark_odoo_failed", {"p_order_id": order_id, "p_reason": reason}).execute()
-
     # ---- Db port for business handlers (M6) --------------------------------
     def generate_quote(self, order_id: str) -> dict | None:
         res = self._client.rpc("generate_order_quote", {"p_order_id": order_id}).execute()
@@ -257,26 +248,16 @@ def default_tools_for(source: SupabaseTaskSource, settings: WorkerSettings) -> d
         process_document_upload,
         process_notification_job,
         process_payment_event,
-        push_order_to_odoo,
         update_delivery_status,
     )
     from .notification_sender import make_notification_sender
     from .ocr_provider import make_ocr_provider
-    from .odoo_client import OdooClient
-
-    def _odoo():
-        if not settings.odoo_url:
-            raise RuntimeError("ODOO_URL missing")
-        return OdooClient(
-            settings.odoo_url, settings.odoo_db, settings.odoo_user, settings.odoo_api_key or ""
-        )
 
     ocr = make_ocr_provider()
     sender = make_notification_sender()
 
     return {
         "process_payment_event": lambda payload: process_payment_event(payload, source),
-        "push_order_to_odoo": lambda payload: push_order_to_odoo(payload, source, _odoo()),
         "process_document_upload": lambda payload: process_document_upload(payload, source, ocr),
         "process_notification_job": lambda payload: process_notification_job(
             payload, source, sender

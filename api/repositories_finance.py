@@ -218,9 +218,9 @@ class FinanceRepository:
             ),
         )
         if event.event_type == "payment.captured":
-            self._enqueue_odoo_draft(
+            self._ensure_financial_request(
                 connection, platform_id, order_id, mapping["created_by_account_id"],
-                amount_major, event.currency, correlation_id, task_max_attempts,
+                amount_major, event.currency, correlation_id,
             )
         self._record_event(connection, platform_id, receipt_id, "gateway.projected", {
             "event_type": event.event_type,
@@ -1159,7 +1159,7 @@ class FinanceRepository:
             return UUID(str(existing["gateway_event_id"]))
         return UUID(str(row["gateway_event_id"]))
 
-    def _enqueue_odoo_draft(
+    def _ensure_financial_request(
         self,
         connection: Connection[dict[str, Any]],
         platform_id: UUID,
@@ -1168,8 +1168,11 @@ class FinanceRepository:
         amount: Decimal,
         currency: str,
         correlation_id: UUID,
-        task_max_attempts: int,
     ) -> None:
+        """Persist requested finance state without scheduling external execution.
+
+        Preserve the historical request key so existing requests remain idempotent.
+        """
         request_key = f"odoo:draft_customer_invoice:{order_id}"
         request_hash = _sha256_json(
             {
@@ -1210,25 +1213,6 @@ class FinanceRepository:
             ).fetchone()
         if request is None:
             raise RuntimeError("financial request persistence failed")
-        connection.execute(
-            """
-            INSERT INTO zippy.durable_tasks (
-                durable_task_id, platform_id, task_type, aggregate_type,
-                aggregate_id, payload_reference, idempotency_key,
-                max_attempts, correlation_id
-            ) VALUES (%s, %s, 'odoo_draft_sync', 'financial_request', %s, %s, %s, %s, %s)
-            ON CONFLICT (platform_id, task_type, idempotency_key) DO NOTHING
-            """,
-            (
-                uuid4(),
-                platform_id,
-                request["financial_request_id"],
-                f"financial_request:{request['financial_request_id']}",
-                request_key,
-                task_max_attempts,
-                correlation_id,
-            ),
-        )
 
     def _order_actor_role(
         self,

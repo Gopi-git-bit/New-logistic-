@@ -9,10 +9,8 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any, Protocol
 
-from .capabilities import assert_can_call_external
 from .notification_sender import NotificationSender
 from .ocr_provider import OCRExtractor
-from .odoo_client import OdooClient
 
 
 class Db(Protocol):
@@ -20,10 +18,6 @@ class Db(Protocol):
 
     def transition_order(self, order_id: str, new_status: str) -> None: ...
     def enqueue_task(self, agent: str, task_type: str, payload: dict[str, Any]) -> None: ...
-    def mark_odoo_synced(
-        self, order_id: str, sale_id: int, invoice_id: int | None = None
-    ) -> None: ...
-    def mark_odoo_failed(self, order_id: str, reason: str) -> None: ...
 
     # M5: POD / document pipeline
     def upsert_document(
@@ -98,36 +92,7 @@ def process_payment_event(payload: dict[str, Any], db: Db) -> HandlerResult:
             return HandlerResult(True, {"note": "idempotent no-op"})
         return HandlerResult(False, {"error": msg[:200]})
 
-    # Next hop in pipeline: mirror to Odoo (dedupe key reuse)
-    db.enqueue_task("order_management", "push_order_to_odoo", {"order_id": order_id})
     return HandlerResult(True, {"advanced_to": "inventory_confirmed"})
-
-
-# ---------------------------------------------------------------- odoo push
-def push_order_to_odoo(payload: dict[str, Any], db: Db, odoo: OdooClient) -> HandlerResult:
-    """Mirror the order into Odoo 18 CE (partner + sale.order)."""
-    assert_can_call_external("order_management", "odoo")
-
-    order_id = payload.get("order_id")
-    order_number = payload.get("order_number")
-    total = float(payload.get("total_amount", 0))
-    email = payload.get("consignee_email") or f"anon-{order_number}@zippy.local"
-    name = payload.get("customer_name") or f"Zippy Order {order_number}"
-
-    try:
-        partner_id = odoo.find_or_create_partner(email=email, name=name)
-        sale_id = odoo.create_sale_order(
-            partner_id=partner_id,
-            order_number=str(order_number),
-            total_amount=total,
-            reference_note=payload.get("special_instructions"),
-        )
-        db.mark_odoo_synced(str(order_id), sale_id)
-        return HandlerResult(True, {"sale_order_id": sale_id, "partner_id": partner_id})
-    except Exception as exc:  # noqa: BLE001 - transport/protocol failures
-        reason = str(exc)[:200]
-        db.mark_odoo_failed(str(order_id), reason)
-        return HandlerResult(False, {"error": reason})
 
 
 HANDLER_TOOLS = {

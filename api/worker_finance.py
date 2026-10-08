@@ -1,9 +1,8 @@
-"""M4 durable finance workers: gateway reconciliation, POD gate, Odoo drafts.
+"""M4 durable finance workers: gateway reconciliation and POD gate.
 
 Uses the same claim/lease/fail controls as the M3 worker but with explicit
-M4 task types. External Odoo calls happen outside the database transaction;
-references are recorded idempotently so timeout-after-success cannot create
-duplicates. No automatic financial execution exists anywhere in this module.
+M4 task types. Retired Odoo tasks fail explicitly through durable retry/DLQ.
+No automatic financial execution exists anywhere in this module.
 """
 
 from __future__ import annotations
@@ -14,7 +13,6 @@ from uuid import UUID
 
 from .config import Settings
 from .database import Database
-from .odoo import OdooDraftAdapter
 from .repositories import retry_at
 from .repositories_finance import FinanceRepository
 
@@ -104,51 +102,21 @@ def _reference_id(task: dict[str, Any], prefix: str) -> UUID:
     return UUID(reference.removeprefix(prefix))
 
 
-def odoo_draft_sync_handler(
-    database: Database, settings: Settings, adapter: OdooDraftAdapter
-) -> TaskHandler:
-    """Process one draft-only financial request against the Odoo transport."""
+class OdooIntegrationUnavailable(RuntimeError):
+    """Retired ERP work must remain failed, never fabricated as executed."""
 
-    repository = FinanceRepository()
+
+def odoo_draft_sync_handler(
+    database: Database, settings: Settings, adapter: object | None = None
+) -> TaskHandler:
+    """Compatibility handler for queued tasks; no ERP or request-state writes.
+
+    The former adapter argument is ignored. Existing callers enter the normal
+    durable retry/dead-letter path instead of executing or acknowledging ERP work.
+    """
 
     def handle(task: dict[str, Any]) -> None:
-        financial_request_id = _reference_id(task, "financial_request:")
-        with database.transaction(settings.platform_id) as connection:
-            request = repository.lock_financial_request(
-                connection, settings.platform_id, financial_request_id
-            )
-        if request is None:
-            return  # already acknowledged or removed; idempotent no-op
-        if request["status"] not in ("requested", "sent"):
-            return  # timeout-after-success: external side effect already recorded
-
-        email = request["email_normalized"] or f"order-{request['order_id']}@example.invalid"
-        name = f"Zippy order {request['order_id']}"
-        partner_id = adapter.find_or_create_partner(email=email, name=name)
-        reference = f"zippy:{request['request_type']}:{financial_request_id}"
-        amount = str(request["amount"]) if request["amount"] is not None else "0"
-        currency = request["currency_code"] or "INR"
-        if request["request_type"] == "draft_vendor_bill":
-            move_id = adapter.create_draft_vendor_bill(partner_id, reference, amount, currency)
-        else:
-            move_id = adapter.create_draft_customer_invoice(
-                partner_id, reference, amount, currency
-            )
-
-        with database.transaction(settings.platform_id) as connection:
-            repository.record_partner_reference(
-                connection, settings.platform_id, request["order_id"], partner_id,
-                task["correlation_id"],
-            )
-            repository.record_move_reference(
-                connection, settings.platform_id, financial_request_id, move_id,
-                task["correlation_id"],
-            )
-            repository._record_event(
-                connection, settings.platform_id, financial_request_id,
-                "odoo.draft_acknowledged", {"request_type": request["request_type"]},
-                task["correlation_id"], aggregate_type="financial_request",
-            )
+        raise OdooIntegrationUnavailable("ODOO_INTEGRATION_REMOVED")
 
     return handle
 

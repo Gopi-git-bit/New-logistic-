@@ -1,10 +1,15 @@
 """M4 handler + Odoo client tests (no network, fakes for Db/Odoo)."""
 
+from types import SimpleNamespace
+
 import httpx
+import pytest
 
 from zippy_workers.capabilities import UnauthorizedCapability, assert_can_call_external
-from zippy_workers.handlers import process_payment_event, push_order_to_odoo
-from zippy_workers.odoo_client import OdooClient, OdooError
+from zippy_workers.config import WorkerSettings
+from zippy_workers.handlers import process_payment_event
+from zippy_workers.kernel import default_tools_for, run_one_tick
+from zippy_workers.odoo_client import OdooClient
 
 
 class FakeDb:
@@ -28,11 +33,12 @@ class FakeDb:
 
 
 # ---------------------------------------------------------------- payments
-def test_payment_captured_advances_and_enqueues():
+def test_payment_captured_advances_without_odoo_work():
     db = FakeDb()
     r = process_payment_event({"event_type": "razorpay_payment.captured", "order_id": "o-1"}, db)
     assert r.ok and ("o-1", "inventory_confirmed") in db.transitions
-    assert db.tasks[0][1] == "push_order_to_odoo"
+    assert not db.tasks
+    assert not db.synced and not db.failed
 
 
 def test_payment_replay_is_idempotent_noop():
@@ -57,40 +63,54 @@ def test_failed_event_short_circuits():
 
 
 # ---------------------------------------------------------------- odoo push
-def test_push_happy_path_marks_synced():
-    class FakeOdoo:
-        def find_or_create_partner(self, email, name):
-            return 42
-
-        def create_sale_order(self, **kw):
-            return 9001
-
-    db = FakeDb()
-    r = push_order_to_odoo(
-        {"order_id": "o-9", "order_number": "ZP-1", "total_amount": 3463.95}, db, FakeOdoo()
-    )
-    assert r.ok and r.detail["sale_order_id"] == 9001
-    assert db.synced == [("o-9", 9001)] and not db.failed
+@pytest.mark.parametrize("agent", ["order_management", "resource_management", "communication"])
+def test_active_capability_matrix_denies_odoo(agent):
+    with pytest.raises(UnauthorizedCapability):
+        assert_can_call_external(agent, "odoo")
 
 
-def test_push_transport_failure_marks_failed():
-    class BoomOdoo:
-        def find_or_create_partner(self, **_):
-            raise OdooError("transport:ConnectError")
+def test_default_runtime_has_no_odoo_dependency(monkeypatch):
+    monkeypatch.setattr("zippy_workers.ocr_provider.make_ocr_provider", lambda: object())
+    monkeypatch.setattr("zippy_workers.notification_sender.make_notification_sender", lambda: object())
+    settings = WorkerSettings()
+    tools = default_tools_for(FakeDb(), settings)
+    assert "push_order_to_odoo" not in tools
+    assert {"process_payment_event", "place_order", "assign_driver", "update_delivery_status"} <= tools.keys()
+    assert not any(name.startswith("odoo_") for name in WorkerSettings.model_fields)
 
-    db = FakeDb()
-    r = push_order_to_odoo({"order_id": "o-10", "order_number": "ZP-2"}, db, BoomOdoo())
-    assert not r.ok and "transport" in db.failed[0][1]
 
+def test_existing_odoo_task_is_failed_not_completed():
+    class TaskSource(FakeDb):
+        def __init__(self):
+            super().__init__()
+            self.completed = []
+            self.spent = []
+            self.beats = []
 
-def test_capability_matrix_gates_odoo_to_correct_agents():
-    assert_can_call_external("order_management", "odoo")  # allowed
-    assert_can_call_external("resource_management", "odoo")  # allowed
-    try:
-        assert_can_call_external("communication", "odoo")
-        raise AssertionError("communication must not reach odoo")
-    except UnauthorizedCapability:
-        pass
+        def claim(self, *_):
+            return SimpleNamespace(data=[{
+                "task_id": "legacy-odoo-1",
+                "task_type": "push_order_to_odoo",
+                "payload": {"order_id": "o-1"},
+            }])
+
+        def complete(self, *args):
+            self.completed.append(args)
+
+        def fail(self, task_id, reason):
+            self.failed.append((task_id, reason))
+
+        def spend(self, *args):
+            self.spent.append(args)
+
+        def beat(self, agent):
+            self.beats.append(agent)
+
+    source = TaskSource()
+    assert run_one_tick("order_management", "worker-1", source, {}, WorkerSettings()) == 1
+    assert source.failed == [("legacy-odoo-1", "no_handler:push_order_to_odoo")]
+    assert not source.completed and not source.spent and not source.synced
+    assert source.beats == ["order_management"]
 
 
 # ---------------------------------------------------------------- odoo client request shape

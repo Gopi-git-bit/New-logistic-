@@ -6,6 +6,8 @@ import hashlib
 import hmac
 import json
 from decimal import Decimal
+from unittest.mock import Mock
+from uuid import UUID, uuid4
 
 import pytest
 
@@ -20,6 +22,8 @@ from api.gateway import (
     payload_hash,
     verify_signature,
 )
+from api.repositories_finance import FinanceRepository
+from api.worker_finance import OdooIntegrationUnavailable, odoo_draft_sync_handler
 
 SECRET = "m4-synthetic-webhook-secret-32bytes!"
 ORDER_A = "30000000-0000-0000-0000-00000000000a"
@@ -169,3 +173,49 @@ def test_unsupported_and_incomplete_events_parse_safely():
     )
     assert no_amount.amount_minor_units is None
     assert no_amount.provider_reference_id is None
+
+
+def test_captured_payment_preserves_finance_state_without_odoo_work(monkeypatch):
+    repository = FinanceRepository()
+    connection = Mock()
+    connection.execute.return_value.fetchone.return_value = {
+        "gateway_event_id": uuid4(),
+        "financial_request_id": uuid4(),
+    }
+    order_id = UUID(ORDER_A)
+    requester_id = uuid4()
+    monkeypatch.setattr(repository, "_resolve_payment_mapping", lambda *_: {
+        "order_id": order_id,
+        "created_by_account_id": requester_id,
+        "expected_amount_minor_units": 10000,
+        "expected_currency_code": "INR",
+    })
+
+    outcome = repository._project_payment(
+        connection, uuid4(), uuid4(), parse_event(_payment_body()), uuid4(), 3,
+    )
+
+    assert outcome == ("projected", "evidence_verified")
+    statements = [call.args[0] for call in connection.execute.call_args_list]
+    for table in ("gateway_events", "payment_projections", "financial_requests", "operational_events", "event_outbox"):
+        assert any(f"INSERT INTO zippy.{table}" in statement for statement in statements)
+    assert not any("durable_tasks" in statement for statement in statements)
+    assert not any("external_references" in statement for statement in statements)
+    request_call = next(
+        call for call in connection.execute.call_args_list
+        if "INSERT INTO zippy.financial_requests" in call.args[0]
+    )
+    assert "'requested'" in request_call.args[0]
+    assert requester_id in request_call.args[1]
+    assert f"odoo:draft_customer_invoice:{order_id}" in request_call.args[1]
+    assert "ON CONFLICT" in request_call.args[0]
+
+
+def test_retired_odoo_handler_never_acknowledges_or_calls_adapter():
+    database = Mock()
+    adapter = Mock()
+    handler = odoo_draft_sync_handler(database, Mock(), adapter)
+    with pytest.raises(OdooIntegrationUnavailable, match="ODOO_INTEGRATION_REMOVED"):
+        handler({"payload_reference": f"financial_request:{uuid4()}"})
+    assert not database.mock_calls
+    assert not adapter.mock_calls

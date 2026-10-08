@@ -23,6 +23,9 @@ jobs:
           python-version: "3.12"
       - run: pip install -e ".[dev]"
         working-directory: workers
+      - name: Run worker regressions
+        run: python -m pytest tests -q
+        working-directory: workers
       - run: ruff check src tests
         working-directory: workers
       - run: ruff format src tests
@@ -35,7 +38,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install fastapi pydantic pydantic-settings httpx pytest pyjwt
+      - run: pip install -r requirements-api-dev.txt
       - name: Run API security tests
         env:
           DATABASE_URL: postgresql://localhost/test
@@ -46,13 +49,11 @@ jobs:
           RAZORPAY_KEY_ID: rzp_test
           RAZORPAY_KEY_SECRET: test
           RAZORPAY_WEBHOOK_SECRET: whsec
-          ODOO_URL: http://localhost
-          ODOO_API_KEY: test
           PAPERCLIP_URL: http://localhost
           PAPERCLIP_API_KEY: test
           HERMES_API_URL: http://localhost
           HERMES_API_KEY: test
-        run: python -m pytest api/tests/ -v
+        run: python -m pytest api/tests api/tests_m4 api/tests_m5 -v
 
   security-scan:
     runs-on: ubuntu-latest
