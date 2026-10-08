@@ -135,12 +135,16 @@ class TelemetryAdapter:
             self._dropped_sampling += 1
             return
 
-        result: RedactionResult = redact_event(event)
-        if not result.accepted:
+        try:
+            result: RedactionResult = redact_event(event)
+            if not result.accepted:
+                self._dropped_redaction += 1
+                return
+            ok, violations = validate_event_fields(result.event or {})
+        except Exception:
             self._dropped_redaction += 1
             return
 
-        ok, violations = validate_event_fields(result.event or {})
         if not ok:
             self._dropped_validation += 1
             return
@@ -181,6 +185,7 @@ class _TraceContext:
         return _SpanContext(
             adapter=self.adapter,
             trace_id=self.trace_id,
+            correlation_id=self.correlation_id,
             span_id=generate_span_id(),
             name=name,
             metadata=metadata,
@@ -200,6 +205,7 @@ class _TraceContext:
 class _SpanContext:
     adapter: TelemetryAdapter | None = None
     trace_id: str = ""
+    correlation_id: str = ""
     span_id: str = ""
     name: str = ""
     metadata: dict[str, Any] | None = None
@@ -236,6 +242,7 @@ class _SpanContext:
 
         event: dict[str, Any] = {
             "trace_id": self.trace_id,
+            "correlation_id": self.correlation_id,
             "span_id": self.span_id,
             "service_name": self.adapter.service_name,
             "operation_name": self.operation,
