@@ -241,6 +241,7 @@ def test_harness_has_no_operational_ports_or_active_importers():
         for path in folder.rglob("*.py"):
             if (
                 path == source
+                or path == source.with_name("recommendation_reviews.py")
                 or "tests" in path.parts
                 or "tests_m4" in path.parts
                 or "tests_m5" in path.parts

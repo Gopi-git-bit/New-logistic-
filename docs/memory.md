@@ -21,6 +21,17 @@ assignment, every-refund manual approval, settlement and governance remain intac
 Vercel/Zoho connections are available for later approved integration; Razorpay
 is pending. See `EXECUTION_TRACKER.md` and `TEST_EVIDENCE.md` for current evidence.
 
+D-38 separately authorizes the fake-only recommendation-review contract on
+`feat/m7-recommendation-review`, isolated from published master
+`a3b4d97542d55fa39c5b738504783ae2f40703ba`. Immutable snapshot-bound reviews support
+pending, accepted, rejected and expired states with explicit fake humans,
+idempotent retries, stale/conflicting-review rejection and in-memory storage.
+Acceptance records an advisory preference only; deterministic assignment and
+all operational/financial/governance controls remain unchanged. No runtime
+registration, SQL, live providers, hosting, deployment, activation or merge.
+D-33 remains pending; M7 live activation BLOCKED. Publication and exact-head PR
+CI require successful feature-branch push and draft PR creation.
+
 The dated legacy milestone/test/database summaries below are historical claims,
 not current staging or production verification. Canonical M6 is observability,
 not the legacy E2E order-flow milestone.

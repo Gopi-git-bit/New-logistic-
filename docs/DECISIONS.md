@@ -35,6 +35,33 @@
 
 ## Bounded Development Authorizations
 
+### D-38: Fake-Only Recommendation Review Contract
+
+**Status:** Owner-authorized development, checks, feature-branch commit/push and
+draft PR only, 2026-10-09, by the current user instruction.
+
+Start from published `origin/master` at
+`a3b4d97542d55fa39c5b738504783ae2f40703ba` in a new isolated worktree on
+`feat/m7-recommendation-review`; preserve all existing worktrees. Reuse the
+recommendation and synthetic shadow contracts without recreating their changes.
+Use immutable synthetic candidate snapshots, explicit fake reviewer identities
+and in-memory fake storage only. Support pending, accepted, rejected and expired
+records; reject stale/mismatched snapshots and unauthorized reviewers.
+
+The owner selected explicit per-record expiry, idempotent identical retries,
+and rejection of conflicting retries or changes to terminal reviews. Acceptance
+records an advisory candidate preference only, never assignment or operational
+authorization. Snapshot version and ordered numeric features must both match.
+This is a synthetic contract, not runtime identity authentication, durable
+storage, a governance approval or an in-process sandbox.
+
+Keep the contract outside active API/worker registration. Automatic deterministic
+assignment, orders, prices, payments, every-refund manual approval, settlements
+and Paperclip decisions/locks remain unchanged. No live providers, SQL, hosting
+changes, deployment, activation, direct master push or merge. M6 staging/live
+evidence remains UNVERIFIED; M7 live activation BLOCKED; D-33 pending. This
+permission does not approve D-33 or waive any staging/governance gate.
+
 ### D-34: M7-A Provider-Neutral Recommendations Development Only
 
 **Status:** Owner-authorized development and tests only, 2026-10-08, by the current user instruction: "I authorize development and tests for agent recommendations only."
