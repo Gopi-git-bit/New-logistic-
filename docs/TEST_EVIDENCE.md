@@ -1319,6 +1319,33 @@ These commands validate the documentation diff and working-tree inventory. They 
 | Operator/automation | GitHub Copilot |
 | Notes | Documentation-only owner acceptance per D-32. Acceptance relies on M6-E003, the retained disposable proof `/tmp/m6a-proof.vYDFZu`, and the reviewed pre-commit audit. No GitHub CI checks are claimed. No code, runtime, deployment, credential, infrastructure, or external telemetry action occurred during acceptance. |
 
+### M6-E006: Owner Acceptance and PR #8 Review Checkpoint
+
+| Field | Value |
+|---|---|
+| Date / authority | 2026-10-09; D-36 explicit owner acceptance of M6-E005 as synthetic development evidence |
+| Accepted scope | D-31 development boundary plus M6-E005; development acceptance only, not staging/live acceptance |
+| Reviewed remote head | PR #8 at `8711c87ba7359e3626dc822b19196537485f44c1`; still draft and unmerged at this checkpoint |
+| Actual review evidence | Submitted reviews: zero. Review threads: zero. CodeRabbit's issue comment explicitly says draft PR not reviewed; its skipped review is not treated as approval or a clear external review. No concrete in-scope defect identified in direct inspection of the adapter change and added tests. |
+| Fresh local validation | Affected-module pytest: `82 passed, 1 warning in 0.21s`; existing unknown `asyncio_mode` warning. Touched-file Ruff lint and format check PASS; strict adapter mypy PASS; `git diff --check` PASS. No SQL or database proof executed. |
+| Exact-head CI | All five checks PASS at the reviewed remote head: `compose-config`, `python-checks`, `api-tests`, `security-scan`, `secret-safety`; run `37777388529`. This CI does not cover unpublished local decision/evidence commits. |
+| Branch requirements | Public master branch API reports `protected=false`, checks enforcement off with no required contexts; effective branch rules endpoint returns `[]`. No protection or review configuration changed. |
+| Repository workflow inspection | CI runs on master/main push and PR. The only tracked deployment workflow is manual `workflow_dispatch` with deploy job `if: false`. External webhook/hosting deployment configuration could not be verified without authenticated write/admin access; no overall no-deployment guarantee is claimed. |
+| Publication blocker | Git push failed because no GitHub credentials were available; browser remained signed out and available GitHub MCP tools were read-only. D-36 and its superseding no-merge restriction were committed locally, not published at this checkpoint. No review request or PR update could be submitted. |
+| Current repository-action authority | The owner's subsequent instruction explicitly prohibits merge unless separately authorized, superseding the earlier conditional merge permission in D-36. PR was not marked ready or merged. No resulting master CI exists for this work. |
+| Completion reconciliation | Pending successful, separately authorized merge. Tracker/PRD have not been marked M6 development complete; M7 live activation remains BLOCKED; D-33 remains Pending owner approval. |
+| Preserved controls | Existing worktrees/uncommitted work, deterministic assignment, every-refund manual approval, settlement, idempotency and Paperclip governance unchanged. No live database, payment, service activation, telemetry export or deployment occurred. |
+
+**Separate staging/live acceptance gates — deferred, mandatory, UNVERIFIED (not PASS):**
+
+- [ ] Live end-to-end instrumentation and trusted workflow/correlation propagation proven before live instrumentation is enabled.
+- [ ] Deployed observability storage, roles, credentials, volumes and networks isolated from authoritative operational, governance and financial stores.
+- [ ] Real exporter timeout, outage and recovery proven nonfatal to business/governance operations.
+- [ ] Real provider usage/invoices and financial-ledger reconciliation proven; synthetic estimated cents are not accounting evidence.
+- [ ] Owner separately approves hosting mode, live emitters/credentials, residency, retention, sampling and staging execution scope.
+
+**Smallest proposed next M7 development slice (not started or authorized here):** build a synthetic, read-only shadow evaluation harness around the existing D-34 recommendation contract, following the canonical M7 capability/allowlist then shadow/recommendation sequence. Use fake agents and already eligible synthetic shortlists; prove explicit capability/tool denials, compare advisory rankings with the deterministic baseline, and prove no assignment, price, order, payment or governance mutations. Keep the harness outside the active worker/API registry; no provider, SQL, hosting or live telemetry. The specific owner choice is whether to authorize this fake-only capability/shadow slice next. A real-provider alternative would first require explicit provider/model and bounded cost/data/activation choices; none are inferred.
+
 ### M6-E005: Supplemental Development Acceptance Evidence
 
 | Field | Value |
