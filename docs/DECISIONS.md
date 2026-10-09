@@ -51,6 +51,18 @@ Tests must prove valid recommendations, malformed or mutation-bearing output rej
 
 **Separate foundation merge authorization, 2026-10-08:** The owner subsequently authorized merging PR #7's four-file foundation after verifying its initial head `fa20a174af236a87a73968531881e6311a8cbefb`, inspecting actual review findings, fixing scoped defects and obtaining fresh green CI for any revised head. Mark ready and merge normally with the exact final reviewed SHA only after checking effective branch requirements and merge-triggered workflows; stop if deployment would be triggered. This is repository integration permission only, not live agent activation, approval of D-33, M6 completion, SQL execution, live integrations/payments, service activation or deployment. Preserve the original worktree. D-34's development scope and all milestone/financial/governance gates remain unchanged.
 
+### D-36: M6 Development Acceptance and Guarded Repository Integration
+
+**Owner acceptance status:** OWNER ACCEPTED — 2026-10-09 — Gopinathan
+
+The owner explicitly accepts M6-E005 as synthetic development evidence and approves limiting M6 development completion to D-31's development scope plus that supplemental evidence. Development acceptance is not staging or live acceptance. Live instrumentation, deployed storage/credential isolation, exporter recovery, and real provider/financial-ledger reconciliation remain mandatory gates before the corresponding live features are enabled. They are deferred, not waived or marked PASS.
+
+The owner authorizes final review of PR #8, initially at `8711c87ba7359e3626dc822b19196537485f44c1`, including actual review findings and surgical in-scope fixes. Any revised head requires fresh green CI. Mark ready and merge normally only if review is clear, all five checks pass for the exact reviewed head, effective branch requirements are satisfied, and merging triggers no deployment. Use an exact-SHA guard; never bypass checks or reviews. Inspect resulting master CI. After successful merge, reconcile the PRD, tracker and evidence to label M6 explicitly development complete, retaining a separate staging acceptance checklist and M7 live activation BLOCKED.
+
+D-36 is the next unused ID after committed D-35 and reserved, uncommitted D-33. All previous decisions are preserved. D-33 remains **Pending owner approval**; this acceptance does not approve its proposal or change Odoo/Paperclip authority. Deterministic assignment, every-refund manual approval, settlement, idempotency and governance controls remain unchanged.
+
+Identify only the smallest next M7 development slice from the existing approved plan and its specific owner choices; do not begin implementation or live activation. Preserve existing worktrees and uncommitted work. No shared-database SQL, payments, service activation or deployment is authorized. D-31's disabled defaults, synthetic-only sampling, redaction, zero external telemetry spending and separately approved hosting/credentials/residency/retention/sampling gates remain controlling.
+
 ### D-35: M6 Supplemental Development Evidence and Draft PR Only
 
 **Status:** Current owner-authorized development checks, scoped fixes and draft-PR publication only, 2026-10-08: "I authorize focused code/test fixes and a draft PR for this task. No deployment or live agent activation."
