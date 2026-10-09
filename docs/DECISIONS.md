@@ -65,6 +65,22 @@ Identify only the smallest next M7 development slice from the existing approved 
 
 **Superseding repository-action restriction, 2026-10-09:** The owner's subsequent instruction permits scoped code edits, tests, commit/push of PR #8's feature branch and PR updates, but explicitly prohibits merge unless separately authorized. This supersedes D-36's earlier conditional merge permission. Do not mark M6 development complete in the tracker or reconcile completion after an unperformed merge. The synthetic development acceptance above remains recorded; staging/live gates, D-33 pending status and business controls remain unchanged.
 
+**Renewed conditional authorization and post-merge reconciliation, 2026-10-09:** The owner now explicitly directs reconciliation after PR #8 and recording renewed conditional merge authorization. D-36's earlier exact-head, green-check, review, branch-requirement and no-deployment conditions are retained; the intervening no-merge instruction above remains historical, not deleted. PR #8 was merged by Gopi-git-bit at `2026-10-09T06:34:11Z`; local Git verifies merge commit `dfd3f35167972755322a3746c5628ac9e0b7189f` with parents `f885444ac9bdd85dce9afcd012d234d56c713c69` and `e6973e505aed61d2d7f950ae0553e10c3dd5c0e6`. GitHub CI run [37894212090](https://github.com/Gopi-git-bit/New-logistic-/actions/runs/37894212090) completed successfully for that exact master SHA. Under D-36, M6 is **DEVELOPMENT COMPLETE** for D-31 plus accepted M6-E005 only. This does not retrospectively certify external deployment configuration or repeat accepted audits/proofs.
+
+Staging/live evidence remains **UNVERIFIED**, M7 live activation **BLOCKED**, and D-33 **Pending owner approval**. Current task authorization explicitly prohibits performing any merge, regardless of the recorded historical/renewed conditional authorization; this branch must remain a draft PR. No live providers, hosting changes, deployment, shared-database SQL or agent activation are authorized.
+
+### D-37: M7 Capability/Allowlist and Synthetic Shadow Development
+
+**Status:** Owner-authorized bounded development, tests, scoped commit/push and draft PR only — 2026-10-09 — Gopinathan.
+
+Start from current `origin/master` at `dfd3f35167972755322a3746c5628ac9e0b7189f` on new isolated branch `feat/m7-shadow-allowlist`. Preserve all existing worktrees and uncommitted files. Reuse `capabilities.py`, the backend's already eligible deterministic shortlist order and D-34 `recommendations.py`; do not add another matcher or ranking authority. The smallest development allowlist is `order_management / recommend_drivers / recommend_drivers`, requiring the existing `read:drivers` capability. Other agents/actions/tools are denied before execution, including agents with broader production financial or oversight permissions.
+
+The harness accepts synthetic numeric fixtures and its built-in fake agent only, compares advisory rankings with the deterministic baseline, and proves malformed/mutation-bearing output, timeout and unavailable/failed providers preserve the baseline. No arbitrary adapters, operational database ports, external clients, registry entries, API routes or persistence are added. This is a development harness, not authentication or a sandbox for hostile in-process Python. Human-reviewed recommendations, provider selection and activation remain separately gated.
+
+Customers book; vendors supply vehicles/drivers; transport companies may play either role per transaction. Deterministic backend assignment remains authoritative. Every refund requires manual approval; settlement, idempotency, state transitions, Paperclip decision locks and financial system-of-record controls remain unchanged. Vercel and Zoho CRM connections are available for later separately approved integration; Razorpay is pending. Availability is not permission to call or configure them.
+
+No live provider calls, hosting changes, deployment, shared-database SQL, agent activation or merge. M6 development completion under D-36 does not waive UNVERIFIED staging/live evidence, unblock M7 live activation or approve reserved D-33. Accepted audits and disposable proofs are reused, not repeated.
+
 ### D-35: M6 Supplemental Development Evidence and Draft PR Only
 
 **Status:** Current owner-authorized development checks, scoped fixes and draft-PR publication only, 2026-10-08: "I authorize focused code/test fixes and a draft PR for this task. No deployment or live agent activation."

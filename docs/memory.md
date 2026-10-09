@@ -2,9 +2,28 @@
 
 > Current state of the project. Updated after each milestone completion.
 
-## Current Phase: M6 Complete ✅ + Architecture Correction
+## Current Phase: M6 Development Complete; M7 Synthetic Development Only
 
-**Last updated**: 2026-08-29
+**Last updated**: 2026-10-09
+
+D-36 accepts M6 development only (D-31 plus M6-E005). PR #8 is merged at
+`dfd3f35167972755322a3746c5628ac9e0b7189f`; exact-master CI run
+[37894212090](https://github.com/Gopi-git-bit/New-logistic-/actions/runs/37894212090)
+succeeded. Staging/live telemetry, deployed storage/credential isolation,
+exporter recovery and real provider/financial reconciliation remain
+**UNVERIFIED**, not waived. M7 live activation is **BLOCKED**; D-33 is pending.
+
+D-37 authorizes a fake-only capability/allowlist and shadow comparison slice,
+outside the API/worker registry. No live provider, hosting change, SQL,
+deployment, activation or merge. Customers book; vendors supply vehicles/drivers;
+transport companies may play either role per transaction. Deterministic
+assignment, every-refund manual approval, settlement and governance remain intact.
+Vercel/Zoho connections are available for later approved integration; Razorpay
+is pending. See `EXECUTION_TRACKER.md` and `TEST_EVIDENCE.md` for current evidence.
+
+The dated legacy milestone/test/database summaries below are historical claims,
+not current staging or production verification. Canonical M6 is observability,
+not the legacy E2E order-flow milestone.
 
 ## Architecture Correction (D-09)
 

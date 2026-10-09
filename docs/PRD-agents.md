@@ -2,6 +2,25 @@
 
 > Source of truth for all AI agent specifications.
 
+## Current Development Boundary (D-37, 2026-10-09)
+
+M6 is development complete under D-36; staging/live acceptance remains
+UNVERIFIED. M7 live activation is BLOCKED and D-33 remains pending.
+The synthetic shadow harness grants only
+`order_management / recommend_drivers / recommend_drivers`, checked against
+the existing `read:drivers` capability before execution. Broader legacy
+capability rows below do not grant shadow access. It accepts only synthetic
+numeric fixtures and a built-in fake, reuses `recommendations.py`, and compares
+advisory ranks against backend shortlist order without rematching or assignment.
+There is no active API/worker registration, operational port, live provider or
+persistence. This is neither runtime authentication nor an in-process sandbox.
+
+Customers book; vendors supply vehicles/drivers; transport companies may act as
+either role per transaction. Deterministic backend assignment remains
+authoritative. Every refund requires manual approval; settlement and Paperclip
+decision-lock controls are unchanged. No live providers, hosting changes,
+deployment, shared-database SQL, agent activation or merge are authorized.
+
 ## 1. Agent Architecture
 
 ### 7 + 1 Agent System

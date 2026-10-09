@@ -287,12 +287,29 @@ Deliver `docs/reports/M0_DISCOVERY_REPORT.md`, `docs/reports/RISK_REGISTER.md`, 
 
 ### M6 — Langfuse observability
 
+**D-36 status, 2026-10-09: DEVELOPMENT COMPLETE** for D-31's synthetic
+development boundary plus owner-accepted M6-E005. PR #8 merge
+`dfd3f35167972755322a3746c5628ac9e0b7189f` has successful master CI
+[37894212090](https://github.com/Gopi-git-bit/New-logistic-/actions/runs/37894212090).
+The requirements below remain separate **UNVERIFIED staging/live gates**,
+not development-completion prerequisites and not waived:
+
 - deploy separately from Paperclip and operational/Odoo data;
 - instrument agent traces with correlation IDs;
 - prove audit/trace separation and cost-ledger reconciliation;
 - keep Langfuse failure non-fatal to deterministic operations.
 
 ### M7 — Agent activation
+
+**Live activation: BLOCKED.** D-34/D-37 permit only provider-neutral
+recommendations and fake-only capability/allowlist/shadow development outside
+active API/worker registration. Advisory comparisons consume synthetic eligible
+shortlists in existing deterministic order; they cannot alter assignment,
+prices, orders, payments, refunds, settlements or governance. Customers book;
+vendors supply vehicles/drivers; transport companies may play either role per
+transaction. Deterministic assignment, every-refund manual approval and
+settlement controls remain authoritative. D-33 is pending; no live provider,
+hosting change, deployment, shared-database SQL, activation or merge is authorized.
 
 - resolve actual model IDs, OCR provider, permit verification, and Honcho deployment;
 - enforce capability matrices and tool allowlists;

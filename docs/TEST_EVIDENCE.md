@@ -1319,7 +1319,42 @@ These commands validate the documentation diff and working-tree inventory. They 
 | Operator/automation | GitHub Copilot |
 | Notes | Documentation-only owner acceptance per D-32. Acceptance relies on M6-E003, the retained disposable proof `/tmp/m6a-proof.vYDFZu`, and the reviewed pre-commit audit. No GitHub CI checks are claimed. No code, runtime, deployment, credential, infrastructure, or external telemetry action occurred during acceptance. |
 
+### M6-E007: Post-PR #8 Development Completion Reconciliation
+
+| Field | Value |
+|---|---|
+| Date / authority | 2026-10-09; D-36 owner-accepted synthetic development scope and current explicit reconciliation instruction |
+| Merge verification | GitHub reports PR #8 merged by Gopi-git-bit at `2026-10-09T06:34:11Z`. Fetch of current `origin/master` resolves to `dfd3f35167972755322a3746c5628ac9e0b7189f`; local Git verifies parents `f885444ac9bdd85dce9afcd012d234d56c713c69` and `e6973e505aed61d2d7f950ae0553e10c3dd5c0e6`. |
+| Master CI verification | [Run 37894212090](https://github.com/Gopi-git-bit/New-logistic-/actions/runs/37894212090), `CI`, master push, exact merge SHA; status completed, conclusion success, attempt 1, updated `2026-10-09T06:34:42Z`. |
+| Completion | M6 DEVELOPMENT COMPLETE under D-36 for D-31 plus accepted M6-E005 only; separate staging/live checklist in M6-E006 remains UNVERIFIED and mandatory. |
+| History | D-36's renewed conditional authorization is appended without deleting its intervening no-merge restriction or D-35/D-34 checkpoints. The current task explicitly prohibits executing any merge. M6-E003/E004/E005 accepted results and proof history are reused; no accepted audit/disposable proof repeated. |
+| Preserved gates | M7 live activation BLOCKED; D-33 Pending owner approval; no Odoo/Paperclip authority change. No deployment, shared-database SQL, live provider, hosting change or activation. |
+
+### M7-E001: Capability/Allowlist and Synthetic Shadow Development
+
+| Field | Value |
+|---|---|
+| Date / authority | 2026-10-09; D-37 bounded development, scoped tests/commit/push and draft PR only |
+| Baseline / isolation | `dfd3f35167972755322a3746c5628ac9e0b7189f`; new branch `feat/m7-shadow-allowlist` in a new isolated worktree. Existing worktrees and uncommitted files not modified. |
+| Implementation | `shadow_recommendations.py` reuses `capabilities.has_capability` and `recommendations.recommend_drivers`. Exact development tuple `order_management / recommend_drivers / recommend_drivers` additionally requires `read:drivers`. Unknown and broader-capability agents, mutation actions and external tools are denied before ranking. |
+| Input / fake boundary | Immutable synthetic numeric fixtures in already eligible deterministic shortlist order; built-in fake responses/timeouts/unavailability/failure only. Custom adapters, subclasses and operational dictionaries are rejected. No driver/customer identity, operational port, external client, registry/API wiring or persistence is added. |
+| Exact comparison | Baseline references, advisory result/reason, per-candidate one-based baseline/advisory rank differences, top-choice agreement (`None` for empty input), and exact total absolute rank displacement. No re-sort or alternate matching rules; deterministic backend assignment remains authoritative. |
+| Focused command | `PYTHONDONTWRITEBYTECODE=1 PYTHONPATH="$PWD/workers/src" /opt/new-logistic/.venv/bin/python -m pytest workers/tests/test_shadow_recommendations.py workers/tests/test_m6_handlers.py -q -p no:cacheprovider` |
+| Focused result | **93 passed, 1 warning in 0.30s**. New synthetic permission, comparison, rejection, operational isolation and fallback cases plus existing authoritative-assignment/recommendation regressions. |
+| Host CI regression command | `env -u ZIPPY_M3_TEST_DATABASE_URL -u ZIPPY_M4_TEST_DATABASE_URL -u PAPERCLIP_DISPOSABLE_PROOF -u PAPERCLIP_DATABASE_URL PYTHONDONTWRITEBYTECODE=1 PYTHONPATH="$PWD/workers/src:$PWD" /opt/new-logistic/.venv/bin/python -m pytest workers/tests api/tests api/tests_m4 api/tests_m5 -q -p no:cacheprovider` |
+| Host regression result | **301 passed, 72 skipped, 2 warnings in 2.40s**. All skips are database-gated and remain UNVERIFIED; no SQL/database proof executed. Existing `asyncio_mode` configuration and Starlette/httpx deprecation warnings retained. Normal regression tests are not a repeat of accepted audits/disposable proofs. |
+| Failure / safety evidence | Exact baseline preserved on malformed, duplicate, missing, outsider or mutation-bearing output, timeout, unavailable agent and provider failure. Seven mutation domains (assignment, prices, orders, payments, refunds, settlements, governance) rejected. Fake operational snapshot unchanged; deterministic handler still assigns baseline's first driver after advisory disagreement. Static dependency/importer test proves no operational ports and no active API/worker import. Timeout completes within 0.2s under a 0.01s fake deadline, with network socket calls forbidden and no remaining agent task. |
+| Quality / static CI | Full worker Ruff lint PASS; touched-file Ruff format check PASS; strict mypy on the new implementation PASS; `docker compose --env-file .env.example config --quiet` PASS without service start; existing CI `sk_live_` secret-pattern check and `git diff --check` PASS. Workflows, dependencies, migrations, deployment and runtime registries unchanged. |
+| Local tooling limitation | Built-in test tool did not discover the isolated-worktree tests, so existing pytest CLI was used. Fresh combined dev installation hit pre-existing conflicting Ruff pins (workers 0.16.5 versus API dev 0.16.6); no manifest changed. Existing Python 3.12 validation environment used read-only with explicit new-worktree PYTHONPATH; installed Ruff is 0.16.6. Exact workflow dependency environments still require remote CI. |
+| Publication / remote CI | Git push preflight failed with no HTTPS credentials; available GitHub tools are read-only. Owner chose host authentication and retry; retry still failed. Scoped local commit is authorized; push, draft PR and fresh PR CI remain pending successful host authentication. Prior successful master CI is not claimed as feature-branch CI. |
+| Remaining limitations | Synthetic evidence only, not staging/live acceptance, runtime identity authentication or a sandbox against hostile in-process Python. Fixture shape cannot attest real-world data provenance. No provider/model, cost threshold, hosting, retention, sampling or activation setting selected. Human-reviewed recommendations and automation require separately approved scope. |
+| Business controls | Customers book; vendors supply vehicles/drivers; transport companies may play either role per transaction. Deterministic backend assignment, every-refund manual approval, settlement/POD controls, idempotency and Paperclip governance unchanged. Vercel/Zoho connections reserved for later approved integration; Razorpay pending. |
+| Smallest remaining staging gate | Explicit owner approval of an isolated staging validation scope and hosting, credentials/live emitters, residency, retention and sampling choices. Then prove deployed isolation, instrumentation, nonfatal exporter recovery and real usage/financial reconciliation; all remain UNVERIFIED, M7 live activation BLOCKED, D-33 pending. |
+
 ### M6-E006: Owner Acceptance and PR #8 Review Checkpoint
+
+**Historical checkpoint:** retained unchanged below; its publication/merge and
+completion blockers are superseded by M6-E007 and D-36's post-merge update.
 
 | Field | Value |
 |---|---|
@@ -1347,6 +1382,10 @@ These commands validate the documentation diff and working-tree inventory. They 
 **Smallest proposed next M7 development slice (not started or authorized here):** build a synthetic, read-only shadow evaluation harness around the existing D-34 recommendation contract, following the canonical M7 capability/allowlist then shadow/recommendation sequence. Use fake agents and already eligible synthetic shortlists; prove explicit capability/tool denials, compare advisory rankings with the deterministic baseline, and prove no assignment, price, order, payment or governance mutations. Keep the harness outside the active worker/API registry; no provider, SQL, hosting or live telemetry. The specific owner choice is whether to authorize this fake-only capability/shadow slice next. A real-provider alternative would first require explicit provider/model and bounded cost/data/activation choices; none are inferred.
 
 ### M6-E005: Supplemental Development Acceptance Evidence
+
+**Historical evidence status:** D-36 now owner-accepts this synthetic development
+evidence and M6-E007 records development completion. The original results and
+FAIL history below are retained; no staging/live item is upgraded to PASS.
 
 | Field | Value |
 |---|---|

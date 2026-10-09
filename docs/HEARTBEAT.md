@@ -4,6 +4,24 @@
 
 ## Current Task
 
+**2026-10-09 controlling update:** D-36 labels M6 **DEVELOPMENT COMPLETE** after
+PR #8 merge `dfd3f35167972755322a3746c5628ac9e0b7189f` and successful exact-master
+CI run [37894212090](https://github.com/Gopi-git-bit/New-logistic-/actions/runs/37894212090).
+D-37 authorizes the synthetic capability/allowlist and read-only shadow slice
+on isolated branch `feat/m7-shadow-allowlist`, plus scoped tests/commit/push and
+a draft PR. No live providers, hosting changes, deployment, shared-database SQL,
+agent activation or merge. M7 live activation remains **BLOCKED**; D-33 pending.
+M6 staging/live evidence remains **UNVERIFIED**. Accepted audits/proofs are reused.
+
+**Smallest remaining staging gate:** explicit owner approval of an isolated
+staging validation scope and its hosting, credentials/live emitters, residency,
+retention and sampling choices. Only after approval can deployed isolation,
+instrumentation, exporter recovery and real usage/financial reconciliation be
+proven. No values or live settings are inferred here.
+
+The following 2026-09-27 snapshot is retained as history; its statements that no
+M7 development or M6 completion is authorized are superseded by D-36/D-37.
+
 **M6-A telemetry boundary acceptance** — M6-A is implemented, proven, committed, and owner-accepted (`D-32`, `M6-E004`). `M6-LANGFUSE` remains the sole `IN_PROGRESS` milestone. The next action is an owner decision on M6 completion, additional M6 scope, or a future milestone transition. No additional implementation is currently authorized.
 
 The M6-A boundary remains limited to repository-tracked telemetry contracts, redaction controls, a disabled-by-default adapter, a fake in-memory collector, and disposable synthetic tests. The harness marker `focused_tests count=62=PASS` is accepted under D-31 as semantically equivalent to `focused_tests=PASS count=62` because the log contains the pytest result `62 passed`; this interpretation was applied without modifying the harness or rerunning the proof. The following remain unauthorized:
