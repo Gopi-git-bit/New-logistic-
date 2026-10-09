@@ -17,7 +17,7 @@ from pydantic import SecretStr
 from test_m6_handlers import FakeM6Db
 
 from zippy_workers import recommendation_provider
-from zippy_workers.capabilities import UnauthorizedCapability
+from zippy_workers.capabilities import UnauthorizedCapability, assert_can_call_external
 from zippy_workers.recommendation_provider import (
     CONFIG_NAMES,
     MAX_RESPONSE_BYTES,
@@ -59,6 +59,16 @@ def no_network(monkeypatch):
     monkeypatch.setattr(socket.socket, "connect", forbidden)
     monkeypatch.setattr(socket.socket, "connect_ex", forbidden)
     monkeypatch.setattr(socket, "create_connection", forbidden)
+
+
+@pytest.fixture(autouse=True)
+def fake_provider_authorization(monkeypatch):
+    """Authorize only the mocked OMS capability; leave the real matrix unchanged."""
+
+    def authorize(agent, service):
+        assert (agent, service) == ("order_management", "oms_recommendation_provider")
+
+    monkeypatch.setattr(runner, "assert_can_call_external", authorize)
 
 
 class TrackedTransport(httpx.MockTransport):
@@ -691,6 +701,38 @@ def test_missing_read_capability_denies_before_provider_creation(monkeypatch):
     monkeypatch.setattr(runner, "has_capability", lambda *args: False)
     with pytest.raises(UnauthorizedCapability, match="OMS_STAGING_CAPABILITY_DENIED"):
         asyncio.run(runner.run_synthetic(SETTINGS))
+
+
+def test_real_matrix_denies_provider_before_client_creation(monkeypatch, capsys):
+    monkeypatch.setattr(runner, "assert_can_call_external", assert_can_call_external)
+
+    def forbidden(*args, **kwargs):
+        pytest.fail("unauthorized provider client was constructed")
+
+    monkeypatch.setattr(runner, "OpenAIRecommendationAgent", forbidden)
+    assert runner.main(["--run-synthetic-shadow"], environment=ENVIRONMENT) == 1
+    assert json.loads(capsys.readouterr().out) == {
+        "status": "ERROR",
+        "reason_code": "OMS_STAGING_PROVIDER_NOT_AUTHORIZED",
+    }
+
+
+def test_real_cli_valid_configuration_still_cannot_authorize_provider():
+    root = Path(__file__).resolve().parents[2]
+    result = subprocess.run(
+        [sys.executable, str(RUNNER_PATH), "--run-synthetic-shadow"],
+        env={**ENVIRONMENT, "PYTHONPATH": str(root / "workers/src"), "LANG": "C.UTF-8"},
+        capture_output=True,
+        text=True,
+        timeout=5,
+        check=False,
+    )
+    assert result.returncode == 1
+    assert json.loads(result.stdout) == {
+        "status": "ERROR",
+        "reason_code": "OMS_STAGING_PROVIDER_NOT_AUTHORIZED",
+    }
+    assert "synthetic-provider-key" not in result.stdout + result.stderr
 
 
 def test_runner_and_adapter_have_no_operational_ports_or_active_registration():

@@ -38,16 +38,26 @@ Langfuse or general provider credentials. The client ignores proxy/environment
 configuration (`trust_env=False`), follows no redirects and makes no retries.
 Repository `.env` files are never loaded.
 
-Within a separately authorized, already isolated environment with these names
-injected securely and the existing worker dependencies available:
+The runner separately checks `read:drivers` and the explicit
+`external:oms_recommendation_provider` capability before constructing a provider
+client. The current OMS matrix grants only `external:mapbox`; the new provider
+capability is deliberately **not granted**. Valid configuration and the CLI flag
+therefore still produce `OMS_STAGING_PROVIDER_NOT_AUTHORIZED` without HTTP.
+Mocked tests authorize this capability only through a test fixture. A future,
+separately reviewed owner-approved change must establish provider authorization
+and bind it to the approved endpoint; this PR does not change the capability matrix.
+
+After that future authorization gate, in a separately approved, already isolated
+environment with these names injected securely and the existing dependencies:
 
 ```sh
 PYTHONPATH=workers/src python3 workers/scripts/run_oms_recommendation.py --run-synthetic-shadow
 ```
 
-This command would make a provider request. It has **not** been executed against
-a live provider and must not be run without separate owner authorization. The
-flag makes invocation explicit; it does not grant approval.
+This command currently fails closed at the provider-capability gate. It has
+**not** been executed against a live provider and must not be enabled without
+separate owner authorization. The flag makes invocation explicit; it does not
+grant approval.
 
 Each run sends at most one request, <=4096 request-body bytes and <=16384 raw
 identity-encoded response bytes. At most 16 candidates are accepted before

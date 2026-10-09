@@ -1351,6 +1351,25 @@ These commands validate the documentation diff and working-tree inventory. They 
 | Business controls | Customers book; vendors supply vehicles/drivers; transport companies may play either role per transaction. Deterministic backend assignment, every-refund manual approval, settlement/POD controls, idempotency and Paperclip governance unchanged. Vercel/Zoho connections reserved for later approved integration; Razorpay pending. |
 | Smallest remaining staging gate | Explicit owner approval of an isolated staging validation scope and hosting, credentials/live emitters, residency, retention and sampling choices. Then prove deployed isolation, instrumentation, nonfatal exporter recovery and real usage/financial reconciliation; all remain UNVERIFIED, M7 live activation BLOCKED, D-33 pending. |
 
+### PR #10 review follow-up: explicit provider capability (2026-10-09)
+
+Codex review on `f7f9af2221c5893712a4f76e2d493fb4a61c0f6e` found that `read:drivers`
+did not authorize an external model request. The standalone runner now calls the
+existing explicit external-capability checker for `oms_recommendation_provider`
+before constructing its client. The production capability matrix is unchanged:
+OMS still has only `external:mapbox`, so the valid-config CLI fails closed with
+`OMS_STAGING_PROVIDER_NOT_AUTHORIZED`. Tests grant the capability only through a
+mock fixture; future endpoint-bound provider authorization requires separate
+owner approval and review.
+
+Focused mocked regression: **262 passed, zero skipped or warnings**. Ruff lint
+and format checks passed for both changed Python files; strict mypy passed for
+the runner and adapter. Added tests prove production-matrix denial occurs before
+client construction and a separate valid-config CLI process also denies without
+revealing the synthetic key. No live provider, SQL, deployment, merge or agent
+activation occurred. Exact-head remote CI and CodeRabbit results must be checked
+separately; previous-head CI is not proof for this follow-up.
+
 ### M7-E003: Isolated OMS Staging Bridge Mocked HTTP Evidence
 
 | Field | Value |

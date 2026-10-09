@@ -11,7 +11,11 @@ from dataclasses import asdict, dataclass
 
 import httpx
 
-from zippy_workers.capabilities import UnauthorizedCapability, has_capability
+from zippy_workers.capabilities import (
+    UnauthorizedCapability,
+    assert_can_call_external,
+    has_capability,
+)
 from zippy_workers.recommendation_provider import (
     OpenAIRecommendationAgent,
     ProviderCleanupError,
@@ -42,6 +46,10 @@ async def run_synthetic(
 ) -> StagingReport:
     if not has_capability("order_management", "read", "drivers"):
         raise UnauthorizedCapability("OMS_STAGING_CAPABILITY_DENIED")
+    try:
+        assert_can_call_external("order_management", "oms_recommendation_provider")
+    except UnauthorizedCapability:
+        raise UnauthorizedCapability("OMS_STAGING_PROVIDER_NOT_AUTHORIZED") from None
     candidates = [
         {"distance_m": match.distance_m, "score": match.score} for match in SYNTHETIC_MATCHES
     ]
