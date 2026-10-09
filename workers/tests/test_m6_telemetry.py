@@ -528,6 +528,30 @@ class TestNoAuthority:
 
 
 class TestTraceCorrelation:
+    def test_emitted_spans_keep_server_correlation_and_workflow(self):
+        sink = InMemorySink()
+        pepper = generate_pepper()
+        adapter = TelemetryAdapter(enabled=True, sampling_rate=1.0, sink=sink, pepper=pepper)
+        workflow_reference = "synthetic-workflow-001"
+        workflow_pseudonym = pseudonymize(workflow_reference, pepper)
+        metadata = {
+            "pseudonymous_workflow_id": workflow_pseudonym,
+            "trace_id": "untrusted-trace",
+            "correlation_id": "untrusted-correlation",
+            "span_id": "untrusted-span",
+        }
+        with adapter.trace("synthetic_workflow") as trace:
+            for step in ("first_step", "second_step"):
+                with trace.span(step, metadata=metadata):
+                    pass
+        assert sink.count == 2
+        assert all(event["trace_id"] == trace.trace_id for event in sink.events)
+        assert all(event["correlation_id"] == trace.correlation_id for event in sink.events)
+        assert all(event["pseudonymous_workflow_id"] == workflow_pseudonym for event in sink.events)
+        assert len({event["span_id"] for event in sink.events}) == 2
+        assert all(event["span_id"] != metadata["span_id"] for event in sink.events)
+        assert workflow_reference not in repr(sink.events)
+
     def test_client_may_not_set_trace_id(self):
         adapter = TelemetryAdapter(enabled=True, sampling_rate=1.0, sink=InMemorySink(), pepper="p")
         t = adapter.trace("op")
@@ -556,6 +580,22 @@ class TestTraceCorrelation:
 
 
 class TestEnvironmentIsolation:
+    def test_collector_cleanup_does_not_affect_other_storage(self):
+        first = InMemorySink()
+        second = InMemorySink()
+        for sink in (first, second):
+            adapter = TelemetryAdapter(enabled=True, sampling_rate=1.0, sink=sink)
+            with adapter.trace("synthetic_storage") as trace:
+                with trace.span("synthetic_event"):
+                    pass
+        before = [dict(event) for event in second.events]
+        first.clear()
+        first.close()
+        first.emit({"event_type": "synthetic_closed_event"})
+        assert first.count == 0
+        assert second.count == 1
+        assert second.events == before
+
     def test_environment_tag_in_events(self):
         sink = InMemorySink()
         adapter = TelemetryAdapter(

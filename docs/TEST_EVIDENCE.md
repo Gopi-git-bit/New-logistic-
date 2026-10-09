@@ -1318,3 +1318,59 @@ These commands validate the documentation diff and working-tree inventory. They 
 | Evidence location | `docs/DECISIONS.md` (D-32), `docs/EXECUTION_TRACKER.md`, `docs/HEARTBEAT.md`, this record, `docs/reports/M6_LANGFUSE_IMPLEMENTATION_REPORT.md` |
 | Operator/automation | GitHub Copilot |
 | Notes | Documentation-only owner acceptance per D-32. Acceptance relies on M6-E003, the retained disposable proof `/tmp/m6a-proof.vYDFZu`, and the reviewed pre-commit audit. No GitHub CI checks are claimed. No code, runtime, deployment, credential, infrastructure, or external telemetry action occurred during acceptance. |
+
+### M6-E006: Owner Acceptance and PR #8 Review Checkpoint
+
+| Field | Value |
+|---|---|
+| Date / authority | 2026-10-09; D-36 explicit owner acceptance of M6-E005 as synthetic development evidence |
+| Accepted scope | D-31 development boundary plus M6-E005; development acceptance only, not staging/live acceptance |
+| Reviewed remote head | PR #8 at `8711c87ba7359e3626dc822b19196537485f44c1`; still draft and unmerged at this checkpoint |
+| Actual review evidence | Submitted reviews: zero. Review threads: zero. CodeRabbit's issue comment explicitly says draft PR not reviewed; its skipped review is not treated as approval or a clear external review. No concrete in-scope defect identified in direct inspection of the adapter change and added tests. |
+| Fresh local validation | Affected-module pytest: `82 passed, 1 warning in 0.21s`; existing unknown `asyncio_mode` warning. Touched-file Ruff lint and format check PASS; strict adapter mypy PASS; `git diff --check` PASS. No SQL or database proof executed. |
+| Exact-head CI | All five checks PASS at the reviewed remote head: `compose-config`, `python-checks`, `api-tests`, `security-scan`, `secret-safety`; run `37777388529`. This CI does not cover unpublished local decision/evidence commits. |
+| Branch requirements | Public master branch API reports `protected=false`, checks enforcement off with no required contexts; effective branch rules endpoint returns `[]`. No protection or review configuration changed. |
+| Repository workflow inspection | CI runs on master/main push and PR. The only tracked deployment workflow is manual `workflow_dispatch` with deploy job `if: false`. External webhook/hosting deployment configuration could not be verified without authenticated write/admin access; no overall no-deployment guarantee is claimed. |
+| Publication blocker | Git push failed because no GitHub credentials were available; browser remained signed out and available GitHub MCP tools were read-only. D-36 and its superseding no-merge restriction were committed locally, not published at this checkpoint. No review request or PR update could be submitted. |
+| Current repository-action authority | The owner's subsequent instruction explicitly prohibits merge unless separately authorized, superseding the earlier conditional merge permission in D-36. PR was not marked ready or merged. No resulting master CI exists for this work. |
+| Completion reconciliation | Pending successful, separately authorized merge. Tracker/PRD have not been marked M6 development complete; M7 live activation remains BLOCKED; D-33 remains Pending owner approval. |
+| Preserved controls | Existing worktrees/uncommitted work, deterministic assignment, every-refund manual approval, settlement, idempotency and Paperclip governance unchanged. No live database, payment, service activation, telemetry export or deployment occurred. |
+
+**Separate staging/live acceptance gates — deferred, mandatory, UNVERIFIED (not PASS):**
+
+- [ ] Live end-to-end instrumentation and trusted workflow/correlation propagation proven before live instrumentation is enabled.
+- [ ] Deployed observability storage, roles, credentials, volumes and networks isolated from authoritative operational, governance and financial stores.
+- [ ] Real exporter timeout, outage and recovery proven nonfatal to business/governance operations.
+- [ ] Real provider usage/invoices and financial-ledger reconciliation proven; synthetic estimated cents are not accounting evidence.
+- [ ] Owner separately approves hosting mode, live emitters/credentials, residency, retention, sampling and staging execution scope.
+
+**Smallest proposed next M7 development slice (not started or authorized here):** build a synthetic, read-only shadow evaluation harness around the existing D-34 recommendation contract, following the canonical M7 capability/allowlist then shadow/recommendation sequence. Use fake agents and already eligible synthetic shortlists; prove explicit capability/tool denials, compare advisory rankings with the deterministic baseline, and prove no assignment, price, order, payment or governance mutations. Keep the harness outside the active worker/API registry; no provider, SQL, hosting or live telemetry. The specific owner choice is whether to authorize this fake-only capability/shadow slice next. A real-provider alternative would first require explicit provider/model and bounded cost/data/activation choices; none are inferred.
+
+### M6-E005: Supplemental Development Acceptance Evidence
+
+| Field | Value |
+|---|---|
+| Date / authority | 2026-10-08; current bounded user authorization recorded as D-35; D-31/D-32 remain controlling |
+| Baseline / branch | `f885444ac9bdd85dce9afcd012d234d56c713c69`; `feat/m6-development-evidence` in a new isolated worktree |
+| Reused evidence | M6-E003/M6-E004: accepted 62-test synthetic proof, disabled defaults, redaction, pseudonymization, fail-open delivery, no live sink, private artifact cleanup; retained proof hash `ba77a1f079bff8e61253bb060ce3cc89f41fd94baaa6ff515c67ec14c6003cf8`. Historical proof was not rerun or changed. |
+| Concrete initial failures | Generated correlation was absent from emitted spans. Non-string metadata keys caused classification exceptions to escape after the business executor returned. Both were reproduced locally and repaired. |
+| Missing checks added | Nine synthetic cases: emitted correlation/workflow grouping; receipt reconciliation/tamper detection; six disabled/healthy/outage/recovery/redaction/classification modes; independent collector cleanup |
+| Focused checks | Correlation class: `4 passed, 1 warning in 0.08s`; new execution/usage cases after repair: `7 passed, 11 deselected, 1 warning in 0.05s`; storage class: `3 passed, 1 warning in 0.10s` |
+| Regression command | `PYTHONDONTWRITEBYTECODE=1 PYTHONPATH="$PWD/workers/src" /opt/new-logistic/.venv/bin/python -m pytest workers/tests/test_m6_telemetry.py workers/tests/test_agent_core.py -q -p no:cacheprovider` |
+| Regression result | `82 passed, 1 warning in 0.19s`; no skipped tests in these two modules; existing unknown `asyncio_mode` warning |
+| Reason for regression | Adapter event shape and classification-error behavior changed; only the two affected modules were rerun, not the full repository audit, historical proof or database suites |
+| Quality checks | Touched-file Ruff lint and format checks PASS; strict mypy on `telemetry_adapter.py` PASS; whitespace check PASS |
+| Exclusions | No SQL, shared/production database, container/service start, network exporter, live credential, billing/provider call, runtime instrumentation, payment, agent activation, deployment or merge. Other database-gated tests remain UNVERIFIED, not waived. |
+| Acceptance status | Development evidence ready for owner review; NOT M6 completion or staging acceptance; M6 `IN_PROGRESS`, M7 activation `BLOCKED`, D-33 pending |
+
+| Acceptance item | Development status / evidence | Remaining status / exact gap |
+|---|---|---|
+| Trace/workflow correlation | **PASS with evidence**: `TestTraceCorrelation.test_emitted_spans_keep_server_correlation_and_workflow`; server-generated trace/correlation IDs survive metadata override attempts, spans share a trusted synthetic workflow pseudonym, raw workflow reference is absent | **UNVERIFIED**: end-to-end live workflow instrumentation; not wired or activated |
+| Business audit separation | **PASS with evidence**: `test_m6_development_audit_and_usage_survive_telemetry_failures`; real existing Executor/LoopGuardian synthetic outcomes and intervention audit sink match uninstrumented controls, including BLOCKED outcomes, while telemetry is disabled, fails, is unsafe or recovers; collector cleanup cannot erase source audit/usage | **UNVERIFIED**: deployed observability credentials/storage segregation from authoritative databases; existing operational and Paperclip controls unchanged |
+| Cost/usage reconciliation | **PASS with evidence**: `test_m6_development_usage_reconciles_independent_receipts`; exact token/estimated-cent totals at 100% synthetic sampling match independent fake receipts; altered telemetry is detected; an outage's missing estimate is explicitly detected (5 observed versus 6 source synthetic cents), never treated as a refund, bill or ledger correction | **UNVERIFIED**: actual provider invoices, financial ledger reconciliation and sampled/live usage; **OWNER DECISION**: accept synthetic estimates for this development boundary or require separately approved staging evidence. No rate, tolerance, FX or pricing policy invented. |
+| Nonfatal failure and recovery | **PASS with evidence**: six-mode execution/audit test; classification exception now drops the unsafe event; an unavailable fake collector recovers on subsequent events without business retries, audit changes or replaying dropped telemetry | **UNVERIFIED**: live exporter timeout/outage/recovery; no live exporter is authorized or configured |
+| Observability storage isolation | **PASS with evidence, fake memory only**: `TestEnvironmentIsolation.test_collector_cleanup_does_not_affect_other_storage` plus audit/usage cleanup independence; accepted M6-E003/M6-E004 private-artifact/no-network cleanup evidence reused | **UNVERIFIED**: separately deployed Langfuse storage, users/roles/credentials, volume/network isolation and residency; **OWNER DECISION**: deployment mode and whether this PRD criterion is deferred to separately approved staging |
+
+**FAIL history, not a current acceptance claim:** the missing correlation and escaping classification error failed the new probes. The corrected focused checks and affected-module regression above pass. Historical M6 proof failures and their accepted resolution remain unchanged.
+
+**Exact next owner decision:** accept or reject M6-E005, and explicitly resolve whether M6 completion is limited to D-31's synthetic development scope with separate deployed storage and real cost-ledger reconciliation deferred to approved staging, or whether M6 stays incomplete pending those checks. Do not infer either choice from passing tests or draft PR CI. Before staging/live telemetry, separately approve cloud versus self-hosting, deployment, live emitters/credentials, data residency, retention and sampling; no production settings are chosen here. Gopinathan remains the only approved initial observability administrator. M6 remains `IN_PROGRESS` and M7 activation `BLOCKED` until the explicit acceptance/transition decision.
