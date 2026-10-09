@@ -1351,6 +1351,24 @@ These commands validate the documentation diff and working-tree inventory. They 
 | Business controls | Customers book; vendors supply vehicles/drivers; transport companies may play either role per transaction. Deterministic backend assignment, every-refund manual approval, settlement/POD controls, idempotency and Paperclip governance unchanged. Vercel/Zoho connections reserved for later approved integration; Razorpay pending. |
 | Smallest remaining staging gate | Explicit owner approval of an isolated staging validation scope and hosting, credentials/live emitters, residency, retention and sampling choices. Then prove deployed isolation, instrumentation, nonfatal exporter recovery and real usage/financial reconciliation; all remain UNVERIFIED, M7 live activation BLOCKED, D-33 pending. |
 
+### M7-E002: Fake-Only Recommendation Review Contract
+
+| Field | Value |
+|---|---|
+| Date / authority | 2026-10-09; D-38 owner-authorized isolated development, checks, feature commit/push and draft PR; explicit expiry and idempotent identical retries selected by owner |
+| Baseline / isolation | Published master `a3b4d97542d55fa39c5b738504783ae2f40703ba`; new `/opt/new-logistic-m7-review` worktree on `feat/m7-recommendation-review`; existing worktrees preserved |
+| Contract | Immutable versioned ordered synthetic numeric snapshot plus stored `RecommendationResult` generated through `evaluate_shadow`; fake memory only; pending, accepted, rejected, expired |
+| Review boundary | Explicit fake human enum identities only; unauthorized fake agents/outsiders and identity strings denied; accepted candidate reference is advisory preference only; rejected/expired records have no preference |
+| Snapshot / retries | Version, order, numeric features and candidate count must match exactly; stale/mismatched submissions rejected. Identical creation/review retries preserve original result; conflicting keys or fresh submissions to terminal records fail explicitly. Submission keys bind identity and review ID across the store; expiry at exact deadline; no terminal reversal |
+| Focused command | `PYTHONDONTWRITEBYTECODE=1 PYTHONPATH="$PWD/workers/src" /opt/new-logistic/.venv/bin/python -m pytest workers/tests/test_recommendation_reviews.py workers/tests/test_shadow_recommendations.py workers/tests/test_m6_handlers.py -q -p no:cacheprovider` |
+| Focused result | **165 passed, 0 skipped, 1 warning in 0.46s**; includes 72 new review cases plus existing shadow/authoritative-handler regressions; existing unknown `asyncio_mode` warning |
+| Quality checks | Full worker Ruff lint PASS; affected-file Ruff format check PASS after formatting new tests; strict mypy on new implementation PASS; `git diff --check` PASS |
+| Isolation evidence | Static import/dependency tests prove no active API/worker importer or operational/network/storage port. Entire fake review lifecycle runs with socket calls forbidden. Accepted/rejected reviews preserve seven synthetic mutation domains and fake DB state; existing handler still automatically assigns baseline's first driver after advisory disagreement |
+| Tooling | Built-in test discovery found no tests in the isolated worktree, so existing pytest CLI/environment used with explicit new-worktree PYTHONPATH. No dependency manifest changed or package installed; no accepted audit/disposable proof rerun |
+| Skipped / unverified | No focused skips. Database/SQL, live providers, staging, hosting, deployment and activation tests deliberately not run; all corresponding gates remain UNVERIFIED. Prior M7-E001/master CI is not this feature's PR-head CI |
+| Publication | Feature commit/push, draft PR and exact-head PR CI pending; never push to master or manufacture an empty PR |
+| Preserved controls | Contract is unwired and fake-only; deterministic automatic assignment, orders/prices/payments, every-refund manual approval, settlements and Paperclip decisions/locks unchanged; M7 activation BLOCKED, D-33 pending |
+
 ### M6-E006: Owner Acceptance and PR #8 Review Checkpoint
 
 **Historical checkpoint:** retained unchanged below; its publication/merge and
