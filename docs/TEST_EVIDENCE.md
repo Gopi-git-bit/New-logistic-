@@ -1351,6 +1351,64 @@ These commands validate the documentation diff and working-tree inventory. They 
 | Business controls | Customers book; vendors supply vehicles/drivers; transport companies may play either role per transaction. Deterministic backend assignment, every-refund manual approval, settlement/POD controls, idempotency and Paperclip governance unchanged. Vercel/Zoho connections reserved for later approved integration; Razorpay pending. |
 | Smallest remaining staging gate | Explicit owner approval of an isolated staging validation scope and hosting, credentials/live emitters, residency, retention and sampling choices. Then prove deployed isolation, instrumentation, nonfatal exporter recovery and real usage/financial reconciliation; all remain UNVERIFIED, M7 live activation BLOCKED, D-33 pending. |
 
+### M7-E003: Isolated OMS Staging Bridge Mocked HTTP Evidence
+
+| Field | Value |
+|---|---|
+| Date / authority | 2026-10-09; D-39 current owner implementation and mocked HTTP validation instruction; owner-selected OpenAI-compatible protocol |
+| Base / isolation | Reviewed PR #9 head `70c372fdd1f1328eb09a4175f028d4a7755fa77d`; new branch `feat/m7-oms-staging-bridge` at `/opt/new-logistic-m7-staging-bridge`; existing worktrees/uncommitted files preserved |
+| Reused evidence | Discovery report; M6-E003/E004/E005/E007; M7-E001/E002 and PR #9's existing exact-head CI `37908923159`. No accepted audit, disposable SQL proof or CI rerun initiated |
+| Implementation | Explicit endpoint/key/model/timeout/output-token settings; one-request OpenAI-compatible async adapter; standalone finite synthetic runner; existing shortlist-order baseline and complete-permutation validation unchanged |
+| Limits | One request per run, no retry/redirect; <=16 candidates before serialization; bounded model/key/endpoint fields; finite features normalized to floats; body <=4096 bytes. Raw identity-only response <=16384 bytes, oversized headers/chunks rejected before body read/buffer extension. Configured total run timeout >0 and <=10 seconds: half reserved for concurrent cancellation/response/client cleanup; output tokens 1..256 |
+| Isolation | CLI rejects non-allowlisted environment variables before client creation, including database/service-role/payment/governance keys and legacy tracer keys; no environment-file loading, operational ports, API/worker registration or telemetry initialization |
+| Test discovery | Built-in unit-test discovery found no tests in the isolated worktree; existing pytest environment used with explicit worktree PYTHONPATH instead. No installation or dependency changes |
+| Focused command | From the new worktree: `PYTHONDONTWRITEBYTECODE=1 PYTHONPATH="$PWD/workers/src:$PWD" /opt/new-logistic/.venv/bin/python -m pytest workers/tests/test_staging_recommendations.py workers/tests/test_shadow_recommendations.py workers/tests/test_recommendation_reviews.py workers/tests/test_m6_handlers.py -q -p no:cacheprovider` |
+| Initial implementation result | **249 passed, zero skipped, 1 warning in 0.91s** before finalization review; preserved as a checkpoint, not the final corrected-head result |
+| Failure history | Initial run: 245 passed, 1 failed; CLI test's mocked constructor omitted the injected `transport` keyword. Corrected the test fixture; implementation typing already passed. Import sorting/formatting corrected using existing Ruff. A direct-input overflow guard and input-budget/real-CLI isolation tests were added before final validation |
+| Mocked cases | Valid minimized payload/permutation; malformed ranking/envelope; duplicate/outsider/extra/mutation-bearing fields; duplicate JSON keys; truncated/tool-call/refusal output; request/response byte bounds; 429 with Retry-After, HTTP rejection/redirect, unavailable transport, timeout, caller cancellation; explicit cleanup failure/timeout; one-request limit; secret-safe configuration/reporting; capability denial and CLI environment isolation |
+| Cleanup / noninterference | Mocked streams and transports closed on success/failure/timeout; normal timeout and caller cancellation leave no pending tasks; hanging request completes within 0.2 seconds at a 0.02-second configured deadline. Existing fake review/shadow/authoritative-assignment regressions pass; adapter/runner imports have no operational ports or active registration |
+| Lint / format | `python -m ruff check` on the three new Python files: All checks passed. `python -m ruff format --check` on the same files: 3 files already formatted |
+| Type check | `python -m mypy --strict --follow-imports=silent workers/src/zippy_workers/recommendation_provider.py workers/scripts/run_oms_recommendation.py`: Success, no issues in 2 source files |
+| Not verified / not run | No live provider/model/credential validation, SQL, shared database, staging deployment, exporter/storage/billing proof, merge or agent activation. Prior database-gated skips remain UNVERIFIED |
+| Preserved controls | No changes to matching/assignment authority, orders/prices/payments, every-refund manual approval, settlement or Paperclip locks. M6 development complete only; M7 activation BLOCKED; D-33 pending |
+
+**Finalization review and affected validation, 2026-10-09:**
+
+- Actual review found post-serialization request limiting, HTTPX decoded/chunked
+  buffering before the response cap, separate full cleanup budgets/early client
+  closure omission, cancellation during cleanup, and a CI-working-directory test
+  import failure. Corrected only the adapter, runner and their tests.
+- Request preflights now bound candidate count/configuration before serialization;
+  response headers/compression are checked before reading, and raw chunks before
+  copying. There is no decompression. One absolute deadline reserves half its
+  budget for cancellation and concurrent resource closure. Cleanup is shielded
+  from repeated caller cancellation. The test runner loads the standalone script
+  by its explicit file path rather than relying on the repository root in
+  `PYTHONPATH`.
+- Intermediate finalization validation: 259 passed, 1 failed (the stalled
+  cancellation regression exposed the outer recommendation timeout still using
+  the whole budget). Strict mypy identified the raw response-stream union needing
+  an async-stream guard. Corrected both; no checks weakened.
+- Final command, from `workers/`:
+  `PYTHONDONTWRITEBYTECODE=1 PYTHONPATH="$PWD/src" /opt/new-logistic/.venv/bin/python -m pytest tests/test_staging_recommendations.py tests/test_shadow_recommendations.py tests/test_recommendation_reviews.py tests/test_m6_handlers.py -q -p no:cacheprovider -W error::RuntimeWarning -W error::pytest.PytestUnraisableExceptionWarning --junitxml=<private-session>/oms-bridge-final-junit.xml`.
+- **260 passed, zero skipped, 1 warning in 1.06s.** JUnit independently confirms
+  260 executed cases, zero errors/failures/skips: 95 bridge, 55 shadow, 72 review,
+  38 handler cases. No full audit, database proof or completed discovery repeated.
+- The bridge module has 30 synchronous test functions and zero top-level async
+  test functions. Async HTTP/cancellation/cleanup scenarios explicitly execute
+  through `asyncio.run`; their request/result/closure assertions ran. The local
+  pytest-asyncio plugin is not installed, explaining the unknown `asyncio_mode`
+  configuration warning. This warning is not evidence that coroutines were
+  skipped, nor is this result proof of plugin-managed async-test coverage.
+  Unawaited-coroutine/runtime and unraisable-exception warnings were promoted to
+  errors for this validation. No dependency installation or warning suppression.
+- Touched-file Ruff lint/format PASS; strict mypy PASS for adapter/runner.
+- Current fetched master is `a3b4d97542d55fa39c5b738504783ae2f40703ba`.
+  PR #9's nine-file review-contract delta is inherited by this branch, not new
+  bridge implementation. The new scoped bridge commit is based on
+  `70c372fdd1f1328eb09a4175f028d4a7755fa77d`; publication and exact-head CI must be
+  reported separately from the prior PR #9 checks.
+
 ### M7-E002: Fake-Only Recommendation Review Contract
 
 | Field | Value |

@@ -53,6 +53,38 @@ authoritative. Every refund requires manual approval; settlement and Paperclip
 decision-lock controls are unchanged. No live providers, hosting changes,
 deployment, shared-database SQL, agent activation or merge are authorized.
 
+### Isolated OMS staging bridge (D-39)
+
+`workers/src/zippy_workers/recommendation_provider.py` implements the existing
+recommendation protocol for an explicitly configured OpenAI-compatible HTTPS
+endpoint, dedicated provider key and exact model ID. There are no endpoint/model
+defaults, retries, redirects, provider routing or automatic activation.
+
+`workers/scripts/run_oms_recommendation.py --run-synthetic-shadow` is a separate
+finite runner, not an API route, worker CLI command or registry entry. It uses
+three already-eligible synthetic numeric fixtures in shortlist order and reuses
+the existing deterministic baseline and complete-permutation validator. It does
+not run the SQL matcher, establish live eligibility, assign a driver or confer
+review/governance authority. D-37/D-38's built-in fake restrictions are unchanged.
+
+The CLI rejects every environment variable except its five dedicated
+configuration names and a small interpreter/locale allowlist; it never loads
+`.env`. Candidate/configuration preflights precede serialization; responses use
+bounded raw identity-encoded bytes, without decoder/chunker buffering. Each run
+permits one request under a single deadline: half the configured budget is
+reserved for cancellation and concurrent response/client cleanup. Cleanup is
+shielded from caller cancellation and failures are explicit, not successful
+reports. Reports contain only opaque rankings and explicit
+fallback/provider outcomes. No telemetry adapter or legacy tracer is created.
+This is an isolation preflight, not a sandbox for untrusted Python; staging must
+also restrict process identity, filesystem access and network egress.
+
+M7-E003 is mocked HTTP development evidence only. See
+[the configuration and bounded live plan](plans/M7_OMS_STAGING_BRIDGE.md).
+Live provider/model/credential approval and M6 staging gates remain separate;
+M7 activation stays BLOCKED and D-33 pending. Deterministic assignment, manual
+approval for every refund, settlements and Paperclip controls are unchanged.
+
 ## 1. Agent Architecture
 
 ### 7 + 1 Agent System

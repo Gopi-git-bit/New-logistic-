@@ -35,6 +35,46 @@
 
 ## Bounded Development Authorizations
 
+### D-39: Isolated OMS Recommendation Staging Bridge Development
+
+**Status:** Owner-authorized implementation and mocked HTTP validation only,
+2026-10-09, by the current user instruction.
+
+Base the new `feat/m7-oms-staging-bridge` branch and isolated worktree on PR #9's
+reviewed head `70c372fdd1f1328eb09a4175f028d4a7755fa77d`. Preserve existing
+worktrees and uncommitted files; reuse discovery and completed evidence without
+repeating audits. The owner selected an OpenAI-compatible chat-completions
+protocol with an explicit full HTTPS endpoint and exact model ID. This is not
+approval of a particular provider, endpoint, model, credential or live request.
+
+Implement the existing `RecommendationAgent` protocol and a finite, explicitly
+invoked synthetic runner outside normal API/worker registration. Reuse existing
+shortlist-order fallback and complete-permutation validation; do not introduce a
+matcher or assignment authority. Limit each run to one request, no retries or
+redirects, bounded input/output and total timeout, cancellation and cleanup.
+Send only opaque candidate references and synthetic distance/score features.
+Require isolated provider configuration; reject all non-allowlisted environment
+variables before running. Do not load repository environment files or give the
+runner operational, service-role, payment, assignment or governance credentials.
+
+Keep D-37/D-38 fake-only restrictions intact. Do not instantiate telemetry or the
+legacy key-enabled tracer. Validate only with mocked HTTP transport, including
+failure, fallback, cancellation, cleanup and noninterference. The bounded live
+plan in [M7_OMS_STAGING_BRIDGE.md](plans/M7_OMS_STAGING_BRIDGE.md) is a proposal,
+not execution permission. M6 staging/live gates remain UNVERIFIED; M7 activation
+remains BLOCKED; D-33 remains pending. Every refund retains manual approval;
+settlement, deterministic assignment and Paperclip controls remain unchanged.
+No live providers, SQL execution, merge, deployment or agent activation.
+
+**Separate finalization authorization, 2026-10-09:** The owner authorizes review
+of the actual bridge diff, concrete in-scope fixes and affected checks, a scoped
+commit/push on the existing feature branch, and a draft PR against master.
+Identify inherited PR #9 changes in the actual base diff and verify CI on the
+resulting exact head. Preserve decisions/worktrees. If terminal Git authentication
+fails, preserve the commit and export a commit patch; do not repeat sign-in loops.
+This is publication permission only, not live execution, merge, deployment,
+financial-control changes or agent activation.
+
 ### D-38: Fake-Only Recommendation Review Contract
 
 **Status:** Owner-authorized development, checks, feature-branch commit/push and
