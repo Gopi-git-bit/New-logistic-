@@ -1370,6 +1370,22 @@ revealing the synthetic key. No live provider, SQL, deployment, merge or agent
 activation occurred. Exact-head remote CI and CodeRabbit results must be checked
 separately; previous-head CI is not proof for this follow-up.
 
+### PR #10 CodeRabbit follow-up: repeat cleanup (2026-10-09)
+
+CodeRabbit completed review of `56f165540553b93aee4404ad5804c19a9b6eaa01`
+and reported one minor concrete defect: a second cleanup call could enter an
+expired deadline after resources had already closed. Cleanup now returns without
+another deadline only after successful cleanup with no active request. A failed
+cleanup remains an explicit error; HTTPX's closed flag alone cannot hide a
+transport failure. Active-request cancellation and bounded first cleanup remain
+unchanged.
+
+Mocked regression: **264 passed, zero skipped or warnings**; affected Ruff lint
+and format checks and strict adapter/runner typing passed. New tests cover
+repeat successful cleanup after the deadline and repeat failure despite HTTPX
+marking its client closed. Resulting-head remote CI must be checked separately.
+No provider request, SQL, deployment, merge or agent activation was performed.
+
 ### M7-E003: Isolated OMS Staging Bridge Mocked HTTP Evidence
 
 | Field | Value |

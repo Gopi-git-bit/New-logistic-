@@ -356,6 +356,49 @@ def test_cleanup_timeout_is_bounded_and_explicit():
         )
 
 
+def test_successful_cleanup_is_idempotent_after_run_deadline():
+    class CountingClose(TrackedTransport):
+        closes = 0
+
+        async def aclose(self):
+            self.closes += 1
+            await super().aclose()
+
+    stream = TrackedStream(json.dumps(envelope({"candidate_ids": BASELINE})).encode())
+    transport = CountingClose(lambda request: httpx.Response(200, stream=stream))
+    agent = OpenAIRecommendationAgent(SETTINGS, transport=transport)
+
+    async def scenario():
+        await recommend_drivers([{}, {}, {}], agent, timeout_seconds=0.1)
+        await agent.aclose()
+        assert agent.is_closed and stream.closed and transport.closed
+        agent._deadline = asyncio.get_running_loop().time() - 1
+        await agent.aclose()
+        await agent.aclose()
+        assert transport.closes == 1
+        assert asyncio.all_tasks() == {asyncio.current_task()}
+
+    asyncio.run(scenario())
+
+
+def test_failed_cleanup_stays_explicit_despite_httpx_closed_flag():
+    class BrokenClose(TrackedTransport):
+        async def aclose(self):
+            raise httpx.ConnectError("private cleanup diagnostic")
+
+    agent = OpenAIRecommendationAgent(SETTINGS, transport=BrokenClose(lambda request: None))
+
+    async def scenario():
+        with pytest.raises(ProviderCleanupError, match="PROVIDER_CLEANUP_FAILURE"):
+            await agent.aclose()
+        assert agent.is_closed
+        with pytest.raises(ProviderCleanupError, match="PROVIDER_CLEANUP_FAILURE"):
+            await agent.aclose()
+        assert asyncio.all_tasks() == {asyncio.current_task()}
+
+    asyncio.run(scenario())
+
+
 def test_adapter_conforms_to_protocol_and_cannot_make_a_second_request():
     calls = []
 

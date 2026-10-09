@@ -172,6 +172,8 @@ class OpenAIRecommendationAgent:
         self._active: asyncio.Task[object] | None = None
         self._response: httpx.Response | None = None
         self._deadline: float | None = None
+        self._cleanup_complete = False
+        self._cleanup_failed = False
         self._client = httpx.AsyncClient(
             transport=transport,
             timeout=settings.timeout_seconds,
@@ -309,6 +311,10 @@ class OpenAIRecommendationAgent:
             self._active = None
 
     async def aclose(self) -> None:
+        if self._cleanup_failed:
+            raise ProviderCleanupError("PROVIDER_CLEANUP_FAILURE")
+        if self._cleanup_complete and self._active is None:
+            return
         deadline = self._deadline
         if deadline is None:
             deadline = asyncio.get_running_loop().time() + self.settings.timeout_seconds
@@ -329,6 +335,9 @@ class OpenAIRecommendationAgent:
             async with asyncio.timeout_at(deadline):
                 results = await asyncio.gather(*operations, return_exceptions=True)
         except TimeoutError:
+            self._cleanup_failed = True
             raise ProviderCleanupError("PROVIDER_CLEANUP_FAILURE") from None
         if any(isinstance(result, BaseException) for result in results[:close_count]):
+            self._cleanup_failed = True
             raise ProviderCleanupError("PROVIDER_CLEANUP_FAILURE") from None
+        self._cleanup_complete = True
