@@ -35,6 +35,73 @@
 
 ## Bounded Development Authorizations
 
+### D-39: Isolated OMS Recommendation Staging Bridge Development
+
+**Status:** Owner-authorized implementation and mocked HTTP validation only,
+2026-10-09, by the current user instruction.
+
+Base the new `feat/m7-oms-staging-bridge` branch and isolated worktree on PR #9's
+reviewed head `70c372fdd1f1328eb09a4175f028d4a7755fa77d`. Preserve existing
+worktrees and uncommitted files; reuse discovery and completed evidence without
+repeating audits. The owner selected an OpenAI-compatible chat-completions
+protocol with an explicit full HTTPS endpoint and exact model ID. This is not
+approval of a particular provider, endpoint, model, credential or live request.
+
+Implement the existing `RecommendationAgent` protocol and a finite, explicitly
+invoked synthetic runner outside normal API/worker registration. Reuse existing
+shortlist-order fallback and complete-permutation validation; do not introduce a
+matcher or assignment authority. Limit each run to one request, no retries or
+redirects, bounded input/output and total timeout, cancellation and cleanup.
+Send only opaque candidate references and synthetic distance/score features.
+Require isolated provider configuration; reject all non-allowlisted environment
+variables before running. Do not load repository environment files or give the
+runner operational, service-role, payment, assignment or governance credentials.
+
+Keep D-37/D-38 fake-only restrictions intact. Do not instantiate telemetry or the
+legacy key-enabled tracer. Validate only with mocked HTTP transport, including
+failure, fallback, cancellation, cleanup and noninterference. The bounded live
+plan in [M7_OMS_STAGING_BRIDGE.md](plans/M7_OMS_STAGING_BRIDGE.md) is a proposal,
+not execution permission. M6 staging/live gates remain UNVERIFIED; M7 activation
+remains BLOCKED; D-33 remains pending. Every refund retains manual approval;
+settlement, deterministic assignment and Paperclip controls remain unchanged.
+No live providers, SQL execution, merge, deployment or agent activation.
+
+**Separate finalization authorization, 2026-10-09:** The owner authorizes review
+of the actual bridge diff, concrete in-scope fixes and affected checks, a scoped
+commit/push on the existing feature branch, and a draft PR against master.
+Identify inherited PR #9 changes in the actual base diff and verify CI on the
+resulting exact head. Preserve decisions/worktrees. If terminal Git authentication
+fails, preserve the commit and export a commit patch; do not repeat sign-in loops.
+This is publication permission only, not live execution, merge, deployment,
+financial-control changes or agent activation.
+
+### D-38: Fake-Only Recommendation Review Contract
+
+**Status:** Owner-authorized development, checks, feature-branch commit/push and
+draft PR only, 2026-10-09, by the current user instruction.
+
+Start from published `origin/master` at
+`a3b4d97542d55fa39c5b738504783ae2f40703ba` in a new isolated worktree on
+`feat/m7-recommendation-review`; preserve all existing worktrees. Reuse the
+recommendation and synthetic shadow contracts without recreating their changes.
+Use immutable synthetic candidate snapshots, explicit fake reviewer identities
+and in-memory fake storage only. Support pending, accepted, rejected and expired
+records; reject stale/mismatched snapshots and unauthorized reviewers.
+
+The owner selected explicit per-record expiry, idempotent identical retries,
+and rejection of conflicting retries or changes to terminal reviews. Acceptance
+records an advisory candidate preference only, never assignment or operational
+authorization. Snapshot version and ordered numeric features must both match.
+This is a synthetic contract, not runtime identity authentication, durable
+storage, a governance approval or an in-process sandbox.
+
+Keep the contract outside active API/worker registration. Automatic deterministic
+assignment, orders, prices, payments, every-refund manual approval, settlements
+and Paperclip decisions/locks remain unchanged. No live providers, SQL, hosting
+changes, deployment, activation, direct master push or merge. M6 staging/live
+evidence remains UNVERIFIED; M7 live activation BLOCKED; D-33 pending. This
+permission does not approve D-33 or waive any staging/governance gate.
+
 ### D-34: M7-A Provider-Neutral Recommendations Development Only
 
 **Status:** Owner-authorized development and tests only, 2026-10-08, by the current user instruction: "I authorize development and tests for agent recommendations only."

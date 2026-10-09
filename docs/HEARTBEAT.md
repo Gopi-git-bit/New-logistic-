@@ -4,6 +4,17 @@
 
 ## Current Task
 
+**2026-10-09 recommendation-review update:** D-38 authorizes an isolated
+`feat/m7-recommendation-review` worktree from published master
+`a3b4d97542d55fa39c5b738504783ae2f40703ba`, fake-only review lifecycle development,
+checks, commit/push and a draft PR. Reuse the existing recommendation/shadow
+modules; do not republish the old shadow slice. Snapshot binding, fake reviewer
+authorization, expiry and idempotent review submissions record advisory
+preferences only, outside runtime registration. Existing deterministic
+assignment, every-refund manual approval and Paperclip locks remain unchanged.
+M7 live activation BLOCKED, D-33 pending. No providers, SQL, hosting changes,
+deployment, activation, master push or merge. Existing worktrees are preserved.
+
 **2026-10-09 controlling update:** D-36 labels M6 **DEVELOPMENT COMPLETE** after
 PR #8 merge `dfd3f35167972755322a3746c5628ac9e0b7189f` and successful exact-master
 CI run [37894212090](https://github.com/Gopi-git-bit/New-logistic-/actions/runs/37894212090).
