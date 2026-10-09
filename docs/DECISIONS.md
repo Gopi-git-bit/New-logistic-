@@ -63,6 +63,8 @@ D-36 is the next unused ID after committed D-35 and reserved, uncommitted D-33. 
 
 Identify only the smallest next M7 development slice from the existing approved plan and its specific owner choices; do not begin implementation or live activation. Preserve existing worktrees and uncommitted work. No shared-database SQL, payments, service activation or deployment is authorized. D-31's disabled defaults, synthetic-only sampling, redaction, zero external telemetry spending and separately approved hosting/credentials/residency/retention/sampling gates remain controlling.
 
+**Superseding repository-action restriction, 2026-10-09:** The owner's subsequent instruction permits scoped code edits, tests, commit/push of PR #8's feature branch and PR updates, but explicitly prohibits merge unless separately authorized. This supersedes D-36's earlier conditional merge permission. Do not mark M6 development complete in the tracker or reconcile completion after an unperformed merge. The synthetic development acceptance above remains recorded; staging/live gates, D-33 pending status and business controls remain unchanged.
+
 ### D-35: M6 Supplemental Development Evidence and Draft PR Only
 
 **Status:** Current owner-authorized development checks, scoped fixes and draft-PR publication only, 2026-10-08: "I authorize focused code/test fixes and a draft PR for this task. No deployment or live agent activation."
