@@ -69,6 +69,9 @@ def fake_provider_authorization(monkeypatch):
         assert (agent, service) == ("order_management", "oms_recommendation_provider")
 
     monkeypatch.setattr(runner, "assert_can_call_external", authorize)
+    # This fixture remains fake-only. Real capability/grant registries are empty
+    # and CLI subprocess tests do not inherit these monkeypatches.
+    monkeypatch.setattr(runner, "assert_staging_authorized", lambda *args, **kwargs: None)
 
 
 class TrackedTransport(httpx.MockTransport):
@@ -123,7 +126,11 @@ def execute(response):
     transport = TrackedTransport(handle)
 
     async def scenario():
-        report = await runner.run_synthetic(SETTINGS, transport=transport)
+        # Immediate HTTP-outcome tests should not race a 10ms scheduler window.
+        # Deadline/cancellation tests below retain their explicit short budgets.
+        report = await runner.run_synthetic(
+            replace(SETTINGS, timeout_seconds=0.5), transport=transport
+        )
         await asyncio.sleep(0)
         assert asyncio.all_tasks() == {asyncio.current_task()}
         return report
@@ -899,6 +906,7 @@ def test_runner_and_adapter_have_no_operational_ports_or_active_registration():
     root = Path(__file__).resolve().parents[2]
     runner_path = root / "workers/scripts/run_oms_recommendation.py"
     adapter_path = root / "workers/src/zippy_workers/recommendation_provider.py"
+    authorization_path = root / "workers/src/zippy_workers/staging_authorization.py"
     for path in (runner_path, adapter_path):
         tree = ast.parse(path.read_text())
         imports = {
@@ -914,7 +922,10 @@ def test_runner_and_adapter_have_no_operational_ports_or_active_registration():
         )
     for folder in (root / "api", root / "workers/src/zippy_workers"):
         for path in folder.rglob("*.py"):
-            if path == adapter_path or any(part.startswith("tests") for part in path.parts):
+            if path in {adapter_path, authorization_path} or any(
+                part.startswith("tests") for part in path.parts
+            ):
                 continue
             assert "recommendation_provider" not in path.read_text(), path
             assert "run_oms_recommendation" not in path.read_text(), path
+            assert "staging_authorization" not in path.read_text(), path

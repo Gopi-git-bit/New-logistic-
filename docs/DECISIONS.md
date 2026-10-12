@@ -35,6 +35,38 @@
 
 ## Bounded Development Authorizations
 
+### D-40: M7 Isolated Target and Endpoint-Bound Execution Preparation
+
+**Scope:** Current owner instruction, 2026-10-12: proceed with unprivileged
+staging target preparation, restricted egress, explicit CLI profile selection
+and endpoint-bound authorization implementation. Live testing remains blocked;
+budget proof is still required. This is preparation for review, not permission
+to install/start a service, apply firewall rules, consume a real key, grant
+authority, merge, deploy or activate agents. Preserve VPS worktrees and PR #11.
+
+Base the isolated feature slice on reviewed PR #11 head
+`6ed3f35676fa8f5b622ef226a35c3ec20ee66771`. Keep active runtime registration and
+the capability matrix unchanged. Add reviewed disabled systemd/network-namespace
+templates and mocked endpoint/model/source/UID/limits/expiry/credential-path/
+one-invocation checks. Approved grant registry remains empty and immutable;
+trusted issuer integration is deferred. No request flag, evidence label or
+credential may approve itself. One-use claims use only a private staging file
+directory, never an operational/governance database, and are not removed after
+failure. A record's monetary field/evidence label is not enforcement of a budget.
+
+GitHub metadata confirms `DEEPSEEK_API_KEY` in the `Production` environment,
+created 2026-10-12; no secret value was read. Neither inspected environment nor
+repository secrets contains `OMS_STAGING_API_KEY`. GitHub storage is not VPS
+injection, key validity, dedicated scope, budget proof or execution permission.
+No secret is copied or wired into CI/provider calls by this preparation.
+
+Scoped code/templates/documentation, mocked verification and feature-branch
+publication for review are the development deliverable. Host application,
+dedicated key injection, effective namespace/filesystem/egress evidence,
+provider-enforced hard budget and a separately approved trusted grant remain
+NO-GO gates. D-33 pending; deterministic assignment, Paperclip controls and
+manual approval for every refund are unchanged.
+
 ### D-39: Isolated OMS Recommendation Staging Bridge Development
 
 **Status:** Owner-authorized implementation and mocked HTTP validation only,

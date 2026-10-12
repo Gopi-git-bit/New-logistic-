@@ -1,5 +1,24 @@
 # Zippy Test and Discovery Evidence
 
+### M7-E004: Isolated Execution Preparation (D-40)
+
+2026-10-12; base PR #11 head `6ed3f35676fa8f5b622ef226a35c3ec20ee66771`.
+This is development/preparation evidence, not host setup or live acceptance.
+
+| Check | Evidence / result |
+|---|---|
+| Focused mocked checks | From workers directory, pytest `test_staging_authorization.py`, `test_staging_recommendations.py`, `test_shadow_recommendations.py`, `test_recommendation_reviews.py`, `test_m6_handlers.py`: **316 passed**, zero skips/warnings |
+| Ruff / typing | Four affected Python files: lint and formatting checks pass. Strict mypy on staging_authorization.py and run_oms_recommendation.py passes |
+| One-use claims | Synthetic grants and private temporary files prove one winner under concurrent claims; independent new instances reject repeats; alternate claim store cannot reset invocation |
+| Binding / denial | Endpoint/model/source/UID/credential path, time window, limits and missing evidence denied before claims/client; real matrix and empty immutable registry remain denied. No CLI/env approval loader |
+| Explicit profile / credentials | Mocked CLI sends disabled thinking only for explicit DeepSeek profile. Denied CLI never reads credential file or constructs client. Private-file owner/mode/link/symlink/size rules; no real secret loaded |
+| Service template | `systemd-analyze verify --man=no` on temporary .service copy passes with no warnings; no service started. Initial RuntimeMaxSec/oneshot warning corrected by using TimeoutStartSec |
+| Egress template | Static assertions verify namespace scope, empty IPv4/IPv6 provider/DNS sets and three drop-default chains. **nft syntax/kernel evaluation and effective host egress UNVERIFIED**; nft unavailable in scratch |
+| Corrected test failure | Immediate HTTP 302 outcome test raced its inherited 10ms scheduler window once. Immediate-response helper now uses 0.5 seconds; dedicated timeout/cancellation cases retain explicit short budgets. Final focused suite passes; runtime limits unchanged |
+| Credential metadata only | GitHub Production environment has DEEPSEEK_API_KEY; repository/copilot/Production listings have no OMS_STAGING_API_KEY. No secret value read, copied, probed or injected |
+| Publication / CI | Pending feature publication at this local checkpoint; exact resulting-head CI will be reported in the PR. Inherited PR #11 CI is not this slice's CI |
+| Exclusions | No host setup/firewall application, authenticated provider calls, SQL, merge, deployment, active registration or authority grants. No production/account budget verified. Database-gated gaps unchanged; D-33 pending; refunds manually approved |
+
 ## Evidence Policy
 
 - Current verdict: **BLOCKED FOR PRODUCTION — M3 DETERMINISTIC CORE COMPLETE IN DISPOSABLE TEST ENVIRONMENTS**.
