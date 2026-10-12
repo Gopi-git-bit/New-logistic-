@@ -28,7 +28,7 @@
 
 | ID | Question | Options | Recommendation |
 |----|----------|---------|----------------|
-| R1 | DeepSeek model IDs | `deepseek-v4-pro` / `deepseek-v4-flash` on OpenRouter | Confirm availability first |
+| R1 | DeepSeek model IDs on OpenRouter | `deepseek-v4-pro` / `deepseek-v4-flash` historical candidates | OpenRouter account availability remains pending; direct DeepSeek selection is recorded under D-39 below |
 | R4 | Razorpay live keys | Sandbox → Live KYC | Business/compliance required |
 | R5 | Permit verification API | Vahan API, SERPAPI, custom | National permit scope TBD |
 | R9 | Honcho deployment | Self-hosted vs managed | Self-hosted for control |
@@ -74,6 +74,30 @@ resulting exact head. Preserve decisions/worktrees. If terminal Git authenticati
 fails, preserve the commit and export a commit patch; do not repeat sign-in loops.
 This is publication permission only, not live execution, merge, deployment,
 financial-control changes or agent activation.
+
+**Direct DeepSeek profile selection and evidence, 2026-10-12:** The owner
+selected direct DeepSeek for the bounded M7 preflight on 2026-10-10 and delegated
+model selection. The selected pair is `https://api.deepseek.com/chat/completions`
+and `deepseek-flash`. This is model selection for the synthetic recommendation
+slice, not approval to execute a request or activate Paperclip, OCR or agents.
+
+The [official Chat Completions API reference](https://api-docs.deepseek.com/api/create-chat-completion/),
+inspected 2026-10-12, explicitly lists `deepseek-flash` as an accepted `model`
+value and documents POST `/chat/completions`. It also documents JSON output,
+explicit `max_tokens` and the thinking-mode switch used by the closed profile.
+The identifier is therefore supported by public provider documentation, rather
+than inferred from a display name or an OpenRouter alias. R1's OpenRouter
+account-availability question remains separate and unresolved.
+
+Public identifier validation does **not** prove availability through the owner's
+account, key validity, pricing/budget enforcement, isolation or live permission.
+Those execution gates remain UNVERIFIED/BLOCKED. No inference, model-list,
+authentication or balance probe was made. The runner's provider capability
+remains ungranted; the CLI does not select this formatting profile. If the
+approved endpoint/model changes, the profile and its evidence require a new
+review; do not silently substitute another model or enable automatic fallback.
+No live providers, SQL, merge, deployment or agent activation is authorized.
+D-33 remains pending and every refund remains manually approved.
 
 ### D-38: Fake-Only Recommendation Review Contract
 
