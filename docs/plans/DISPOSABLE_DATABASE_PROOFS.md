@@ -51,6 +51,14 @@ mismatch fails the job; no silent substitution. Historical proof records are not
 current CI evidence. Resulting-head runs and any environment corrections must be
 recorded in the PR before claiming the 72 gaps are closed.
 
+First CI run 38224409837: governance passed 46 tests, zero skips, including its
+12 integration cases plus SQL security/concurrency, rollback/reapply and cleanup.
+Operations stopped at the legacy equality assumption between registry digest
+and Docker config ID. The correction retains the original registry digest,
+verifies the image's repository digest and binds the container to its resolved
+config ID; these are separately reported as non-secret artifact metadata.
+Operations evidence remains pending until a resulting-head proof passes.
+
 The FastAPI/Starlette `httpx` deprecation remains a separate maintenance item.
 M7's dedicated credentials, installed target, effective egress, budget and trusted
 authorization remain unverified. D-33 remains pending; real refunds require manual

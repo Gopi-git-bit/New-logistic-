@@ -5,7 +5,10 @@
 set -euo pipefail
 
 readonly image='postgres@sha256:f1c3376c26f2609ab9f29f71f824103fe2fcd8ee0346485cb6122a4f93df6f94'
-readonly expected_image_id='sha256:f1c3376c26f2609ab9f29f71f824103fe2fcd8ee0346485cb6122a4f93df6f94'
+# Registry digest and Docker config/image ID are distinct on hosted Docker.
+# Resolve the exact pinned artifact, verify its repository digest, then bind
+# the launched container to that artifact's actual config ID.
+readonly expected_image_id=$(docker image inspect "$image" --format '{{.Id}}')
 readonly repository_root=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../../.." && pwd)
 readonly python_bin=${ZIPPY_M4_PYTHON:-/tmp/zippy-m3-venv/bin/python}
 readonly suffix="$(date -u +%Y%m%d%H%M%S)_$(tr -d '-' </proc/sys/kernel/random/uuid | cut -c1-8)"
@@ -32,7 +35,10 @@ cleanup() {
 trap cleanup EXIT
 
 [[ -x "$python_bin" ]]
-[[ "$(docker image inspect "$image" --format '{{.Id}}')" == "$expected_image_id" ]]
+[[ "$expected_image_id" =~ ^sha256:[0-9a-f]{64}$ ]]
+docker image inspect "$image" --format '{{range .RepoDigests}}{{println .}}{{end}}' \
+    | grep -Eq '^(postgres|docker.io/library/postgres)@sha256:f1c3376c26f2609ab9f29f71f824103fe2fcd8ee0346485cb6122a4f93df6f94$'
+printf 'image_identity=PASS\nimage_id=%s\n' "$expected_image_id"
 [[ "$(ss -lntH | awk '{print $4}' | grep -Ec '(^|:)(5432)$' || true)" == 0 ]]
 # Resolve the pinned image's postgres UID/GID, then restrict the private Unix
 # socket directory to that identity (mode 0700). Host-side tests and docker
@@ -72,6 +78,7 @@ for _ in {1..120}; do
 done
 [[ "$ready" == true ]]
 [[ "$(docker inspect -f '{{.HostConfig.NetworkMode}}' "$container")" == none ]]
+[[ "$(docker inspect -f '{{.Image}}' "$container")" == "$expected_image_id" ]]
 [[ -z "$(docker port "$container")" ]]
 
 # The image entrypoint broadens /var/run/postgresql during startup; restore the
