@@ -59,6 +59,12 @@ verifies the image's repository digest and binds the container to its resolved
 config ID; these are separately reported as non-secret artifact metadata.
 Operations evidence remains pending until a resulting-head proof passes.
 
+The second run confirms registry digest `f1c337...f6f94` resolves on hosted
+Docker to config ID `80f4c7...ced8d2`; the manifest pin is unchanged. A second
+early operations failure exposed the readiness loop's `/dev/null` read, which
+returns EOF instead of waiting. Use a real one-second interval and safe numeric
+failure-line markers, retaining the existing bounded attempts and private logs.
+
 The FastAPI/Starlette `httpx` deprecation remains a separate maintenance item.
 M7's dedicated credentials, installed target, effective egress, budget and trusted
 authorization remain unverified. D-33 remains pending; real refunds require manual

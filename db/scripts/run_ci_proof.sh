@@ -36,6 +36,7 @@ import sys
 patterns = (
     r"(?:m[3456][a-z0-9_]*|image_identity|network_isolation|cleanup|socket_hardening|socket_scram|bootstrap_and_fixture_reset|exact_cleanup|host_port_5432|rollback|reapply|secret_scan)=PASS",
     r"image_id=sha256:[0-9a-f]{64}",
+    r"M4_FAILURE_LINE=[0-9]+",
     r"negative_local_user=(?:PASS|NOT VERIFIED)",
     r"(?:socket_dir_mode|socket_file_mode|secret_pattern_matches)=[0-9]+",
     r"(?:password_encryption|pg_hba_local_auth)=scram-sha-256",

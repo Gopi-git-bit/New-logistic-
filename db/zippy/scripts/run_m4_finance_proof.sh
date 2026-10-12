@@ -2,7 +2,8 @@
 # M4 operations-finance disposable proof. Same hardened isolation controls as
 # the M3 proof: network none, private hardened Unix socket, scram-sha-256 local
 # auth, restricted logins, negative non-root probe, exact cleanup verification.
-set -euo pipefail
+set -Eeuo pipefail
+trap 'printf "M4_FAILURE_LINE=%s\n" "$LINENO" >&2' ERR
 
 readonly image='postgres@sha256:f1c3376c26f2609ab9f29f71f824103fe2fcd8ee0346485cb6122a4f93df6f94'
 # Registry digest and Docker config/image ID are distinct on hosted Docker.
@@ -74,7 +75,8 @@ for _ in {1..120}; do
         ready=true
         break
     fi
-    read -r -t 1 _ </dev/null || true
+    # Reading /dev/null returns EOF immediately; it does not wait one second.
+    sleep 1
 done
 [[ "$ready" == true ]]
 [[ "$(docker inspect -f '{{.HostConfig.NetworkMode}}' "$container")" == none ]]
