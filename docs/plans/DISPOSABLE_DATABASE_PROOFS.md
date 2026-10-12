@@ -65,6 +65,16 @@ early operations failure exposed the readiness loop's `/dev/null` read, which
 returns EOF instead of waiting. Use a real one-second interval and safe numeric
 failure-line markers, retaining the existing bounded attempts and private logs.
 
+Later phase diagnostics narrowed failure to the interval after fixture loading
+and before pytest, which also contained the non-root probe. That probe used a
+project virtualenv import and conflated any interpreter exit 1 with a successful
+database connection. Use system Python's standard-library Unix socket probe
+instead: verify UID 65534, require permission denial, distinguish actual socket
+access with exit 42, and leave other probe errors explicitly NOT VERIFIED.
+This tests the private-directory boundary directly rather than accepting an
+authentication failure as proof of filesystem isolation. SQLSTATE/source-only
+fixture diagnostics remain available without emitting statements or values.
+
 The FastAPI/Starlette `httpx` deprecation remains a separate maintenance item.
 M7's dedicated credentials, installed target, effective egress, budget and trusted
 authorization remain unverified. D-33 remains pending; real refunds require manual

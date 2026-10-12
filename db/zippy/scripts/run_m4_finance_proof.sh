@@ -159,34 +159,30 @@ docker exec "${common_env[@]}" -e PGUSER=zippy_m2_runner -e PGPASSWORD="$super_p
 # hardened socket directory. Safely skipped (NOT VERIFIED) without root or
 # setpriv; no host accounts are created or modified.
 negative_local_user='NOT VERIFIED'
-if [[ "$(id -u)" == 0 ]] && command -v setpriv >/dev/null 2>&1; then
+proof_phase=negative_identity
+if [[ "$(id -u)" == 0 ]] && command -v setpriv >/dev/null 2>&1 && [[ -x /usr/bin/python3 ]]; then
     negative_rc=0
-    ZIPPY_M3_TEST_DATABASE_URL="host=$socket_dir dbname=$database user=zippy_m2_app_login" \
-        setpriv --reuid=65534 --regid=65534 --clear-groups "$python_bin" - <<'PY' || negative_rc=$?
+    ZIPPY_M4_SOCKET_PROBE="$socket_dir/.s.PGSQL.5432" \
+        setpriv --reuid=65534 --regid=65534 --clear-groups /usr/bin/python3 - <<'PY' || negative_rc=$?
+import errno
 import os
+import socket
 import sys
 
-import psycopg
-
-try:
-    psycopg.connect(os.environ["ZIPPY_M3_TEST_DATABASE_URL"], connect_timeout=3)
-except psycopg.OperationalError as exc:
-    message = str(exc)
-    denied = (
-        "ermission denied" in message
-        or "password authentication failed" in message
-        or "no password supplied" in message
-    )
-    if denied:
-        sys.exit(0)
-    print(f"unexpected connection failure: {type(exc).__name__}", file=sys.stderr)
+if os.geteuid() != 65534:
     sys.exit(3)
-sys.exit(1)
+with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as probe:
+    try:
+        probe.connect(os.environ["ZIPPY_M4_SOCKET_PROBE"])
+    except OSError as exc:
+        sys.exit(0 if exc.errno in {errno.EACCES, errno.EPERM} else 3)
+# Distinguish an actual successful connection from generic interpreter errors.
+sys.exit(42)
 PY
     case "$negative_rc" in
         0) negative_local_user='PASS' ;;
-        1)
-            printf 'ERROR: unrelated non-root identity connected to the disposable socket\n' >&2
+        42)
+            printf 'ERROR: unrelated non-root identity reached the disposable socket\n' >&2
             exit 1
             ;;
         *) negative_local_user='NOT VERIFIED' ;;

@@ -37,7 +37,7 @@ patterns = (
     r"(?:m[3456][a-z0-9_]*|image_identity|network_isolation|cleanup|socket_hardening|socket_scram|bootstrap_and_fixture_reset|exact_cleanup|host_port_5432|rollback|reapply|secret_scan)=PASS",
     r"image_id=sha256:[0-9a-f]{64}",
     r"M4_FAILURE_LINE=[0-9]+",
-    r"M4_FAILURE_PHASE=(?:initializing|image_identity|port_precheck|postgres_identity|container_start|readiness|socket_hardening|authentication|marker|role_bootstrap|migrations|fixtures|fixtures_m3|fixtures_m4|tests|report|rollback|role_teardown|cleanup)",
+    r"M4_FAILURE_PHASE=(?:initializing|image_identity|port_precheck|postgres_identity|container_start|readiness|socket_hardening|authentication|marker|role_bootstrap|migrations|fixtures|fixtures_m3|fixtures_m4|negative_identity|tests|report|rollback|role_teardown|cleanup)",
     r"negative_local_user=(?:PASS|NOT VERIFIED)",
     r"(?:socket_dir_mode|socket_file_mode|secret_pattern_matches)=[0-9]+",
     r"(?:password_encryption|pg_hba_local_auth)=scram-sha-256",
@@ -53,8 +53,8 @@ with open(sys.argv[1]) as log:
         line = line.rstrip("\n")
         if any(re.fullmatch(pattern, line) for pattern in patterns):
             print(line)
-        match = re.fullmatch(
-            r"psql:/workspace/db/zippy/tests/(setup_m[34]\.sql):([0-9]+): ERROR:\s+([A-Z0-9]{5})",
+        match = re.match(
+            r"psql:/workspace/db/zippy/tests/(setup_m[34]\.sql):([0-9]+): ERROR:\s+([A-Z0-9]{5})\b",
             line,
         )
         if match:
