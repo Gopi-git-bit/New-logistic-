@@ -107,6 +107,11 @@ exclusive reservations, private regular-file/owner/link checks and fsync prevent
 concurrent admissions or process restart from clearing a failed/abandoned run.
 One provider failure opens the circuit. Authentication/invalid-output/configuration,
 cleanup and cancellation failures also latch it, without granting fallback.
+Successful release first persists a blocking release guard, then removes and
+syncs the active reservation before unlinking the guard. A release error leaves
+blocking state without requiring a recovery write. The final guard unlink is
+intentionally not synced: after a crash it may reappear and conservatively block
+a later run. Unobserved or incomplete release guards also deny admission.
 There is no cooldown, half-open probe, automatic reset or reset CLI. Operator
 deletion of its own state or hostile in-process Python is outside this boundary.
 

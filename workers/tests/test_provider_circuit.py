@@ -37,6 +37,71 @@ def test_success_releases_only_its_own_inflight_reservation(circuit):
     circuit.finish(second, None)
 
 
+def test_success_release_sync_failure_blocks_a_new_instance(circuit, monkeypatch):
+    import os
+
+    permit = circuit.reserve()
+    active = circuit.directory / "deepseek-circuit.active"
+    fsync = os.fsync
+
+    def fail_after_active_removal(fd):
+        if not active.exists():
+            raise OSError("synthetic release persistence failure")
+        fsync(fd)
+
+    with monkeypatch.context() as patch:
+        patch.setattr(os, "fsync", fail_after_active_removal)
+        with pytest.raises(CircuitError, match="STORE_UNAVAILABLE"):
+            circuit.finish(permit, None)
+    assert not active.exists()
+    with pytest.raises(CircuitError):
+        StrictProviderCircuit(circuit.directory).reserve()
+
+
+@pytest.mark.parametrize("stage", ["guard_file_sync", "guard_directory_sync", "guard_removal"])
+def test_release_guard_storage_failures_stay_blocked(circuit, monkeypatch, stage):
+    import os
+
+    permit = circuit.reserve()
+    fsync, unlink = os.fsync, os.unlink
+    syncs = 0
+
+    def failing_sync(fd):
+        nonlocal syncs
+        syncs += 1
+        if (stage == "guard_file_sync" and syncs == 1) or (
+            stage == "guard_directory_sync" and syncs == 2
+        ):
+            raise OSError("synthetic guard persistence failure")
+        fsync(fd)
+
+    def failing_unlink(name, **kwargs):
+        if stage == "guard_removal" and name == "deepseek-circuit.releasing":
+            raise OSError("synthetic guard removal failure")
+        unlink(name, **kwargs)
+
+    with monkeypatch.context() as patch:
+        patch.setattr(os, "fsync", failing_sync)
+        patch.setattr(os, "unlink", failing_unlink)
+        with pytest.raises(CircuitError, match="STORE_UNAVAILABLE"):
+            circuit.finish(permit, None)
+    with pytest.raises(CircuitError):
+        StrictProviderCircuit(circuit.directory).reserve()
+
+
+@pytest.mark.parametrize("kind", ["empty_file", "symlink", "directory"])
+def test_partial_or_unexpected_release_guard_blocks_admission(circuit, kind):
+    guard = circuit.directory / "deepseek-circuit.releasing"
+    if kind == "empty_file":
+        guard.touch(mode=0o600)
+    elif kind == "symlink":
+        guard.symlink_to(circuit.directory / "missing")
+    else:
+        guard.mkdir()
+    with pytest.raises(CircuitError, match="RELEASE_UNVERIFIED"):
+        StrictProviderCircuit(circuit.directory).reserve()
+
+
 @pytest.mark.parametrize("failure", list(CircuitFailure))
 def test_one_failure_latches_across_new_instances_without_reset(circuit, failure):
     circuit.finish(circuit.reserve(), failure)

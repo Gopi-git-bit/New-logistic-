@@ -92,6 +92,8 @@ class StrictProviderCircuit:
         with self._locked() as directory_fd:
             if self._exists(directory_fd, "deepseek-circuit.open"):
                 raise CircuitError("OMS_STAGING_CIRCUIT_OPEN")
+            if self._exists(directory_fd, "deepseek-circuit.releasing"):
+                raise CircuitError("OMS_STAGING_CIRCUIT_RELEASE_UNVERIFIED")
             if self._exists(directory_fd, "deepseek-circuit.active"):
                 raise CircuitError("OMS_STAGING_CIRCUIT_BUSY_OR_ABANDONED")
             permit = CircuitPermit(uuid.uuid4().hex)
@@ -132,6 +134,24 @@ class StrictProviderCircuit:
                 os.close(fd)
             if token != permit.token.encode("ascii"):
                 raise CircuitError("OMS_STAGING_CIRCUIT_PERMIT_MISMATCH")
+            if failure is None:
+                # Persist a blocking guard before removing the sole reservation.
+                # Release failures must not need a recovery write to deny later
+                # runs: a failing store may reject that write too.
+                fd = os.open(
+                    "deepseek-circuit.releasing",
+                    os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW,
+                    0o600,
+                    dir_fd=directory_fd,
+                )
+                try:
+                    self._private_file(fd)
+                    if os.write(fd, token) != len(token):
+                        raise CircuitError("OMS_STAGING_CIRCUIT_STORE_UNAVAILABLE")
+                    os.fsync(fd)
+                    os.fsync(directory_fd)
+                finally:
+                    os.close(fd)
             if failure is not None:
                 # The existence of even an incomplete marker latches the circuit.
                 # Never remove a failure marker or clear abandoned reservations.
@@ -152,6 +172,11 @@ class StrictProviderCircuit:
                     os.close(fd)
             os.unlink("deepseek-circuit.active", dir_fd=directory_fd)
             os.fsync(directory_fd)
+            if failure is None:
+                os.unlink("deepseek-circuit.releasing", dir_fd=directory_fd)
+                # Intentionally no final fsync: the active removal is already
+                # durable. A crash may restore this guard and conservatively
+                # deny a later run, but cannot erase an error's blocking state.
 
     def assert_fallback_authorized(self) -> None:
         # No trusted OpenRouter/Qwen policy or issuer exists in this preparation.
