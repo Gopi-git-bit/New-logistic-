@@ -156,8 +156,8 @@ docker exec "${common_env[@]}" -e PGUSER=zippy_m2_runner -e PGPASSWORD="$super_p
     psql -X --set=ON_ERROR_STOP=1 --set=VERBOSITY=sqlstate --quiet --no-psqlrc --file=/workspace/db/zippy/tests/setup_m4.sql
 
 # Negative check: an unrelated non-root host identity must not reach the
-# hardened socket directory. Safely skipped (NOT VERIFIED) without root or
-# setpriv; no host accounts are created or modified.
+# hardened socket directory. Missing prerequisites or an unexpected probe error
+# fail the proof; no host accounts are created or modified.
 negative_local_user='NOT VERIFIED'
 proof_phase=negative_identity
 if [[ "$(id -u)" == 0 ]] && command -v setpriv >/dev/null 2>&1 && [[ -x /usr/bin/python3 ]]; then
@@ -172,6 +172,7 @@ import sys
 if os.geteuid() != 65534:
     sys.exit(3)
 with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as probe:
+    probe.settimeout(5)
     try:
         probe.connect(os.environ["ZIPPY_M4_SOCKET_PROBE"])
     except OSError as exc:
@@ -187,6 +188,10 @@ PY
             ;;
         *) negative_local_user='NOT VERIFIED' ;;
     esac
+fi
+if [[ "$negative_local_user" != PASS ]]; then
+    printf 'negative_local_user=NOT VERIFIED\n' >&2
+    exit 1
 fi
 
 proof_phase=tests

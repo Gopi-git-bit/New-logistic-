@@ -86,6 +86,17 @@ both mode-0700 and mode-0755 synthetic socket directories. A mismatch stops the
 operations proof; no database is started on a failed control. Final resulting-head
 control/proof outcomes are recorded in PR #13 without another local socket attempt.
 
+PR #13 review found that an unexpected error in the actual PostgreSQL socket
+probe could remain NOT VERIFIED while the harness still succeeded. The proof
+now requires that actual check to PASS before pytest begins: missing prerequisites,
+unexpected errors and successful access by the unrelated identity all exit 1.
+Only EACCES/EPERM denial under UID 65534 is accepted. The connect operation has a
+five-second timeout; hosted controls allow seven seconds for process startup and
+the connect timeout. Focused regressions exercise denial, access, missing sockets,
+connection errors, timeout, wrong identity and shell/interpreter failures without
+creating local sockets. They supplement the actual hosted PostgreSQL/control
+proofs; resulting-head evidence is recorded in PR #13.
+
 The FastAPI/Starlette `httpx` deprecation remains a separate maintenance item.
 M7's dedicated credentials, installed target, effective egress, budget and trusted
 authorization remain unverified. D-33 remains pending; real refunds require manual

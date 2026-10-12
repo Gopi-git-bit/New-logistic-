@@ -41,7 +41,7 @@ def verify_controls() -> None:
                         "PATH": "/usr/bin:/bin",
                         "ZIPPY_M4_SOCKET_PROBE": str(endpoint),
                     },
-                    timeout=3,
+                    timeout=7,
                     check=False,
                 )
                 if result.returncode != expected:

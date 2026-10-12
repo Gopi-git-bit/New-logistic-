@@ -33,8 +33,8 @@ jobs:
         run: |
           python -m venv .venv
           .venv/bin/python -m pip install -r requirements-api-dev.txt
-      - name: Check proof-report gate regressions
-        run: .venv/bin/python -m pytest db/tests/test_proof_report.py -q
+      - name: Check proof acceptance regressions
+        run: .venv/bin/python -m pytest db/tests -q
       - name: Obtain the existing pinned PostgreSQL artifact
         run: |
           docker pull postgres@sha256:f1c3376c26f2609ab9f29f71f824103fe2fcd8ee0346485cb6122a4f93df6f94
