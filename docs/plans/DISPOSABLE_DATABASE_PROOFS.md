@@ -75,6 +75,17 @@ This tests the private-directory boundary directly rather than accepting an
 authentication failure as proof of filesystem isolation. SQLSTATE/source-only
 fixture diagnostics remain available without emitting statements or values.
 
+Evidence correction: commit d582bd5's message incorrectly stated that local
+private/accessible socket controls passed. The local attempt failed at socket
+creation with EPERM before either control ran; it is not counted as evidence.
+Hosted CI run 38226933907 at that commit passed operations (118 tests, including
+60 integration cases) and governance (46 tests, including 12 integration cases),
+with zero skips, scoped cleanup and the actual non-root socket denial PASS.
+The launcher now requires a separate hosted control using the same probe against
+both mode-0700 and mode-0755 synthetic socket directories. A mismatch stops the
+operations proof; no database is started on a failed control. Final resulting-head
+control/proof outcomes are recorded in PR #13 without another local socket attempt.
+
 The FastAPI/Starlette `httpx` deprecation remains a separate maintenance item.
 M7's dedicated credentials, installed target, effective egress, budget and trusted
 authorization remain unverified. D-33 remains pending; real refunds require manual

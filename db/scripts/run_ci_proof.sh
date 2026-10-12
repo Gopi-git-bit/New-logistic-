@@ -19,13 +19,19 @@ trap 'rm -rf -- "$private_dir"' EXIT
 set +e
 if [[ "$proof" == operations ]]; then
     unshare --net env -i PATH="$PATH" PYTHONDONTWRITEBYTECODE=1 \
-        ZIPPY_M4_PYTHON="$root/.venv/bin/python" \
-        bash "$root/db/zippy/scripts/run_m4_finance_proof.sh" >>"$log" 2>&1
+        "$root/.venv/bin/python" "$root/db/scripts/check_socket_probe.py" >>"$log" 2>&1
+    status=$?
+    if [[ "$status" == 0 ]]; then
+        unshare --net env -i PATH="$PATH" PYTHONDONTWRITEBYTECODE=1 \
+            ZIPPY_M4_PYTHON="$root/.venv/bin/python" \
+            bash "$root/db/zippy/scripts/run_m4_finance_proof.sh" >>"$log" 2>&1
+        status=$?
+    fi
 else
     unshare --net env -i PATH="$PATH" PYTHONDONTWRITEBYTECODE=1 M5B_PROOF_LOG="$log" \
         bash "$root/db/paperclip/scripts/run_m5b_service_proof.sh" >>"$log" 2>&1
+    status=$?
 fi
-status=$?
 set -e
 # Publish only fixed proof markers and numeric summaries. Full SQL/pytest
 # diagnostics remain private even on failure; never print credential strings.
@@ -36,6 +42,8 @@ import sys
 patterns = (
     r"(?:m[3456][a-z0-9_]*|image_identity|network_isolation|cleanup|socket_hardening|socket_scram|bootstrap_and_fixture_reset|exact_cleanup|host_port_5432|rollback|reapply|secret_scan)=PASS",
     r"image_id=sha256:[0-9a-f]{64}",
+    r"socket_probe_controls=PASS",
+    r"SOCKET_PROBE_CONTROLS_UNVERIFIED",
     r"M4_FAILURE_LINE=[0-9]+",
     r"M4_FAILURE_PHASE=(?:initializing|image_identity|port_precheck|postgres_identity|container_start|readiness|socket_hardening|authentication|marker|role_bootstrap|migrations|fixtures|fixtures_m3|fixtures_m4|negative_identity|tests|report|rollback|role_teardown|cleanup)",
     r"negative_local_user=(?:PASS|NOT VERIFIED)",
