@@ -35,6 +35,7 @@ def source_digest() -> str:
         "src/zippy_workers/capabilities.py",
         "src/zippy_workers/recommendations.py",
         "src/zippy_workers/recommendation_provider.py",
+        "src/zippy_workers/provider_circuit.py",
         "src/zippy_workers/staging_authorization.py",
         "scripts/run_oms_recommendation.py",
     )

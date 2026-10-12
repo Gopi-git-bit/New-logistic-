@@ -20,6 +20,7 @@ from zippy_workers.capabilities import (
     assert_can_call_external,
     has_capability,
 )
+from zippy_workers.provider_circuit import CircuitError, CircuitFailure, StrictProviderCircuit
 from zippy_workers.recommendation_provider import (
     OpenAIRecommendationAgent,
     ProviderCleanupError,
@@ -69,6 +70,50 @@ async def run_synthetic(
         claim_directory=claim_directory,
         credential_file=credential_file,
     )
+    circuit = None
+    permit = None
+    if expires_at is not None:
+        if claim_directory is None:
+            raise CircuitError("OMS_STAGING_CIRCUIT_BINDING_MISSING")
+        circuit = StrictProviderCircuit(claim_directory)
+        permit = circuit.reserve()
+    try:
+        report = await _run_provider(
+            settings,
+            transport=transport,
+            profile=profile,
+            expires_at=expires_at,
+            credential_file=credential_file,
+        )
+    except BaseException:
+        if circuit is not None and permit is not None:
+            circuit.finish(permit, CircuitFailure.SAFETY)
+        raise
+    if circuit is not None and permit is not None:
+        failure = None
+        if (
+            report.advisory.reason_code != "RECOMMENDED"
+            or report.provider_outcome != "RESPONSE_RECEIVED"
+            or report.requests_started != 1
+        ):
+            failure = {
+                "UNAVAILABLE": CircuitFailure.UNAVAILABLE,
+                "TIMEOUT": CircuitFailure.TIMEOUT,
+                "RATE_LIMITED": CircuitFailure.RATE_LIMITED,
+            }.get(report.provider_outcome, CircuitFailure.SAFETY)
+        circuit.finish(permit, failure)
+    return report
+
+
+async def _run_provider(
+    settings: ProviderSettings,
+    *,
+    transport: httpx.AsyncBaseTransport | None,
+    profile: ProviderRequestProfile | None,
+    expires_at: datetime | None,
+    credential_file: Path | None,
+) -> StagingReport:
+    """Called only after capability, grant and persistent circuit admission."""
     if profile is not None:
         profile.validate_settings(settings)
     if credential_file is not None:

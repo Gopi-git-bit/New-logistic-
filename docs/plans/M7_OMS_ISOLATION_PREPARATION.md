@@ -75,7 +75,8 @@ Do not populate it manually from request metadata or test records, change the
 global matrix to enable all provider requests, or monkeypatch a real invocation.
 
 `--source-sha` is an asserted identifier, not attestation. The source digest binds
-five actual source files; it is not a dependency/OS image digest. A future owner
+six actual source files, including the prepared persistent circuit guard; it is
+not a dependency/OS image digest. A future owner
 must verify the sealed artifact's provenance, dependencies, source digest and
 isolation evidence before a trusted authority can register any matching grant.
 Hostile in-process Python/root is outside this module's security boundary.

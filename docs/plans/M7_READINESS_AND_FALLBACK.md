@@ -22,7 +22,7 @@ evidence, not installed M7 target or provider-budget acceptance.
 | Restricted egress | Empty destination sets and drop-default template are reviewed; effective policy remains UNVERIFIED | Observe the actual target namespace's IPv4/IPv6 rules, approved TLS/DNS destinations and denial of database/payment/governance destinations |
 | Hard spending cap | UNVERIFIED; 66 tokens measures usage, not enforced spend | Owner-approved monetary amount/currency and provider-account evidence of enforcement, credits, balance, reset/recharge behavior and worst-case charge |
 | Endpoint-bound authorization | VERIFIED DENIED: capability absent and trusted registry empty | Separately reviewed trusted issuer integration and one-use approval bound to actual source, UID, credential path, endpoint/model, limits, expiry and evidence |
-| OpenRouter/Qwen fallback | Owner preference recorded; NOT IMPLEMENTED OR ENABLED | Exact Qwen model ID and provider routing choice, separate key/account evidence, aggregate budget, endpoint authorization and mocked fallback proof |
+| OpenRouter/Qwen fallback | Owner preference recorded; persistent primary circuit guard prepared; fallback NOT IMPLEMENTED OR ENABLED | Exact Qwen model ID and provider routing choice, separate key/account evidence, aggregate budget, endpoint authorization and mocked fallback proof |
 
 The claim that both configured models are available does not select the second
 model or authorize model switching during the DeepSeek-specific preflight.
@@ -32,6 +32,28 @@ output and output-token limits. Automatic model fallback remains disabled in the
 merged implementation while its separate preparation is reviewed.
 
 ## Next evidence collection, without inference
+
+`workers/scripts/collect_oms_staging_evidence.py` is a standalone, standard-library
+collector for the existing VS Code Remote-SSH window. It checks the expected
+Linux hostname before querying the named target. It reads only selected systemd
+properties, effective process UID/capabilities, relevant mount flags, namespace
+inodes, named nftables policy/set counts and a rules hash, plus credential/state
+file metadata. It never reads a key, Environment/ExecStart, process environments,
+business files or unrestricted service logs. Commands are only `systemctl show`
+and the named namespace's `nft -j list table` through `ip netns exec`; no service
+start, firewall application, curl, provider request or account call is present.
+
+The normal exit 0 means evidence was collected, not readiness approval. JSON
+always retains `readiness=UNVERIFIED`, and flags wrong hosts, absent processes,
+root effective identity and unobserved access/destination denial. A wrong host
+returns exit 2 without querying target properties. Configured sandbox settings
+and firewall policy/hash alone never produce an isolation PASS.
+
+After fetching the reviewed PR #14 head in the existing repository, execute the
+collector from its exact reviewed SHA with `git show <SHA>:workers/scripts/collect_oms_staging_evidence.py`
+piped to `python3 - --expected-host srv1943844`. This needs no checkout, temporary
+key, dependency installation or worktree changes. Do not run from a local Windows
+terminal and promote those observations to VPS evidence.
 
 Use the existing authorized VS Code Remote-SSH session to collect safe metadata
 from the actual named target. Do not replace a target with the privileged shell
@@ -76,6 +98,28 @@ databases, payment gateways or governance services to claim isolation evidence.
 No provider retry or fallback is required to prove those boundaries.
 
 ## Separate OpenRouter/Qwen fallback design
+
+### Prepared strict circuit guard
+
+`provider_circuit.py` implements a persistent single-inflight primary latch in
+the trusted grant's already-private claim directory. Nonblocking file locking,
+exclusive reservations, private regular-file/owner/link checks and fsync prevent
+concurrent admissions or process restart from clearing a failed/abandoned run.
+One provider failure opens the circuit. Authentication/invalid-output/configuration,
+cleanup and cancellation failures also latch it, without granting fallback.
+There is no cooldown, half-open probe, automatic reset or reset CLI. Operator
+deletion of its own state or hostile in-process Python is outside this boundary.
+
+The runner reserves only after the existing capability and trusted grant checks,
+then before credential-file read/client construction. A successful, validated,
+single-request result and completed cleanup release that reservation. Storage
+errors fail closed; partial failure markers or abandoned reservations keep later
+invocations blocked. The source digest also binds this circuit module. No real
+grant is registered, so the normal CLI still denies before touching circuit state.
+
+`assert_fallback_authorized` deliberately denies while no trusted Qwen policy
+exists. An open breaker or a second API key cannot authorize another request.
+These mocked preparations change neither the primary model nor live authority.
 
 The owner has selected the fallback family, not an exact model. Do not guess a
 Qwen identifier, use an automatic model router, or reuse the DeepSeek credential.

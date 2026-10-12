@@ -228,12 +228,13 @@ def test_window_is_checked_again_after_preparation_delay():
 
 @pytest.mark.parametrize("initialization_elapsed", [0.7, 1.2])
 def test_client_initialization_cannot_restart_bound_grant_window(
-    monkeypatch, initialization_elapsed
+    monkeypatch, initialization_elapsed, tmp_path
 ):
     """Advance loop time deterministically instead of racing real sleeps."""
     from test_staging_recommendations import TrackedTransport
 
     settings = replace(DIRECT, timeout_seconds=1)
+    tmp_path.chmod(0o700)
     transport = TrackedTransport(lambda request: pytest.fail("expired request reached HTTP"))
     concrete_client = httpx.AsyncClient
     monkeypatch.setattr(runner, "assert_can_call_external", lambda *args: None)
@@ -257,14 +258,18 @@ def test_client_initialization_cannot_restart_bound_grant_window(
 
         monkeypatch.setattr(httpx, "AsyncClient", delayed_client)
         if initialization_elapsed < settings.timeout_seconds:
-            report = await runner.run_synthetic(settings, transport=transport, profile=PROFILE)
+            report = await runner.run_synthetic(
+                settings, transport=transport, profile=PROFILE, claim_directory=tmp_path
+            )
             assert report.requests_started == 0 and report.provider_outcome == "TIMEOUT"
             assert report.advisory.candidate_ids == BASELINE
             assert transport.closed
         else:
             # There is no fresh cleanup budget once the fixed window is spent.
             with pytest.raises(ProviderCleanupError, match="PROVIDER_CLEANUP_FAILURE"):
-                await runner.run_synthetic(settings, transport=transport, profile=PROFILE)
+                await runner.run_synthetic(
+                    settings, transport=transport, profile=PROFILE, claim_directory=tmp_path
+                )
         assert asyncio.all_tasks() == {asyncio.current_task()}
 
     asyncio.run(scenario())
