@@ -28,12 +28,154 @@
 
 | ID | Question | Options | Recommendation |
 |----|----------|---------|----------------|
-| R1 | DeepSeek model IDs | `deepseek-v4-pro` / `deepseek-v4-flash` on OpenRouter | Confirm availability first |
+| R1 | DeepSeek model IDs on OpenRouter | `deepseek-v4-pro` / `deepseek-v4-flash` historical candidates | OpenRouter account availability remains pending; direct DeepSeek selection is recorded under D-39 below |
 | R4 | Razorpay live keys | Sandbox → Live KYC | Business/compliance required |
 | R5 | Permit verification API | Vahan API, SERPAPI, custom | National permit scope TBD |
 | R9 | Honcho deployment | Self-hosted vs managed | Self-hosted for control |
 
 ## Bounded Development Authorizations
+
+### D-41: Reproducible Disposable Database Proofs
+
+**Scope:** On 2026-10-12 the owner accepted the recommendation to retain useful
+mocks and run real disposable PostgreSQL proofs for the 72 skipped integration
+cases. Prepare and publish a separate feature slice based on PR #12 head
+`1b61b7c4a67bfb8874f7efe29886abd1ac7fcef0`, preserving all prior PRs and VPS
+worktrees. Reuse M4/M3 and M5-B harnesses on separate ephemeral CI runners, with
+synthetic records, restricted database logins, private Unix sockets, network-none
+containers, isolated test processes and exact scoped cleanup. No duplicate
+business mocks or removed skip guards; zero-skip JUnit acceptance is mandatory.
+
+The scope includes disposable test SQL and CI preparation/execution, not production
+SQL, shared operational/governance databases, VPS changes, real credentials,
+external provider/financial calls, merge, deployment or agent activation. No
+GitHub Production secret is exposed or consumed. Immutable migration checksums,
+RLS, manual refund policy and denied M7 authority remain unchanged. Preserve
+historical evidence; record actual resulting-head proof outcomes and blockers.
+Full diagnostic logs are private and deleted, with only safe summaries published.
+
+### D-40: M7 Isolated Target and Endpoint-Bound Execution Preparation
+
+**Scope:** Current owner instruction, 2026-10-12: proceed with unprivileged
+staging target preparation, restricted egress, explicit CLI profile selection
+and endpoint-bound authorization implementation. Live testing remains blocked;
+budget proof is still required. This is preparation for review, not permission
+to install/start a service, apply firewall rules, consume a real key, grant
+authority, merge, deploy or activate agents. Preserve VPS worktrees and PR #11.
+
+Base the isolated feature slice on reviewed PR #11 head
+`6ed3f35676fa8f5b622ef226a35c3ec20ee66771`. Keep active runtime registration and
+the capability matrix unchanged. Add reviewed disabled systemd/network-namespace
+templates and mocked endpoint/model/source/UID/limits/expiry/credential-path/
+one-invocation checks. Approved grant registry remains empty and immutable;
+trusted issuer integration is deferred. No request flag, evidence label or
+credential may approve itself. One-use claims use only a private staging file
+directory, never an operational/governance database, and are not removed after
+failure. A record's monetary field/evidence label is not enforcement of a budget.
+
+GitHub metadata confirms `DEEPSEEK_API_KEY` in the `Production` environment,
+created 2026-10-12; no secret value was read. Neither inspected environment nor
+repository secrets contains `OMS_STAGING_API_KEY`. GitHub storage is not VPS
+injection, key validity, dedicated scope, budget proof or execution permission.
+No secret is copied or wired into CI/provider calls by this preparation.
+
+Scoped code/templates/documentation, mocked verification and feature-branch
+publication for review are the development deliverable. Host application,
+dedicated key injection, effective namespace/filesystem/egress evidence,
+provider-enforced hard budget and a separately approved trusted grant remain
+NO-GO gates. D-33 pending; deterministic assignment, Paperclip controls and
+manual approval for every refund are unchanged.
+
+### D-39: Isolated OMS Recommendation Staging Bridge Development
+
+**Status:** Owner-authorized implementation and mocked HTTP validation only,
+2026-10-09, by the current user instruction.
+
+Base the new `feat/m7-oms-staging-bridge` branch and isolated worktree on PR #9's
+reviewed head `70c372fdd1f1328eb09a4175f028d4a7755fa77d`. Preserve existing
+worktrees and uncommitted files; reuse discovery and completed evidence without
+repeating audits. The owner selected an OpenAI-compatible chat-completions
+protocol with an explicit full HTTPS endpoint and exact model ID. This is not
+approval of a particular provider, endpoint, model, credential or live request.
+
+Implement the existing `RecommendationAgent` protocol and a finite, explicitly
+invoked synthetic runner outside normal API/worker registration. Reuse existing
+shortlist-order fallback and complete-permutation validation; do not introduce a
+matcher or assignment authority. Limit each run to one request, no retries or
+redirects, bounded input/output and total timeout, cancellation and cleanup.
+Send only opaque candidate references and synthetic distance/score features.
+Require isolated provider configuration; reject all non-allowlisted environment
+variables before running. Do not load repository environment files or give the
+runner operational, service-role, payment, assignment or governance credentials.
+
+Keep D-37/D-38 fake-only restrictions intact. Do not instantiate telemetry or the
+legacy key-enabled tracer. Validate only with mocked HTTP transport, including
+failure, fallback, cancellation, cleanup and noninterference. The bounded live
+plan in [M7_OMS_STAGING_BRIDGE.md](plans/M7_OMS_STAGING_BRIDGE.md) is a proposal,
+not execution permission. M6 staging/live gates remain UNVERIFIED; M7 activation
+remains BLOCKED; D-33 remains pending. Every refund retains manual approval;
+settlement, deterministic assignment and Paperclip controls remain unchanged.
+No live providers, SQL execution, merge, deployment or agent activation.
+
+**Separate finalization authorization, 2026-10-09:** The owner authorizes review
+of the actual bridge diff, concrete in-scope fixes and affected checks, a scoped
+commit/push on the existing feature branch, and a draft PR against master.
+Identify inherited PR #9 changes in the actual base diff and verify CI on the
+resulting exact head. Preserve decisions/worktrees. If terminal Git authentication
+fails, preserve the commit and export a commit patch; do not repeat sign-in loops.
+This is publication permission only, not live execution, merge, deployment,
+financial-control changes or agent activation.
+
+**Direct DeepSeek profile selection and evidence, 2026-10-12:** The owner
+selected direct DeepSeek for the bounded M7 preflight on 2026-10-10 and delegated
+model selection. The selected pair is `https://api.deepseek.com/chat/completions`
+and `deepseek-flash`. This is model selection for the synthetic recommendation
+slice, not approval to execute a request or activate Paperclip, OCR or agents.
+
+The [official Chat Completions API reference](https://api-docs.deepseek.com/api/create-chat-completion/),
+inspected 2026-10-12, explicitly lists `deepseek-flash` as an accepted `model`
+value and documents POST `/chat/completions`. It also documents JSON output,
+explicit `max_tokens` and the thinking-mode switch used by the closed profile.
+The identifier is therefore supported by public provider documentation, rather
+than inferred from a display name or an OpenRouter alias. R1's OpenRouter
+account-availability question remains separate and unresolved.
+
+Public identifier validation does **not** prove availability through the owner's
+account, key validity, pricing/budget enforcement, isolation or live permission.
+Those execution gates remain UNVERIFIED/BLOCKED. No inference, model-list,
+authentication or balance probe was made. The runner's provider capability
+remains ungranted; the CLI does not select this formatting profile. If the
+approved endpoint/model changes, the profile and its evidence require a new
+review; do not silently substitute another model or enable automatic fallback.
+No live providers, SQL, merge, deployment or agent activation is authorized.
+D-33 remains pending and every refund remains manually approved.
+
+### D-38: Fake-Only Recommendation Review Contract
+
+**Status:** Owner-authorized development, checks, feature-branch commit/push and
+draft PR only, 2026-10-09, by the current user instruction.
+
+Start from published `origin/master` at
+`a3b4d97542d55fa39c5b738504783ae2f40703ba` in a new isolated worktree on
+`feat/m7-recommendation-review`; preserve all existing worktrees. Reuse the
+recommendation and synthetic shadow contracts without recreating their changes.
+Use immutable synthetic candidate snapshots, explicit fake reviewer identities
+and in-memory fake storage only. Support pending, accepted, rejected and expired
+records; reject stale/mismatched snapshots and unauthorized reviewers.
+
+The owner selected explicit per-record expiry, idempotent identical retries,
+and rejection of conflicting retries or changes to terminal reviews. Acceptance
+records an advisory candidate preference only, never assignment or operational
+authorization. Snapshot version and ordered numeric features must both match.
+This is a synthetic contract, not runtime identity authentication, durable
+storage, a governance approval or an in-process sandbox.
+
+Keep the contract outside active API/worker registration. Automatic deterministic
+assignment, orders, prices, payments, every-refund manual approval, settlements
+and Paperclip decisions/locks remain unchanged. No live providers, SQL, hosting
+changes, deployment, activation, direct master push or merge. M6 staging/live
+evidence remains UNVERIFIED; M7 live activation BLOCKED; D-33 pending. This
+permission does not approve D-33 or waive any staging/governance gate.
 
 ### D-34: M7-A Provider-Neutral Recommendations Development Only
 

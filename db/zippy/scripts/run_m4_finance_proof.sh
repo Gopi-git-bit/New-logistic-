@@ -2,10 +2,15 @@
 # M4 operations-finance disposable proof. Same hardened isolation controls as
 # the M3 proof: network none, private hardened Unix socket, scram-sha-256 local
 # auth, restricted logins, negative non-root probe, exact cleanup verification.
-set -euo pipefail
+set -Eeuo pipefail
+proof_phase=initializing
+trap 'printf "M4_FAILURE_PHASE=%s\n" "$proof_phase" >&2' ERR
 
 readonly image='postgres@sha256:f1c3376c26f2609ab9f29f71f824103fe2fcd8ee0346485cb6122a4f93df6f94'
-readonly expected_image_id='sha256:f1c3376c26f2609ab9f29f71f824103fe2fcd8ee0346485cb6122a4f93df6f94'
+# Registry digest and Docker config/image ID are distinct on hosted Docker.
+# Resolve the exact pinned artifact, verify its repository digest, then bind
+# the launched container to that artifact's actual config ID.
+readonly expected_image_id=$(docker image inspect "$image" --format '{{.Id}}')
 readonly repository_root=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../../.." && pwd)
 readonly python_bin=${ZIPPY_M4_PYTHON:-/tmp/zippy-m3-venv/bin/python}
 readonly suffix="$(date -u +%Y%m%d%H%M%S)_$(tr -d '-' </proc/sys/kernel/random/uuid | cut -c1-8)"
@@ -32,11 +37,17 @@ cleanup() {
 trap cleanup EXIT
 
 [[ -x "$python_bin" ]]
-[[ "$(docker image inspect "$image" --format '{{.Id}}')" == "$expected_image_id" ]]
+proof_phase=image_identity
+[[ "$expected_image_id" =~ ^sha256:[0-9a-f]{64}$ ]]
+docker image inspect "$image" --format '{{range .RepoDigests}}{{println .}}{{end}}' \
+    | grep -Eq '^(postgres|docker.io/library/postgres)@sha256:f1c3376c26f2609ab9f29f71f824103fe2fcd8ee0346485cb6122a4f93df6f94$'
+printf 'image_identity=PASS\nimage_id=%s\n' "$expected_image_id"
+proof_phase=port_precheck
 [[ "$(ss -lntH | awk '{print $4}' | grep -Ec '(^|:)(5432)$' || true)" == 0 ]]
 # Resolve the pinned image's postgres UID/GID, then restrict the private Unix
 # socket directory to that identity (mode 0700). Host-side tests and docker
 # exec run as root, which retains access without broadening permissions.
+proof_phase=postgres_identity
 postgres_ids=$(docker run --rm --network none --entrypoint id "$image" postgres)
 postgres_uid=$(printf '%s\n' "$postgres_ids" | sed -n 's/^uid=\([0-9][0-9]*\)(.*/\1/p')
 postgres_gid=$(printf '%s\n' "$postgres_ids" | sed -n 's/.* gid=\([0-9][0-9]*\)(.*/\1/p')
@@ -44,6 +55,7 @@ postgres_gid=$(printf '%s\n' "$postgres_ids" | sed -n 's/.* gid=\([0-9][0-9]*\)(
 chown "$postgres_uid:$postgres_gid" "$socket_dir"
 chmod 0700 "$socket_dir"
 docker volume create "$volume" >/dev/null
+proof_phase=container_start
 docker run -d \
     --name "$container" \
     --network none \
@@ -60,6 +72,7 @@ docker run -d \
     -e POSTGRES_DB="$database" \
     "$image" >/dev/null
 
+proof_phase=readiness
 ready=false
 for _ in {1..120}; do
     ready_events=$(docker logs "$container" 2>&1 | grep -c 'database system is ready to accept connections' || true)
@@ -68,16 +81,19 @@ for _ in {1..120}; do
         ready=true
         break
     fi
-    read -r -t 1 _ </dev/null || true
+    # Reading /dev/null returns EOF immediately; it does not wait one second.
+    sleep 1
 done
 [[ "$ready" == true ]]
 [[ "$(docker inspect -f '{{.HostConfig.NetworkMode}}' "$container")" == none ]]
+[[ "$(docker inspect -f '{{.Image}}' "$container")" == "$expected_image_id" ]]
 [[ -z "$(docker port "$container")" ]]
 
 # The image entrypoint broadens /var/run/postgresql during startup; restore the
 # hardened mode after initialization and before any host-side access. Assert on
 # the permission bits only: this filesystem preserves the harmless setgid bit
 # through chmod, so %a may report 2700 rather than 700.
+proof_phase=socket_hardening
 chmod 0700 "$socket_dir"
 socket_dir_mode_hex=$(stat -c '%f' "$socket_dir")
 (( (16#$socket_dir_mode_hex & 8#077) == 0 ))
@@ -86,6 +102,7 @@ socket_dir_mode_hex=$(stat -c '%f' "$socket_dir")
 # Record effective socket and authentication state for evidence.
 socket_dir_mode=$(stat -c '%a' "$socket_dir")
 socket_file_mode=$(stat -c '%a' "$socket_dir/.s.PGSQL.5432")
+proof_phase=authentication
 auth_record=$(docker exec -e PGHOST=/var/run/postgresql -e PGPASSWORD="$super_password" "$container" \
     psql -X --tuples-only --no-align --no-psqlrc -U zippy_m2_runner -d postgres \
     --field-separator=$'\t' --command="SELECT current_setting('password_encryption'), (SELECT string_agg(DISTINCT auth_method, ',' ORDER BY auth_method) FROM pg_hba_file_rules WHERE type = 'local')")
@@ -104,6 +121,7 @@ common_env=(
     -e ZIPPY_EXPECTED_IMAGE_DIGEST="$image"
 )
 
+proof_phase=marker
 docker exec -i -e PGHOST=/var/run/postgresql -e PGPASSWORD="$super_password" "$container" \
     psql -X --set=ON_ERROR_STOP=1 --quiet -U zippy_m2_runner -d postgres \
     --set=database_name="$database" --set=marker="$marker" --set=container_name="$container" \
@@ -114,6 +132,7 @@ ALTER DATABASE :"database_name" SET "zippy.m2_volume" TO :'volume_name';
 ALTER DATABASE :"database_name" SET "zippy.m2_image_digest" TO :'image_digest';
 SQL
 
+proof_phase=role_bootstrap
 docker exec "${common_env[@]}" \
     -e PGUSER=zippy_m2_runner -e PGPASSWORD="$super_password" \
     -e ZIPPY_M2_MIGRATION_PASSWORD="$migration_password" \
@@ -127,61 +146,72 @@ run_migrator() {
         -e PGOPTIONS='-c role=zippy_migrator' "$container" "$@"
 }
 
+proof_phase=migrations
 run_migrator /workspace/db/zippy/scripts/migrate.sh up
+proof_phase=fixtures_m3
 docker exec "${common_env[@]}" -e PGUSER=zippy_m2_runner -e PGPASSWORD="$super_password" "$container" \
-    psql -X --set=ON_ERROR_STOP=1 --quiet --no-psqlrc --file=/workspace/db/zippy/tests/setup_m3.sql
+    psql -X --set=ON_ERROR_STOP=1 --set=VERBOSITY=sqlstate --quiet --no-psqlrc --file=/workspace/db/zippy/tests/setup_m3.sql
+proof_phase=fixtures_m4
 docker exec "${common_env[@]}" -e PGUSER=zippy_m2_runner -e PGPASSWORD="$super_password" "$container" \
-    psql -X --set=ON_ERROR_STOP=1 --quiet --no-psqlrc --file=/workspace/db/zippy/tests/setup_m4.sql
+    psql -X --set=ON_ERROR_STOP=1 --set=VERBOSITY=sqlstate --quiet --no-psqlrc --file=/workspace/db/zippy/tests/setup_m4.sql
 
 # Negative check: an unrelated non-root host identity must not reach the
-# hardened socket directory. Safely skipped (NOT VERIFIED) without root or
-# setpriv; no host accounts are created or modified.
+# hardened socket directory. Missing prerequisites or an unexpected probe error
+# fail the proof; no host accounts are created or modified.
 negative_local_user='NOT VERIFIED'
-if [[ "$(id -u)" == 0 ]] && command -v setpriv >/dev/null 2>&1; then
+proof_phase=negative_identity
+if [[ "$(id -u)" == 0 ]] && command -v setpriv >/dev/null 2>&1 && [[ -x /usr/bin/python3 ]]; then
     negative_rc=0
-    ZIPPY_M3_TEST_DATABASE_URL="host=$socket_dir dbname=$database user=zippy_m2_app_login" \
-        setpriv --reuid=65534 --regid=65534 --clear-groups "$python_bin" - <<'PY' || negative_rc=$?
+    ZIPPY_M4_SOCKET_PROBE="$socket_dir/.s.PGSQL.5432" \
+        setpriv --reuid=65534 --regid=65534 --clear-groups /usr/bin/python3 - <<'PY' || negative_rc=$?
+import errno
 import os
+import socket
 import sys
 
-import psycopg
-
-try:
-    psycopg.connect(os.environ["ZIPPY_M3_TEST_DATABASE_URL"], connect_timeout=3)
-except psycopg.OperationalError as exc:
-    message = str(exc)
-    denied = (
-        "ermission denied" in message
-        or "password authentication failed" in message
-        or "no password supplied" in message
-    )
-    if denied:
-        sys.exit(0)
-    print(f"unexpected connection failure: {type(exc).__name__}", file=sys.stderr)
+if os.geteuid() != 65534:
     sys.exit(3)
-sys.exit(1)
+with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as probe:
+    probe.settimeout(5)
+    try:
+        probe.connect(os.environ["ZIPPY_M4_SOCKET_PROBE"])
+    except OSError as exc:
+        sys.exit(0 if exc.errno in {errno.EACCES, errno.EPERM} else 3)
+# Distinguish an actual successful connection from generic interpreter errors.
+sys.exit(42)
 PY
     case "$negative_rc" in
         0) negative_local_user='PASS' ;;
-        1)
-            printf 'ERROR: unrelated non-root identity connected to the disposable socket\n' >&2
+        42)
+            printf 'ERROR: unrelated non-root identity reached the disposable socket\n' >&2
             exit 1
             ;;
         *) negative_local_user='NOT VERIFIED' ;;
     esac
 fi
+if [[ "$negative_local_user" != PASS ]]; then
+    printf 'negative_local_user=NOT VERIFIED\n' >&2
+    exit 1
+fi
 
+proof_phase=tests
 ZIPPY_M3_TEST_DATABASE_URL="host=$socket_dir dbname=$database user=zippy_m2_app_login password=$app_password" \
 ZIPPY_M4_TEST_DATABASE_URL="host=$socket_dir dbname=$database user=zippy_m2_app_login password=$app_password" \
 PYTHONPATH="$repository_root" \
-    "$python_bin" -m pytest "$repository_root/api/tests" "$repository_root/api/tests_m4" -q
+    "$python_bin" -m pytest "$repository_root/api/tests" "$repository_root/api/tests_m4" -q \
+        --junitxml="$socket_dir/results.xml"
+proof_phase=report
+"$python_bin" "$repository_root/db/scripts/check_proof_report.py" "$socket_dir/results.xml" operations
 
+proof_phase=rollback
 run_migrator env ZIPPY_CONFIRM_DISPOSABLE_DOWN="$database" /workspace/db/zippy/scripts/migrate.sh down
+proof_phase=role_teardown
 docker exec "${common_env[@]}" \
     -e PGUSER=zippy_m2_runner -e PGPASSWORD="$super_password" \
     -e ZIPPY_CONFIRM_DISPOSABLE_ROLE_TEARDOWN="$database:$container:$volume" \
     "$container" /workspace/db/zippy/scripts/roles.sh teardown
 
+proof_phase=cleanup
 version=$(docker exec "${common_env[@]}" -e PGUSER=zippy_m2_runner -e PGPASSWORD="$super_password" "$container" \
     psql -X --tuples-only --no-align --no-psqlrc --command='SHOW server_version')
 docker rm -f "$container" >/dev/null
@@ -196,3 +226,4 @@ trap - EXIT
 printf 'm4_unit_contracts=PASS\nm4_webhook_ingress=PASS\nm4_idempotency=PASS\nm4_authorization=PASS\nm4_pod_settlement_gate=PASS\nm4_manual_refund=PASS\nm6r1_odoo_unavailable=PASS\nm4_reconciliation=PASS\nm3_regression=PASS\nnetwork_isolation=PASS\ncleanup=PASS\nsocket_hardening=PASS\nsocket_dir_mode=%s\nsocket_file_mode=%s\npassword_encryption=%s\npg_hba_local_auth=%s\nnegative_local_user=%s\nresource_container=%s\nresource_volume=%s\nresource_socket=%s\npostgres_version=%s\nimage=%s\n' \
     "$socket_dir_mode" "$socket_file_mode" "$password_encryption" "$pg_hba_local_auth" \
     "$negative_local_user" "$container" "$volume" "$socket_dir" "$version" "$image"
+

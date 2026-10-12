@@ -1,5 +1,45 @@
 # Zippy Test and Discovery Evidence
 
+### M7-E005: PR #12 Expiry Review Correction
+
+2026-10-12; independent GitHub Codex review of `ab1ed7d1dd7315c811ca55adf01d3c8f30cbaa03`
+identified a P2 expiry gap ([review finding](https://github.com/Gopi-git-bit/New-logistic-/pull/12#discussion_r4245648975)):
+client initialization followed the final grant-window check, while ranking started
+a fresh duration. The implementing assistant's earlier manual review missed it.
+
+The runner now captures a fixed monotonic deadline before client construction,
+capped by granted expiry and configured duration. Ranking and cleanup preserve it;
+a second check after request construction prevents late HTTP. No new approval,
+credential source, model, retry or fallback was enabled.
+
+Seven additional mocked cases exercise initialization delay, exhausted cleanup
+window, request-construction delay and invalid deadline values. Time is advanced
+deterministically on the test event loop; there are no sleeps or live probes.
+The five focused suites report **323 passed**, zero skips/warnings. Affected Ruff
+lint/format and strict adapter/runner typing pass. Publication and new-head CI
+evidence will be recorded in PR #12; earlier passing CI is not the corrected
+head's CI. Dedicated credentials, effective host isolation/egress, hard spending
+cap and trusted authority remain unverified; database gaps and D-33 are unchanged.
+
+### M7-E004: Isolated Execution Preparation (D-40)
+
+2026-10-12; base PR #11 head `6ed3f35676fa8f5b622ef226a35c3ec20ee66771`.
+This is development/preparation evidence, not host setup or live acceptance.
+
+| Check | Evidence / result |
+|---|---|
+| Focused mocked checks | From workers directory, pytest `test_staging_authorization.py`, `test_staging_recommendations.py`, `test_shadow_recommendations.py`, `test_recommendation_reviews.py`, `test_m6_handlers.py`: **316 passed**, zero skips/warnings |
+| Ruff / typing | Four affected Python files: lint and formatting checks pass. Strict mypy on staging_authorization.py and run_oms_recommendation.py passes |
+| One-use claims | Synthetic grants and private temporary files prove one winner under concurrent claims; independent new instances reject repeats; alternate claim store cannot reset invocation |
+| Binding / denial | Endpoint/model/source/UID/credential path, time window, limits and missing evidence denied before claims/client; real matrix and empty immutable registry remain denied. No CLI/env approval loader |
+| Explicit profile / credentials | Mocked CLI sends disabled thinking only for explicit DeepSeek profile. Denied CLI never reads credential file or constructs client. Private-file owner/mode/link/symlink/size rules; no real secret loaded |
+| Service template | `systemd-analyze verify --man=no` on temporary .service copy passes with no warnings; no service started. Initial RuntimeMaxSec/oneshot warning corrected by using TimeoutStartSec |
+| Egress template | Static assertions verify namespace scope, empty IPv4/IPv6 provider/DNS sets and three drop-default chains. **nft syntax/kernel evaluation and effective host egress UNVERIFIED**; nft unavailable in scratch |
+| Corrected test scheduling | Immediate HTTP 302 outcome test raced its inherited 10ms scheduler window locally. Initial PR #12 CI also hit the inherited 20ms budget in the cancellation-during-cleanup test (431 passed, one failed). Immediate-response helper uses 0.5 seconds; cancellation ordering now uses explicit close/release events with a 0.5-second fake budget. Dedicated deadline/failure tests retain their short budgets. Corrected focused suite: 316 passed, zero skips/warnings; runtime limits unchanged |
+| Credential metadata only | GitHub Production environment has DEEPSEEK_API_KEY; repository/copilot/Production listings have no OMS_STAGING_API_KEY. No secret value read, copied, probed or injected |
+| Publication / CI | Draft PR #12 published on feat/m7-oms-isolation-preparation. Initial head a136d423 CI run 38212077977 failed only the cleanup scheduling test; four other jobs passed. The corrective commit's exact-head CI will be reported in the PR. Inherited PR #11 CI is not this slice's CI |
+| Exclusions | No host setup/firewall application, authenticated provider calls, SQL, merge, deployment, active registration or authority grants. No production/account budget verified. Database-gated gaps unchanged; D-33 pending; refunds manually approved |
+
 ## Evidence Policy
 
 - Current verdict: **BLOCKED FOR PRODUCTION — M3 DETERMINISTIC CORE COMPLETE IN DISPOSABLE TEST ENVIRONMENTS**.
@@ -1350,6 +1390,117 @@ These commands validate the documentation diff and working-tree inventory. They 
 | Remaining limitations | Synthetic evidence only, not staging/live acceptance, runtime identity authentication or a sandbox against hostile in-process Python. Fixture shape cannot attest real-world data provenance. No provider/model, cost threshold, hosting, retention, sampling or activation setting selected. Human-reviewed recommendations and automation require separately approved scope. |
 | Business controls | Customers book; vendors supply vehicles/drivers; transport companies may play either role per transaction. Deterministic backend assignment, every-refund manual approval, settlement/POD controls, idempotency and Paperclip governance unchanged. Vercel/Zoho connections reserved for later approved integration; Razorpay pending. |
 | Smallest remaining staging gate | Explicit owner approval of an isolated staging validation scope and hosting, credentials/live emitters, residency, retention and sampling choices. Then prove deployed isolation, instrumentation, nonfatal exporter recovery and real usage/financial reconciliation; all remain UNVERIFIED, M7 live activation BLOCKED, D-33 pending. |
+
+### PR #10 review follow-up: explicit provider capability (2026-10-09)
+
+Codex review on `f7f9af2221c5893712a4f76e2d493fb4a61c0f6e` found that `read:drivers`
+did not authorize an external model request. The standalone runner now calls the
+existing explicit external-capability checker for `oms_recommendation_provider`
+before constructing its client. The production capability matrix is unchanged:
+OMS still has only `external:mapbox`, so the valid-config CLI fails closed with
+`OMS_STAGING_PROVIDER_NOT_AUTHORIZED`. Tests grant the capability only through a
+mock fixture; future endpoint-bound provider authorization requires separate
+owner approval and review.
+
+Focused mocked regression: **262 passed, zero skipped or warnings**. Ruff lint
+and format checks passed for both changed Python files; strict mypy passed for
+the runner and adapter. Added tests prove production-matrix denial occurs before
+client construction and a separate valid-config CLI process also denies without
+revealing the synthetic key. No live provider, SQL, deployment, merge or agent
+activation occurred. Exact-head remote CI and CodeRabbit results must be checked
+separately; previous-head CI is not proof for this follow-up.
+
+### PR #10 CodeRabbit follow-up: repeat cleanup (2026-10-09)
+
+CodeRabbit completed review of `56f165540553b93aee4404ad5804c19a9b6eaa01`
+and reported one minor concrete defect: a second cleanup call could enter an
+expired deadline after resources had already closed. Cleanup now returns without
+another deadline only after successful cleanup with no active request. A failed
+cleanup remains an explicit error; HTTPX's closed flag alone cannot hide a
+transport failure. Active-request cancellation and bounded first cleanup remain
+unchanged.
+
+Mocked regression: **264 passed, zero skipped or warnings**; affected Ruff lint
+and format checks and strict adapter/runner typing passed. New tests cover
+repeat successful cleanup after the deadline and repeat failure despite HTTPX
+marking its client closed. Resulting-head remote CI must be checked separately.
+No provider request, SQL, deployment, merge or agent activation was performed.
+
+### M7-E003: Isolated OMS Staging Bridge Mocked HTTP Evidence
+
+| Field | Value |
+|---|---|
+| Date / authority | 2026-10-09; D-39 current owner implementation and mocked HTTP validation instruction; owner-selected OpenAI-compatible protocol |
+| Base / isolation | Reviewed PR #9 head `70c372fdd1f1328eb09a4175f028d4a7755fa77d`; new branch `feat/m7-oms-staging-bridge` at `/opt/new-logistic-m7-staging-bridge`; existing worktrees/uncommitted files preserved |
+| Reused evidence | Discovery report; M6-E003/E004/E005/E007; M7-E001/E002 and PR #9's existing exact-head CI `37908923159`. No accepted audit, disposable SQL proof or CI rerun initiated |
+| Implementation | Explicit endpoint/key/model/timeout/output-token settings; one-request OpenAI-compatible async adapter; standalone finite synthetic runner; existing shortlist-order baseline and complete-permutation validation unchanged |
+| Limits | One request per run, no retry/redirect; <=16 candidates before serialization; bounded model/key/endpoint fields; finite features normalized to floats; body <=4096 bytes. Raw identity-only response <=16384 bytes, oversized headers/chunks rejected before body read/buffer extension. Configured total run timeout >0 and <=10 seconds: half reserved for concurrent cancellation/response/client cleanup; output tokens 1..256 |
+| Isolation | CLI rejects non-allowlisted environment variables before client creation, including database/service-role/payment/governance keys and legacy tracer keys; no environment-file loading, operational ports, API/worker registration or telemetry initialization |
+| Test discovery | Built-in unit-test discovery found no tests in the isolated worktree; existing pytest environment used with explicit worktree PYTHONPATH instead. No installation or dependency changes |
+| Focused command | From the new worktree: `PYTHONDONTWRITEBYTECODE=1 PYTHONPATH="$PWD/workers/src:$PWD" /opt/new-logistic/.venv/bin/python -m pytest workers/tests/test_staging_recommendations.py workers/tests/test_shadow_recommendations.py workers/tests/test_recommendation_reviews.py workers/tests/test_m6_handlers.py -q -p no:cacheprovider` |
+| Initial implementation result | **249 passed, zero skipped, 1 warning in 0.91s** before finalization review; preserved as a checkpoint, not the final corrected-head result |
+| Failure history | Initial run: 245 passed, 1 failed; CLI test's mocked constructor omitted the injected `transport` keyword. Corrected the test fixture; implementation typing already passed. Import sorting/formatting corrected using existing Ruff. A direct-input overflow guard and input-budget/real-CLI isolation tests were added before final validation |
+| Mocked cases | Valid minimized payload/permutation; malformed ranking/envelope; duplicate/outsider/extra/mutation-bearing fields; duplicate JSON keys; truncated/tool-call/refusal output; request/response byte bounds; 429 with Retry-After, HTTP rejection/redirect, unavailable transport, timeout, caller cancellation; explicit cleanup failure/timeout; one-request limit; secret-safe configuration/reporting; capability denial and CLI environment isolation |
+| Cleanup / noninterference | Mocked streams and transports closed on success/failure/timeout; normal timeout and caller cancellation leave no pending tasks; hanging request completes within 0.2 seconds at a 0.02-second configured deadline. Existing fake review/shadow/authoritative-assignment regressions pass; adapter/runner imports have no operational ports or active registration |
+| Lint / format | `python -m ruff check` on the three new Python files: All checks passed. `python -m ruff format --check` on the same files: 3 files already formatted |
+| Type check | `python -m mypy --strict --follow-imports=silent workers/src/zippy_workers/recommendation_provider.py workers/scripts/run_oms_recommendation.py`: Success, no issues in 2 source files |
+| Not verified / not run | No live provider/model/credential validation, SQL, shared database, staging deployment, exporter/storage/billing proof, merge or agent activation. Prior database-gated skips remain UNVERIFIED |
+| Preserved controls | No changes to matching/assignment authority, orders/prices/payments, every-refund manual approval, settlement or Paperclip locks. M6 development complete only; M7 activation BLOCKED; D-33 pending |
+
+**Finalization review and affected validation, 2026-10-09:**
+
+- Actual review found post-serialization request limiting, HTTPX decoded/chunked
+  buffering before the response cap, separate full cleanup budgets/early client
+  closure omission, cancellation during cleanup, and a CI-working-directory test
+  import failure. Corrected only the adapter, runner and their tests.
+- Request preflights now bound candidate count/configuration before serialization;
+  response headers/compression are checked before reading, and raw chunks before
+  copying. There is no decompression. One absolute deadline reserves half its
+  budget for cancellation and concurrent resource closure. Cleanup is shielded
+  from repeated caller cancellation. The test runner loads the standalone script
+  by its explicit file path rather than relying on the repository root in
+  `PYTHONPATH`.
+- Intermediate finalization validation: 259 passed, 1 failed (the stalled
+  cancellation regression exposed the outer recommendation timeout still using
+  the whole budget). Strict mypy identified the raw response-stream union needing
+  an async-stream guard. Corrected both; no checks weakened.
+- Final command, from `workers/`:
+  `PYTHONDONTWRITEBYTECODE=1 PYTHONPATH="$PWD/src" /opt/new-logistic/.venv/bin/python -m pytest tests/test_staging_recommendations.py tests/test_shadow_recommendations.py tests/test_recommendation_reviews.py tests/test_m6_handlers.py -q -p no:cacheprovider -W error::RuntimeWarning -W error::pytest.PytestUnraisableExceptionWarning --junitxml=<private-session>/oms-bridge-final-junit.xml`.
+- **260 passed, zero skipped, 1 warning in 1.06s.** JUnit independently confirms
+  260 executed cases, zero errors/failures/skips: 95 bridge, 55 shadow, 72 review,
+  38 handler cases. No full audit, database proof or completed discovery repeated.
+- The bridge module has 30 synchronous test functions and zero top-level async
+  test functions. Async HTTP/cancellation/cleanup scenarios explicitly execute
+  through `asyncio.run`; their request/result/closure assertions ran. The local
+  pytest-asyncio plugin is not installed, explaining the unknown `asyncio_mode`
+  configuration warning. This warning is not evidence that coroutines were
+  skipped, nor is this result proof of plugin-managed async-test coverage.
+  Unawaited-coroutine/runtime and unraisable-exception warnings were promoted to
+  errors for this validation. No dependency installation or warning suppression.
+- Touched-file Ruff lint/format PASS; strict mypy PASS for adapter/runner.
+- Current fetched master is `a3b4d97542d55fa39c5b738504783ae2f40703ba`.
+  PR #9's nine-file review-contract delta is inherited by this branch, not new
+  bridge implementation. The new scoped bridge commit is based on
+  `70c372fdd1f1328eb09a4175f028d4a7755fa77d`; publication and exact-head CI must be
+  reported separately from the prior PR #9 checks.
+
+### M7-E002: Fake-Only Recommendation Review Contract
+
+| Field | Value |
+|---|---|
+| Date / authority | 2026-10-09; D-38 owner-authorized isolated development, checks, feature commit/push and draft PR; explicit expiry and idempotent identical retries selected by owner |
+| Baseline / isolation | Published master `a3b4d97542d55fa39c5b738504783ae2f40703ba`; new `/opt/new-logistic-m7-review` worktree on `feat/m7-recommendation-review`; existing worktrees preserved |
+| Contract | Immutable versioned ordered synthetic numeric snapshot plus stored `RecommendationResult` generated through `evaluate_shadow`; fake memory only; pending, accepted, rejected, expired |
+| Review boundary | Explicit fake human enum identities only; unauthorized fake agents/outsiders and identity strings denied; accepted candidate reference is advisory preference only; rejected/expired records have no preference |
+| Snapshot / retries | Version, order, numeric features and candidate count must match exactly; stale/mismatched submissions rejected. Identical creation/review retries preserve original result; conflicting keys or fresh submissions to terminal records fail explicitly. Submission keys bind identity and review ID across the store; expiry at exact deadline; no terminal reversal |
+| Focused command | `PYTHONDONTWRITEBYTECODE=1 PYTHONPATH="$PWD/workers/src" /opt/new-logistic/.venv/bin/python -m pytest workers/tests/test_recommendation_reviews.py workers/tests/test_shadow_recommendations.py workers/tests/test_m6_handlers.py -q -p no:cacheprovider` |
+| Focused result | **165 passed, 0 skipped, 1 warning in 0.46s**; includes 72 new review cases plus existing shadow/authoritative-handler regressions; existing unknown `asyncio_mode` warning |
+| Quality checks | Full worker Ruff lint PASS; affected-file Ruff format check PASS after formatting new tests; strict mypy on new implementation PASS; `git diff --check` PASS |
+| Isolation evidence | Static import/dependency tests prove no active API/worker importer or operational/network/storage port. Entire fake review lifecycle runs with socket calls forbidden. Accepted/rejected reviews preserve seven synthetic mutation domains and fake DB state; existing handler still automatically assigns baseline's first driver after advisory disagreement |
+| Tooling | Built-in test discovery found no tests in the isolated worktree, so existing pytest CLI/environment used with explicit new-worktree PYTHONPATH. No dependency manifest changed or package installed; no accepted audit/disposable proof rerun |
+| Skipped / unverified | No focused skips. Database/SQL, live providers, staging, hosting, deployment and activation tests deliberately not run; all corresponding gates remain UNVERIFIED. Prior M7-E001/master CI is not this feature's PR-head CI |
+| Publication | Feature commit/push, draft PR and exact-head PR CI pending; never push to master or manufacture an empty PR |
+| Preserved controls | Contract is unwired and fake-only; deterministic automatic assignment, orders/prices/payments, every-refund manual approval, settlements and Paperclip decisions/locks unchanged; M7 activation BLOCKED, D-33 pending |
 
 ### M6-E006: Owner Acceptance and PR #8 Review Checkpoint
 

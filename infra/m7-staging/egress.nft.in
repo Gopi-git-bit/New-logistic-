@@ -1,0 +1,26 @@
+# REVIEW TEMPLATE ONLY: for the dedicated zippy-oms-staging network namespace.
+# Never load this into the host namespace. No flush ruleset, NAT or host rules.
+# All sets intentionally empty: DNS and provider access fail closed.
+# Filling sets and creating the namespace require separate host setup approval.
+table inet zippy_oms_staging {
+    set provider_v4 { type ipv4_addr; }
+    set provider_v6 { type ipv6_addr; }
+    set dns_v4 { type ipv4_addr; }
+    set dns_v6 { type ipv6_addr; }
+    chain input {
+        type filter hook input priority 0; policy drop;
+        ct state established,related accept
+    }
+    chain output {
+        type filter hook output priority 0; policy drop;
+        ip daddr @provider_v4 tcp dport 443 accept
+        ip6 daddr @provider_v6 tcp dport 443 accept
+        ip daddr @dns_v4 udp dport 53 accept
+        ip daddr @dns_v4 tcp dport 53 accept
+        ip6 daddr @dns_v6 udp dport 53 accept
+        ip6 daddr @dns_v6 tcp dport 53 accept
+    }
+    chain forward {
+        type filter hook forward priority 0; policy drop;
+    }
+}
