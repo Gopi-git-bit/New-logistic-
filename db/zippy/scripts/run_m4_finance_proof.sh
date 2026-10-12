@@ -148,11 +148,12 @@ run_migrator() {
 
 proof_phase=migrations
 run_migrator /workspace/db/zippy/scripts/migrate.sh up
-proof_phase=fixtures
+proof_phase=fixtures_m3
 docker exec "${common_env[@]}" -e PGUSER=zippy_m2_runner -e PGPASSWORD="$super_password" "$container" \
-    psql -X --set=ON_ERROR_STOP=1 --quiet --no-psqlrc --file=/workspace/db/zippy/tests/setup_m3.sql
+    psql -X --set=ON_ERROR_STOP=1 --set=VERBOSITY=sqlstate --quiet --no-psqlrc --file=/workspace/db/zippy/tests/setup_m3.sql
+proof_phase=fixtures_m4
 docker exec "${common_env[@]}" -e PGUSER=zippy_m2_runner -e PGPASSWORD="$super_password" "$container" \
-    psql -X --set=ON_ERROR_STOP=1 --quiet --no-psqlrc --file=/workspace/db/zippy/tests/setup_m4.sql
+    psql -X --set=ON_ERROR_STOP=1 --set=VERBOSITY=sqlstate --quiet --no-psqlrc --file=/workspace/db/zippy/tests/setup_m4.sql
 
 # Negative check: an unrelated non-root host identity must not reach the
 # hardened socket directory. Safely skipped (NOT VERIFIED) without root or
