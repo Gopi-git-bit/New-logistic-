@@ -9,6 +9,7 @@ import uuid
 from collections.abc import Mapping
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
+from enum import Enum
 from typing import Literal
 
 import httpx
@@ -40,6 +41,31 @@ class ProviderResponseError(ValueError):
 
 class ProviderCleanupError(RuntimeError):
     pass
+
+
+class ProviderRequestProfile(Enum):
+    """Closed request-format choices; selection never grants provider authority.
+
+    Real execution still requires separate endpoint/model-bound authorization.
+    No arbitrary payload options or mutable request overrides are accepted.
+    """
+
+    DEEPSEEK_DIRECT = "deepseek-direct"
+
+    @property
+    def endpoint(self) -> str:
+        return "https://api.deepseek.com/chat/completions"
+
+    @property
+    def model(self) -> str:
+        return "deepseek-flash"
+
+    def validate_settings(self, settings: ProviderSettings) -> None:
+        if self.endpoint != settings.endpoint or self.model != settings.model:
+            raise StagingConfigurationError("INVALID_OMS_STAGING_PROFILE")
+
+
+DEEPSEEK_DIRECT_PROFILE = ProviderRequestProfile.DEEPSEEK_DIRECT
 
 
 @dataclass(frozen=True)
@@ -165,8 +191,14 @@ class OpenAIRecommendationAgent:
         settings: ProviderSettings,
         *,
         transport: httpx.AsyncBaseTransport | None = None,
+        profile: ProviderRequestProfile | None = None,
     ) -> None:
+        if profile is not None and not isinstance(profile, ProviderRequestProfile):
+            raise TypeError("PROFILE_MUST_BE_PROVIDER_REQUEST_PROFILE")
         self.settings = settings
+        self.profile = profile
+        if profile is not None:
+            profile.validate_settings(settings)
         self.requests_started = 0
         self.outcome: ProviderOutcome = "NOT_CALLED"
         self._active: asyncio.Task[object] | None = None
@@ -205,7 +237,7 @@ class OpenAIRecommendationAgent:
                         valid = False
                     if not valid:
                         raise ValueError("PROVIDER_INPUT_FEATURES")
-        payload = {
+        payload: dict[str, object] = {
             "model": self.settings.model,
             "max_tokens": self.settings.max_output_tokens,
             "response_format": {"type": "json_object"},
@@ -240,6 +272,8 @@ class OpenAIRecommendationAgent:
                 },
             ],
         }
+        if self.profile is ProviderRequestProfile.DEEPSEEK_DIRECT:
+            payload["thinking"] = {"type": "disabled"}
         body = json.dumps(payload, allow_nan=False).encode()
         if len(body) > 4096:
             raise ValueError("PROVIDER_INPUT_LIMIT")

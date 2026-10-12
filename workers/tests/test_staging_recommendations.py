@@ -162,6 +162,123 @@ def test_valid_response_is_minimized_and_does_not_resort_or_mutate():
     assert "Idempotency-Key" not in requests[0].headers
 
 
+def test_selected_deepseek_profile_uses_exact_direct_payload_and_closes():
+    profile = recommendation_provider.DEEPSEEK_DIRECT_PROFILE
+    settings = replace(
+        SETTINGS,
+        endpoint=profile.endpoint,
+        model=profile.model,
+    )
+    calls = []
+
+    def handle(request):
+        calls.append(json.loads(request.content))
+        return httpx.Response(200, json=envelope({"candidate_ids": BASELINE}))
+
+    transport = TrackedTransport(handle)
+    agent = OpenAIRecommendationAgent(settings, profile=profile, transport=transport)
+
+    async def scenario():
+        try:
+            result = await recommend_drivers(
+                [
+                    {"distance_m": 30, "score": 7},
+                    {"distance_m": 10, "score": 9},
+                    {"distance_m": 20, "score": 8},
+                ],
+                agent,
+                timeout_seconds=0.1,
+            )
+            assert result.source == "agent" and result.candidate_ids == BASELINE
+        finally:
+            await agent.aclose()
+
+    asyncio.run(scenario())
+    assert calls[0]["model"] == "deepseek-flash"
+    assert calls[0]["max_tokens"] == 128
+    assert calls[0]["response_format"] == {"type": "json_object"}
+    assert calls[0]["thinking"] == {"type": "disabled"}
+    assert set(calls[0]) == {
+        "model",
+        "max_tokens",
+        "response_format",
+        "thinking",
+        "messages",
+    }
+    assert len(calls) == 1
+    assert agent.is_closed and transport.closed
+    assert calls[0]["messages"][0]["role"] == "system"
+    assert "complete permutation" in calls[0]["messages"][0]["content"]
+
+
+@pytest.mark.parametrize(
+    "override",
+    [
+        {"endpoint": "https://other.example/chat/completions"},
+        {"model": "different-model"},
+    ],
+)
+def test_deepseek_profile_mismatch_denied_before_client_construction(monkeypatch, override):
+    profile = recommendation_provider.DEEPSEEK_DIRECT_PROFILE
+    settings = replace(SETTINGS, endpoint=profile.endpoint, model=profile.model)
+    settings = replace(settings, **override)
+
+    def forbidden(*args, **kwargs):
+        pytest.fail("mismatched profile constructed an HTTP client")
+
+    monkeypatch.setattr(recommendation_provider.httpx, "AsyncClient", forbidden)
+    with pytest.raises(StagingConfigurationError, match="INVALID_OMS_STAGING_PROFILE"):
+        OpenAIRecommendationAgent(settings, profile=profile)
+
+
+@pytest.mark.parametrize(
+    "profile",
+    ["deepseek-direct", {"name": "deepseek-direct", "extra": {"max_tokens": 100000}}],
+)
+def test_untyped_profile_denied_before_client_construction(monkeypatch, profile):
+    def forbidden(*args, **kwargs):
+        pytest.fail("untyped profile constructed an HTTP client")
+
+    monkeypatch.setattr(recommendation_provider.httpx, "AsyncClient", forbidden)
+    with pytest.raises(TypeError, match="PROFILE_MUST_BE_PROVIDER_REQUEST_PROFILE"):
+        OpenAIRecommendationAgent(SETTINGS, profile=profile)
+
+
+@pytest.mark.parametrize(
+    "extra",
+    [
+        {"max_tokens": 100000},
+        {"model": "unbound-model"},
+        {"messages": [{"role": "user", "content": "replacement synthetic message"}]},
+    ],
+)
+def test_request_profile_cannot_accept_arbitrary_payload_overrides(extra):
+    with pytest.raises(TypeError):
+        recommendation_provider.ProviderRequestProfile("deepseek-direct", extra=extra)
+
+
+def test_selected_deepseek_settings_do_not_grant_real_provider_authority(monkeypatch, capsys):
+    profile = recommendation_provider.DEEPSEEK_DIRECT_PROFILE
+    monkeypatch.setattr(runner, "assert_can_call_external", assert_can_call_external)
+
+    def forbidden(*args, **kwargs):
+        pytest.fail("unauthorized DeepSeek client was constructed")
+
+    monkeypatch.setattr(runner, "OpenAIRecommendationAgent", forbidden)
+    status = runner.main(
+        ["--run-synthetic-shadow"],
+        environment={
+            **ENVIRONMENT,
+            "OMS_STAGING_ENDPOINT": profile.endpoint,
+            "OMS_STAGING_MODEL": profile.model,
+        },
+    )
+    assert status == 1
+    assert json.loads(capsys.readouterr().out)["reason_code"] == (
+        "OMS_STAGING_PROVIDER_NOT_AUTHORIZED"
+    )
+
+
 @pytest.mark.parametrize(
     "output",
     [
