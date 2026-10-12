@@ -678,11 +678,12 @@ def test_stalled_request_cancellation_does_not_prevent_client_close():
 
 def test_cancellation_during_cleanup_finishes_closing_without_pending_tasks():
     closing = asyncio.Event()
+    release_close = asyncio.Event()
 
     class SlowClose(TrackedTransport):
         async def aclose(self):
             closing.set()
-            await asyncio.sleep(0.005)
+            await release_close.wait()
             self.closed = True
 
     transport = SlowClose(
@@ -690,11 +691,15 @@ def test_cancellation_during_cleanup_finishes_closing_without_pending_tasks():
     )
 
     async def scenario():
-        task = asyncio.create_task(runner.run_synthetic(SETTINGS, transport=transport))
+        # Exercise cancellation ordering without racing a millisecond deadline.
+        settings = replace(SETTINGS, timeout_seconds=0.5)
+        task = asyncio.create_task(runner.run_synthetic(settings, transport=transport))
         await closing.wait()
         task.cancel()
         await asyncio.sleep(0)
         task.cancel()
+        assert not transport.closed
+        release_close.set()
         with pytest.raises(asyncio.CancelledError):
             await task
         assert transport.closed
