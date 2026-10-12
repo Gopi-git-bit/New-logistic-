@@ -174,7 +174,9 @@ fi
 ZIPPY_M3_TEST_DATABASE_URL="host=$socket_dir dbname=$database user=zippy_m2_app_login password=$app_password" \
 ZIPPY_M4_TEST_DATABASE_URL="host=$socket_dir dbname=$database user=zippy_m2_app_login password=$app_password" \
 PYTHONPATH="$repository_root" \
-    "$python_bin" -m pytest "$repository_root/api/tests" "$repository_root/api/tests_m4" -q
+    "$python_bin" -m pytest "$repository_root/api/tests" "$repository_root/api/tests_m4" -q \
+        --junitxml="$socket_dir/results.xml"
+"$python_bin" "$repository_root/db/scripts/check_proof_report.py" "$socket_dir/results.xml" operations
 
 run_migrator env ZIPPY_CONFIRM_DISPOSABLE_DOWN="$database" /workspace/db/zippy/scripts/migrate.sh down
 docker exec "${common_env[@]}" \
@@ -196,3 +198,4 @@ trap - EXIT
 printf 'm4_unit_contracts=PASS\nm4_webhook_ingress=PASS\nm4_idempotency=PASS\nm4_authorization=PASS\nm4_pod_settlement_gate=PASS\nm4_manual_refund=PASS\nm6r1_odoo_unavailable=PASS\nm4_reconciliation=PASS\nm3_regression=PASS\nnetwork_isolation=PASS\ncleanup=PASS\nsocket_hardening=PASS\nsocket_dir_mode=%s\nsocket_file_mode=%s\npassword_encryption=%s\npg_hba_local_auth=%s\nnegative_local_user=%s\nresource_container=%s\nresource_volume=%s\nresource_socket=%s\npostgres_version=%s\nimage=%s\n' \
     "$socket_dir_mode" "$socket_file_mode" "$password_encryption" "$pg_hba_local_auth" \
     "$negative_local_user" "$container" "$volume" "$socket_dir" "$version" "$image"
+

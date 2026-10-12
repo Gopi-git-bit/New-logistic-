@@ -129,6 +129,7 @@ import xml.etree.ElementTree as ET
 suite = ET.parse(socket + "/results.xml").getroot()
 assert not suite.findall(".//skipped"), "required M5-B tests skipped"
 assert not suite.findall(".//failure") and not suite.findall(".//error")
+subprocess.run([sys.executable, "db/scripts/check_proof_report.py", socket + "/results.xml", "governance"], cwd=root, check=True)
 print("m5b_tests=PASS count=" + str(len(suite.findall(".//testcase"))) + " skipped=0")
 print("m5b_integration_security=PASS")
 ' "$root"
@@ -159,3 +160,4 @@ assert not any(secret in text for secret in secrets) and not re.search(patterns,
 print("secret_pattern_matches=0\nsecret_scan=PASS")
 ' "$log"
 printf 'm5b_disposable_proof=PASS\n'
+

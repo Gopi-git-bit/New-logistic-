@@ -35,6 +35,25 @@
 
 ## Bounded Development Authorizations
 
+### D-41: Reproducible Disposable Database Proofs
+
+**Scope:** On 2026-10-12 the owner accepted the recommendation to retain useful
+mocks and run real disposable PostgreSQL proofs for the 72 skipped integration
+cases. Prepare and publish a separate feature slice based on PR #12 head
+`1b61b7c4a67bfb8874f7efe29886abd1ac7fcef0`, preserving all prior PRs and VPS
+worktrees. Reuse M4/M3 and M5-B harnesses on separate ephemeral CI runners, with
+synthetic records, restricted database logins, private Unix sockets, network-none
+containers, isolated test processes and exact scoped cleanup. No duplicate
+business mocks or removed skip guards; zero-skip JUnit acceptance is mandatory.
+
+The scope includes disposable test SQL and CI preparation/execution, not production
+SQL, shared operational/governance databases, VPS changes, real credentials,
+external provider/financial calls, merge, deployment or agent activation. No
+GitHub Production secret is exposed or consumed. Immutable migration checksums,
+RLS, manual refund policy and denied M7 authority remain unchanged. Preserve
+historical evidence; record actual resulting-head proof outcomes and blockers.
+Full diagnostic logs are private and deleted, with only safe summaries published.
+
 ### D-40: M7 Isolated Target and Endpoint-Bound Execution Preparation
 
 **Scope:** Current owner instruction, 2026-10-12: proceed with unprivileged
