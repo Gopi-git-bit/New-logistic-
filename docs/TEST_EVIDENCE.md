@@ -1,5 +1,26 @@
 # Zippy Test and Discovery Evidence
 
+### M7-E005: PR #12 Expiry Review Correction
+
+2026-10-12; independent GitHub Codex review of `ab1ed7d1dd7315c811ca55adf01d3c8f30cbaa03`
+identified a P2 expiry gap ([review finding](https://github.com/Gopi-git-bit/New-logistic-/pull/12#discussion_r4245648975)):
+client initialization followed the final grant-window check, while ranking started
+a fresh duration. The implementing assistant's earlier manual review missed it.
+
+The runner now captures a fixed monotonic deadline before client construction,
+capped by granted expiry and configured duration. Ranking and cleanup preserve it;
+a second check after request construction prevents late HTTP. No new approval,
+credential source, model, retry or fallback was enabled.
+
+Seven additional mocked cases exercise initialization delay, exhausted cleanup
+window, request-construction delay and invalid deadline values. Time is advanced
+deterministically on the test event loop; there are no sleeps or live probes.
+The five focused suites report **323 passed**, zero skips/warnings. Affected Ruff
+lint/format and strict adapter/runner typing pass. Publication and new-head CI
+evidence will be recorded in PR #12; earlier passing CI is not the corrected
+head's CI. Dedicated credentials, effective host isolation/egress, hard spending
+cap and trusted authority remain unverified; database gaps and D-33 are unchanged.
+
 ### M7-E004: Isolated Execution Preparation (D-40)
 
 2026-10-12; base PR #11 head `6ed3f35676fa8f5b622ef226a35c3ec20ee66771`.

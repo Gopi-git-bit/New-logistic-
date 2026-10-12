@@ -18,6 +18,10 @@ configuration. **Live execution remains NO-GO.**
   exact credential file and claim-directory paths, timeout/output limits,
   one request, validity window and required owner/budget/key/isolation evidence.
   The full run must fit before expiry; this is rechecked after preparation I/O.
+  Before client initialization, the runner captures one monotonic deadline capped
+  by both the granted expiry and configured duration. Initialization, request
+  construction, HTTP and cleanup consume that same window; ranking never resets
+  it. An exhausted request window prevents HTTP, including after request building.
 - Atomic exclusive file creation and fsync consume an approved invocation before
   client creation. A concurrent/restarted caller finds the consumed marker;
   failures never remove it. Changing claim directories does not reset a grant.

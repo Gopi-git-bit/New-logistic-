@@ -9,6 +9,7 @@ import os
 import stat
 from collections.abc import Mapping
 from dataclasses import asdict, dataclass
+from datetime import UTC, datetime
 from pathlib import Path
 
 import httpx
@@ -82,9 +83,17 @@ async def run_synthetic(
         {"distance_m": match.distance_m, "score": match.score} for match in SYNTHETIC_MATCHES
     ]
     baseline = await recommend_drivers(candidates, None, timeout_seconds=settings.timeout_seconds)
+    execution_deadline = None
     if expires_at is not None:
         ensure_execution_window(expires_at, settings.timeout_seconds)
-    agent = OpenAIRecommendationAgent(settings, transport=transport, profile=profile)
+        # Anchor before reading wall time and before constructing the client.
+        # Initialization consumes the same grant/run window as HTTP and cleanup.
+        started = asyncio.get_running_loop().time()
+        remaining = (expires_at - datetime.now(UTC)).total_seconds()
+        execution_deadline = started + min(settings.timeout_seconds, remaining)
+    agent = OpenAIRecommendationAgent(
+        settings, transport=transport, profile=profile, execution_deadline=execution_deadline
+    )
     try:
         advisory = await recommend_drivers(
             candidates, agent, timeout_seconds=settings.timeout_seconds / 2

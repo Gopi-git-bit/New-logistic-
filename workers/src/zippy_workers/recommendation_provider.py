@@ -192,6 +192,7 @@ class OpenAIRecommendationAgent:
         *,
         transport: httpx.AsyncBaseTransport | None = None,
         profile: ProviderRequestProfile | None = None,
+        execution_deadline: float | None = None,
     ) -> None:
         if profile is not None and not isinstance(profile, ProviderRequestProfile):
             raise TypeError("PROFILE_MUST_BE_PROVIDER_REQUEST_PROFILE")
@@ -199,11 +200,17 @@ class OpenAIRecommendationAgent:
         self.profile = profile
         if profile is not None:
             profile.validate_settings(settings)
+        if execution_deadline is not None and (
+            type(execution_deadline) not in (int, float) or not math.isfinite(execution_deadline)
+        ):
+            raise StagingConfigurationError("INVALID_OMS_STAGING_DEADLINE")
         self.requests_started = 0
         self.outcome: ProviderOutcome = "NOT_CALLED"
         self._active: asyncio.Task[object] | None = None
         self._response: httpx.Response | None = None
-        self._deadline: float | None = None
+        # A bound runner captures this before client/TLS initialization. Ranking
+        # and cleanup must never restart or extend that same monotonic window.
+        self._deadline: float | None = execution_deadline
         self._cleanup_complete = False
         self._cleanup_failed = False
         self._client = httpx.AsyncClient(
@@ -223,7 +230,11 @@ class OpenAIRecommendationAgent:
             raise RuntimeError("PROVIDER_REQUEST_LIMIT")
         if len(request.candidates) > MAX_CANDIDATES:
             raise ValueError("PROVIDER_INPUT_LIMIT")
-        self._deadline = asyncio.get_running_loop().time() + self.settings.timeout_seconds
+        loop = asyncio.get_running_loop()
+        local_deadline = loop.time() + self.settings.timeout_seconds
+        self._deadline = (
+            local_deadline if self._deadline is None else min(local_deadline, self._deadline)
+        )
         if tuple(candidate.candidate_id for candidate in request.candidates) != tuple(
             f"candidate-{index}" for index in range(len(request.candidates))
         ):
@@ -277,11 +288,14 @@ class OpenAIRecommendationAgent:
         body = json.dumps(payload, allow_nan=False).encode()
         if len(body) > 4096:
             raise ValueError("PROVIDER_INPUT_LIMIT")
-        self.requests_started += 1
+        request_deadline = self._deadline - self.settings.timeout_seconds / 2
+        if loop.time() >= request_deadline:
+            self.outcome = "TIMEOUT"
+            raise TimeoutError("PROVIDER_TIMEOUT")
         self._active = asyncio.current_task()
         try:
             # Reserve half the single run budget for cancellation and resource cleanup.
-            async with asyncio.timeout_at(self._deadline - self.settings.timeout_seconds / 2):
+            async with asyncio.timeout_at(request_deadline):
                 http_request = self._client.build_request(
                     "POST",
                     self.settings.endpoint,
@@ -295,6 +309,10 @@ class OpenAIRecommendationAgent:
                         "X-Request-Timestamp": datetime.now(UTC).isoformat(),
                     },
                 )
+                # Request construction is synchronous and may consume time too.
+                if loop.time() >= request_deadline:
+                    raise TimeoutError("PROVIDER_TIMEOUT")
+                self.requests_started += 1
                 response = await self._client.send(http_request, stream=True)
                 self._response = response
                 if response.status_code == 429:

@@ -17,6 +17,8 @@ from test_staging_recommendations import BASELINE, ENVIRONMENT, SETTINGS, envelo
 from zippy_workers.capabilities import UnauthorizedCapability
 from zippy_workers.recommendation_provider import (
     DEEPSEEK_DIRECT_PROFILE,
+    OpenAIRecommendationAgent,
+    ProviderCleanupError,
     StagingConfigurationError,
 )
 from zippy_workers.staging_authorization import (
@@ -222,6 +224,91 @@ def test_full_run_must_fit_inside_approval_window(bound):
 def test_window_is_checked_again_after_preparation_delay():
     with pytest.raises(UnauthorizedCapability, match="GRANT_WINDOW_TOO_SHORT"):
         ensure_execution_window(NOW + timedelta(seconds=1), 10, now=NOW)
+
+
+@pytest.mark.parametrize("initialization_elapsed", [0.7, 1.2])
+def test_client_initialization_cannot_restart_bound_grant_window(
+    monkeypatch, initialization_elapsed
+):
+    """Advance loop time deterministically instead of racing real sleeps."""
+    from test_staging_recommendations import TrackedTransport
+
+    settings = replace(DIRECT, timeout_seconds=1)
+    transport = TrackedTransport(lambda request: pytest.fail("expired request reached HTTP"))
+    concrete_client = httpx.AsyncClient
+    monkeypatch.setattr(runner, "assert_can_call_external", lambda *args: None)
+    monkeypatch.setattr(
+        runner,
+        "assert_staging_authorized",
+        lambda *args, **kwargs: datetime.now(UTC) + timedelta(seconds=1.1),
+    )
+
+    async def scenario():
+        loop = asyncio.get_running_loop()
+        original_time = loop.time
+        elapsed = 0.0
+        monkeypatch.setattr(loop, "time", lambda: original_time() + elapsed)
+
+        def delayed_client(**kwargs):
+            nonlocal elapsed
+            client = concrete_client(**kwargs)
+            elapsed += initialization_elapsed
+            return client
+
+        monkeypatch.setattr(httpx, "AsyncClient", delayed_client)
+        if initialization_elapsed < settings.timeout_seconds:
+            report = await runner.run_synthetic(settings, transport=transport, profile=PROFILE)
+            assert report.requests_started == 0 and report.provider_outcome == "TIMEOUT"
+            assert report.advisory.candidate_ids == BASELINE
+            assert transport.closed
+        else:
+            # There is no fresh cleanup budget once the fixed window is spent.
+            with pytest.raises(ProviderCleanupError, match="PROVIDER_CLEANUP_FAILURE"):
+                await runner.run_synthetic(settings, transport=transport, profile=PROFILE)
+        assert asyncio.all_tasks() == {asyncio.current_task()}
+
+    asyncio.run(scenario())
+
+
+def test_request_building_cannot_start_http_after_fixed_request_deadline(monkeypatch):
+    from test_staging_recommendations import TrackedTransport
+
+    transport = TrackedTransport(lambda request: pytest.fail("late request reached HTTP"))
+
+    async def scenario():
+        loop = asyncio.get_running_loop()
+        original_time = loop.time
+        elapsed = 0.0
+        monkeypatch.setattr(loop, "time", lambda: original_time() + elapsed)
+        settings = replace(DIRECT, timeout_seconds=1)
+        agent = OpenAIRecommendationAgent(
+            settings, transport=transport, profile=PROFILE, execution_deadline=loop.time() + 1
+        )
+        build_request = agent._client.build_request
+
+        def delayed_build(*args, **kwargs):
+            nonlocal elapsed
+            request = build_request(*args, **kwargs)
+            elapsed += 0.7
+            return request
+
+        monkeypatch.setattr(agent._client, "build_request", delayed_build)
+        result = await runner.recommend_drivers([{}, {}, {}], agent, timeout_seconds=1)
+        await agent.aclose()
+        assert result.candidate_ids == BASELINE
+        assert agent.requests_started == 0 and agent.outcome == "TIMEOUT"
+        assert transport.closed and asyncio.all_tasks() == {asyncio.current_task()}
+
+    asyncio.run(scenario())
+
+
+@pytest.mark.parametrize("deadline", [True, float("nan"), float("inf"), "unsafe"])
+def test_invalid_fixed_deadline_denied_before_client_creation(monkeypatch, deadline):
+    monkeypatch.setattr(
+        httpx, "AsyncClient", lambda **kwargs: pytest.fail("invalid deadline constructed client")
+    )
+    with pytest.raises(StagingConfigurationError, match="INVALID_OMS_STAGING_DEADLINE"):
+        OpenAIRecommendationAgent(DIRECT, profile=PROFILE, execution_deadline=deadline)
 
 
 def test_cli_profile_is_explicit_and_only_mocked_request_has_disabled_thinking(monkeypatch, capsys):
