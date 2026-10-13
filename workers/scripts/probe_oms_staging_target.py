@@ -1,4 +1,4 @@
-"""Credential-free observations from inside the prepared M7 target boundary."""
+"""Target-boundary observations; optional credential metadata, never contents."""
 
 from __future__ import annotations
 
@@ -8,11 +8,55 @@ import json
 import os
 import platform
 import re
+import stat
 from pathlib import Path
 from typing import Any
 
 BUNDLE = "/opt/zippy-m7-staging"
 FIXTURE = "/var/lib/zippy-m7-denial-fixtures/readable.fixture"
+CREDENTIAL_DIRECTORY = Path("/run/credentials/zippy-oms-staging-credential-probe.service")
+
+
+def credential_metadata() -> dict[str, object]:
+    """Inspect only the service-bound injected file; never read/hash its bytes."""
+    directory_fd = credential_fd = -1
+    try:
+        directory_fd = os.open(CREDENTIAL_DIRECTORY, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
+        directory = os.fstat(directory_fd)
+        if (
+            not stat.S_ISDIR(directory.st_mode)
+            or directory.st_uid not in {0, os.geteuid()}
+            or stat.S_IMODE(directory.st_mode) not in {0o500, 0o700}
+        ):
+            return {"observation": "NOT_VERIFIED", "reason_code": "CREDENTIAL_DIRECTORY_UNSAFE"}
+        credential_fd = os.open(
+            "provider-key", os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK, dir_fd=directory_fd
+        )
+        info = os.fstat(credential_fd)
+        safe = (
+            stat.S_ISREG(info.st_mode)
+            and info.st_uid == os.geteuid()
+            and stat.S_IMODE(info.st_mode) in {0o400, 0o600}
+            and info.st_nlink == 1
+            and 1 <= info.st_size <= 2048
+        )
+        return {
+            "observation": "PRIVATE_STAGING_FILE_OBSERVED" if safe else "NOT_VERIFIED",
+            "uid": info.st_uid,
+            "mode": oct(stat.S_IMODE(info.st_mode)),
+            "bytes": info.st_size,
+            "regular_file": stat.S_ISREG(info.st_mode),
+            "links": info.st_nlink,
+        }
+    except OSError:
+        return {"observation": "NOT_VERIFIED", "reason_code": "CREDENTIAL_UNAVAILABLE"}
+    finally:
+        try:
+            if credential_fd >= 0:
+                os.close(credential_fd)
+        finally:
+            if directory_fd >= 0:
+                os.close(directory_fd)
 
 
 def process_fields(status: str) -> dict[str, object]:
@@ -52,7 +96,7 @@ def fixture_access() -> str:
     return "ACCESSIBLE"
 
 
-def collect(expected_host: str) -> dict[str, Any]:
+def collect(expected_host: str, *, verify_credential: bool = False) -> dict[str, Any]:
     report: dict[str, Any] = {
         "status": "NOT_VERIFIED",
         "readiness": "UNVERIFIED",
@@ -62,6 +106,9 @@ def collect(expected_host: str) -> dict[str, Any]:
         "socket_attempts": 0,
         "configuration_changes": 0,
         "credential_loaded": False,
+        "credential_contents_read": False,
+        "credential_injection": "UNVERIFIED",
+        "dedicated_key_scope": "UNVERIFIED",
         "fixture_positive_control": "REQUIRED_OUTSIDE_TARGET",
         "effective_egress": "UNVERIFIED_NO_CONNECTIVITY_PROBES",
         "namespace_boundary": "UNVERIFIED_REQUIRES_HOST_COMPARISON",
@@ -94,15 +141,28 @@ def collect(expected_host: str) -> dict[str, Any]:
     ):
         # This is not a positive-control, namespace, egress or readiness approval.
         report["status"] = "LOCAL_CHECKS_PASSED"
+        if verify_credential:
+            try:
+                report["credential_metadata"] = credential_metadata()
+            except OSError:
+                # Descriptor close errors must also be redacted and fail closed.
+                report["credential_metadata"] = {"observation": "NOT_VERIFIED"}
+            if report["credential_metadata"]["observation"] == "PRIVATE_STAGING_FILE_OBSERVED":
+                report["credential_injection"] = "PRIVATE_STAGING_FILE_OBSERVED"
+                report["status"] = "LOCAL_CREDENTIAL_CHECKS_PASSED"
+            else:
+                report["status"] = "NOT_VERIFIED"
     return report
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--expected-host", default="srv1943844")
-    report = collect(parser.parse_args(argv).expected_host)
+    parser.add_argument("--verify-staging-credential", action="store_true")
+    args = parser.parse_args(argv)
+    report = collect(args.expected_host, verify_credential=args.verify_staging_credential)
     print(json.dumps(report, sort_keys=True))
-    return 0 if report["status"] == "LOCAL_CHECKS_PASSED" else 1
+    return 0 if report["status"] in {"LOCAL_CHECKS_PASSED", "LOCAL_CREDENTIAL_CHECKS_PASSED"} else 1
 
 
 if __name__ == "__main__":

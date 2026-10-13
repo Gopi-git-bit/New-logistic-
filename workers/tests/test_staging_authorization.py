@@ -230,18 +230,32 @@ def test_window_is_checked_again_after_preparation_delay():
 def test_client_initialization_cannot_restart_bound_grant_window(
     monkeypatch, initialization_elapsed, tmp_path
 ):
-    """Advance loop time deterministically instead of racing real sleeps."""
+    """Control wall and monotonic clocks independently of preparation latency."""
     from test_staging_recommendations import TrackedTransport
 
     settings = replace(DIRECT, timeout_seconds=1)
     tmp_path.chmod(0o700)
     transport = TrackedTransport(lambda request: pytest.fail("expired request reached HTTP"))
     concrete_client = httpx.AsyncClient
+
+    class FixedDatetime(datetime):
+        @classmethod
+        def now(cls, tz=None):
+            return NOW
+
+    # Real wall time made the 100ms preparation margin flaky on busy CI disks.
+    # Keep the actual window validator and all HTTP/cleanup assertions intact.
+    monkeypatch.setattr(runner, "datetime", FixedDatetime)
+    monkeypatch.setattr(
+        runner,
+        "ensure_execution_window",
+        lambda expires, timeout: ensure_execution_window(expires, timeout, now=NOW),
+    )
     monkeypatch.setattr(runner, "assert_can_call_external", lambda *args: None)
     monkeypatch.setattr(
         runner,
         "assert_staging_authorized",
-        lambda *args, **kwargs: datetime.now(UTC) + timedelta(seconds=1.1),
+        lambda *args, **kwargs: NOW + timedelta(seconds=1.1),
     )
 
     async def scenario():
