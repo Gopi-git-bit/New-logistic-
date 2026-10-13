@@ -67,7 +67,8 @@ The synthetic peer protocol echoes the exact `M7-CONTROL ` prefix plus a fresh
 24-character hexadecimal nonce. TCP peers must close after the bounded echo;
 UDP must return one exact datagram. A stale/wrong/oversized response fails.
 Responses and exception messages are not logged; only fixed destinations,
-protocol/port, expected control and sanitized result codes are emitted.
+protocol/port, expected control, synthetic challenge fingerprints, process/time
+identity and sanitized result codes are emitted.
 
 ## Proposed isolated topology and control matrix
 
@@ -94,10 +95,12 @@ All listed denied address/port combinations must have live synthetic echo
 listeners during calibration, including TCP5432 on the allowed peers. No real
 database, payment, governance or provider destination may substitute for them.
 
-The bounded echo-listener artifact, namespace-local privilege binding for ports
-53/443, exact calibration/counter policy and operator evidence collector still
-need concrete review before setup. This draft supplies the client harness,
-disabled client template and protocol, not an automatic listener/policy installer.
+The complete package now supplies the bounded echo listener, separate peer unit
+with only privileged-port binding capability, three exact JSON policies and an
+offline evidence collector. See [the execution protocol](M7_SYNTHETIC_EGRESS_EXECUTION.md)
+for concrete setup, capture and restoration instructions. These artifacts still
+need completed-head review and separate activation authority before setup; this
+draft supplies no automatic listener/policy installer.
 Do not silently rely on root identity, an unknown echo server or permissive
 host networking to fill those gaps. Listener privileged-port capability, if
 required, belongs only to a separately reviewed peer boundary; the target retains
@@ -167,4 +170,4 @@ stop only the diagnostic if active, restore only its original root-owned 0444
 unit, validate and reload configuration. Do not delete existing namespaces,
 firewall, bundle, fixture, markers, credentials or claim state. No rollback was
 executed; the successful corrected diagnostic remains installed. This draft's
-uninstalled client/template/plan have no host resources to roll back.
+uninstalled scripts/templates/policies/plans have no host resources to roll back.

@@ -74,7 +74,7 @@ def test_fixed_matrix_has_both_families_and_address_and_port_negatives():
 def test_suitable_local_controls_still_require_independent_proof(target, monkeypatch, phase):
     calls = []
 
-    def attempt(case, deadline):
+    def attempt(case, deadline, *, receipt=None):
         calls.append((case, deadline))
         return (
             "RESPONSE_MATCHED"
@@ -132,19 +132,21 @@ def test_boundary_or_namespace_failure_never_connects(target, monkeypatch, kind)
 @pytest.mark.parametrize("phase", ["calibration", "restricted"])
 @pytest.mark.parametrize("outcome", ["CONNECTIVITY_ERROR_UNVERIFIED", "INVALID_RESPONSE"])
 def test_unreachable_or_invalid_controls_do_not_qualify(target, monkeypatch, phase, outcome):
-    monkeypatch.setattr(probe, "attempt", lambda *_args: outcome)
+    monkeypatch.setattr(probe, "attempt", lambda *_args, **_kwargs: outcome)
     assert probe.collect(phase, perform_controls=True)["status"] == "NOT_VERIFIED"
 
 
 def test_accessible_negative_destination_is_a_failure(target, monkeypatch):
-    monkeypatch.setattr(probe, "attempt", lambda *_args: "RESPONSE_MATCHED")
+    monkeypatch.setattr(probe, "attempt", lambda *_args, **_kwargs: "RESPONSE_MATCHED")
     assert probe.collect("restricted", perform_controls=True)["status"] == "NOT_VERIFIED"
 
 
 @pytest.mark.parametrize("negative", ["CONNECTIVITY_ERROR_UNVERIFIED", "INVALID_RESPONSE"])
 def test_passing_positives_do_not_hide_unverified_negative_controls(target, monkeypatch, negative):
     monkeypatch.setattr(
-        probe, "attempt", lambda case, _deadline: "RESPONSE_MATCHED" if case.permitted else negative
+        probe,
+        "attempt",
+        lambda case, _deadline, **_kwargs: "RESPONSE_MATCHED" if case.permitted else negative,
     )
     assert probe.collect("restricted", perform_controls=True)["status"] == "NOT_VERIFIED"
 
@@ -153,7 +155,7 @@ def test_passing_ipv4_does_not_hide_missing_ipv6(target, monkeypatch):
     monkeypatch.setattr(
         probe,
         "attempt",
-        lambda case, _deadline: (
+        lambda case, _deadline, **_kwargs: (
             "RESPONSE_MATCHED" if case.family == socket.AF_INET else "CONNECTIVITY_ERROR_UNVERIFIED"
         ),
     )
@@ -170,7 +172,7 @@ def test_deadline_is_global_and_never_resets(target, monkeypatch):
     monkeypatch.setattr(probe.time, "monotonic", lambda: clock[0])
     calls = []
 
-    def delayed(case, deadline):
+    def delayed(case, deadline, *, receipt=None):
         calls.append(deadline)
         clock[0] += 8.0
         return "RESPONSE_MATCHED"
@@ -223,7 +225,7 @@ class FakeSocket:
 @pytest.mark.parametrize("transport", ["tcp", "udp"])
 def test_nonce_echo_uses_numeric_endpoints_and_closes(monkeypatch, family, transport):
     connection = FakeSocket()
-    monkeypatch.setattr(socket, "socket", lambda *_args: connection)
+    monkeypatch.setattr(socket, "socket", lambda *_args, **_kwargs: connection)
     monkeypatch.setattr(probe.time, "monotonic", lambda: 0.0)
     case = next(c for c in probe.control_cases() if c.family == family and c.transport == transport)
     assert probe.attempt(case, 16.0) == "RESPONSE_MATCHED"
@@ -254,7 +256,7 @@ def test_nonce_echo_uses_numeric_endpoints_and_closes(monkeypatch, family, trans
 )
 def test_errors_are_redacted_closed_and_never_denial_proof(monkeypatch, error, outcome):
     connection = FakeSocket(error=error)
-    monkeypatch.setattr(socket, "socket", lambda *_args: connection)
+    monkeypatch.setattr(socket, "socket", lambda *_args, **_kwargs: connection)
     monkeypatch.setattr(probe.time, "monotonic", lambda: 0.0)
     assert probe.attempt(probe.control_cases()[0], 16.0) == outcome
     assert connection.closed
@@ -263,7 +265,7 @@ def test_errors_are_redacted_closed_and_never_denial_proof(monkeypatch, error, o
 @pytest.mark.parametrize("chunks", [[b"wrong", b""], [b"x" * 65]])
 def test_wrong_or_oversized_echo_fails_and_closes(monkeypatch, chunks):
     connection = FakeSocket(chunks=chunks)
-    monkeypatch.setattr(socket, "socket", lambda *_args: connection)
+    monkeypatch.setattr(socket, "socket", lambda *_args, **_kwargs: connection)
     monkeypatch.setattr(probe.time, "monotonic", lambda: 0.0)
     assert probe.attempt(probe.control_cases()[0], 16.0) == "INVALID_RESPONSE"
     assert connection.closed
@@ -272,7 +274,7 @@ def test_wrong_or_oversized_echo_fails_and_closes(monkeypatch, chunks):
 def test_each_operation_consumes_the_same_attempt_deadline(monkeypatch):
     connection = FakeSocket()
     times = iter([0.0, 0.2, 0.7, 1.1])
-    monkeypatch.setattr(socket, "socket", lambda *_args: connection)
+    monkeypatch.setattr(socket, "socket", lambda *_args, **_kwargs: connection)
     monkeypatch.setattr(probe.time, "monotonic", lambda: next(times))
     assert probe.attempt(probe.control_cases()[0], 16.0) == "NO_RESPONSE_UNVERIFIED"
     assert connection.timeouts == pytest.approx([0.8, 0.3]) and connection.closed

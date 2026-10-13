@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import errno
+import hashlib
 import importlib.util
 import json
 import os
@@ -65,10 +66,13 @@ def _set_remaining_timeout(connection: socket.socket, deadline: float) -> None:
     connection.settimeout(remaining)
 
 
-def attempt(case: Control, run_deadline: float) -> str:
+def attempt(case: Control, run_deadline: float, *, receipt: dict[str, str] | None = None) -> str:
     """Send a nonce echo challenge, never HTTP/TLS/DNS/database protocol."""
     deadline = min(run_deadline, time.monotonic() + ATTEMPT_SECONDS)
     challenge = b"M7-CONTROL " + secrets.token_hex(12).encode("ascii")
+    if receipt is not None:
+        # This is a synthetic challenge fingerprint, never a credential hash.
+        receipt["challenge_sha256"] = hashlib.sha256(challenge).hexdigest()
     kind = socket.SOCK_STREAM if case.transport == "tcp" else socket.SOCK_DGRAM
     address: tuple[Any, ...] = (
         (case.address, case.port)
@@ -113,6 +117,7 @@ def collect(phase: str, *, perform_controls: bool = False) -> dict[str, Any]:
     report: dict[str, Any] = {
         "status": "PREPARATION_ONLY",
         "phase": phase,
+        "pid": os.getpid(),
         "started_at_utc": datetime.now(UTC).isoformat(),
         "readiness": "UNVERIFIED",
         "effective_egress": "UNVERIFIED_REQUIRES_INDEPENDENT_POLICY_CORRELATION",
@@ -151,7 +156,8 @@ def collect(phase: str, *, perform_controls: bool = False) -> dict[str, Any]:
         if attempt_started >= deadline:
             report["reason_code"] = "RUN_WINDOW_EXHAUSTED"
             return report
-        outcome = attempt(case, deadline)
+        receipt: dict[str, str] = {}
+        outcome = attempt(case, deadline, receipt=receipt)
         attempt_finished = time.monotonic()
         report["socket_attempts"] += 1
         expects_response = phase == "calibration" or case.permitted
@@ -168,6 +174,7 @@ def collect(phase: str, *, perform_controls: bool = False) -> dict[str, Any]:
                 "port": case.port,
                 "expected": "response" if expects_response else "policy_correlated_denial",
                 "outcome": outcome,
+                **receipt,
                 "started_elapsed_seconds": attempt_started - (deadline - RUN_SECONDS),
                 "finished_elapsed_seconds": attempt_finished - (deadline - RUN_SECONDS),
             }
@@ -180,6 +187,7 @@ def collect(phase: str, *, perform_controls: bool = False) -> dict[str, Any]:
             if phase == "calibration"
             else "CANDIDATE_CONTROLS_REQUIRE_EXTERNAL_PROOF"
         )
+    report["finished_at_utc"] = datetime.now(UTC).isoformat()
     return report
 
 
