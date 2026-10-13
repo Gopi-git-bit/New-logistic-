@@ -79,6 +79,98 @@ def test_missing_or_writable_bundle_mount_fails(target, monkeypatch, mounts):
     assert probe.main([]) == 1
 
 
+@pytest.mark.parametrize("argv", [[], ["--verify-staging-credential"]])
+def test_observed_readonly_root_without_explicit_source_mount_fails(
+    target, monkeypatch, capsys, argv
+):
+    # Sanitized VPS failure shape: per-mount root is ro, ext4 superblock is rw,
+    # and there is no exact /opt/zippy-m7-staging mount in the service namespace.
+    mounts = (
+        "484 456 8:1 / / ro,nosuid,relatime shared:412 master:1 "
+        "- ext4 /dev/sda1 rw,discard,errors=remount-ro,commit=30\n"
+    )
+    monkeypatch.setattr(Path, "read_text", lambda path: STATUS if path.name == "status" else mounts)
+    monkeypatch.setattr(
+        probe, "credential_metadata", lambda: pytest.fail("unsafe source boundary inspected key")
+    )
+    assert probe.main(argv) == 1
+    report = json.loads(capsys.readouterr().out)
+    assert report["status"] == "NOT_VERIFIED"
+    assert report["bundle_readonly"] is None
+    assert report["provider_calls"] == report["socket_attempts"] == 0
+
+
+@pytest.mark.parametrize(
+    "name,marker,timeout",
+    [
+        ("zippy-oms-staging-probe", "owner-probe-enabled", "5"),
+        ("zippy-oms-staging-credential-probe", "owner-credential-probe-enabled", "5"),
+        ("zippy-oms-staging", "owner-enabled", "12"),
+    ],
+)
+def test_templates_preserve_source_resolver_binds_and_security(name, marker, timeout):
+    root = Path(__file__).resolve().parents[2]
+    text = (root / f"infra/m7-staging/{name}.service.in").read_text()
+    directives = {}
+    for line in text.splitlines():
+        if line and not line.startswith(("#", "[")) and "=" in line:
+            key, value = line.split("=", 1)
+            directives.setdefault(key, []).append(value)
+
+    assert directives["BindReadOnlyPaths"] == [
+        "/etc/netns/zippy-oms-staging/resolv.conf:/etc/resolv.conf",
+        "/opt/zippy-m7-staging:/opt/zippy-m7-staging",
+    ]
+    assert "ReadOnlyPaths" not in directives and "BindPaths" not in directives
+    for key in (
+        "DynamicUser",
+        "NoNewPrivileges",
+        "ProtectHome",
+        "PrivateTmp",
+        "PrivateDevices",
+        "PrivateIPC",
+        "ProtectKernelTunables",
+        "ProtectKernelModules",
+        "ProtectKernelLogs",
+        "ProtectControlGroups",
+        "ProtectClock",
+        "RestrictNamespaces",
+        "RestrictRealtime",
+        "RestrictSUIDSGID",
+        "LockPersonality",
+    ):
+        assert directives[key] == ["yes"]
+    assert directives["User"] == ["zippy-m7-oms"]
+    assert directives["ProtectSystem"] == ["strict"]
+    assert directives["CapabilityBoundingSet"] == directives["AmbientCapabilities"] == [""]
+    assert directives["NetworkNamespacePath"] == ["/run/netns/zippy-oms-staging"]
+    assert directives["RestrictAddressFamilies"] == ["AF_INET AF_INET6"]
+    assert directives["TimeoutStartSec"] == [timeout]
+    assert directives["TimeoutStopSec"] == ["2"]
+    assert directives["Restart"] == ["no"] and "[Install]" not in text.split("[Unit]", 1)[1]
+    assert directives["ConditionPathExists"][0] == f"/etc/zippy/m7-staging/{marker}"
+    assert "/usr/bin/env -i " in directives["ExecStart"][0]
+    for path in (
+        "/opt/new-logistic",
+        "/opt/paperclip",
+        "/var/lib/postgresql",
+        "/var/lib/docker",
+        "/run/docker.sock",
+        "/etc/zippy",
+        "/etc/serveravatar",
+    ):
+        assert f"-{path}" in directives["InaccessiblePaths"][0].split()
+    if name.endswith("probe"):
+        assert "/var/lib/zippy-m7-denial-fixtures" in directives["InaccessiblePaths"][0].split()
+        assert "StateDirectory" not in directives
+        assert "/usr/bin/python3 -I " in directives["ExecStart"][0]
+    if name == "zippy-oms-staging-probe":
+        assert "LoadCredential" not in directives
+    else:
+        assert directives["LoadCredential"] == ["provider-key:/etc/zippy/m7-staging/provider.key"]
+    assert "EnvironmentFile" not in directives and "SetCredential" not in directives
+
+
 @pytest.mark.parametrize("result", ["ACCESSIBLE", "UNVERIFIED"])
 def test_accessible_or_unknown_fixture_fails(target, monkeypatch, result):
     monkeypatch.setattr(probe, "fixture_access", lambda: result)
