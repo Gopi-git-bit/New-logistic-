@@ -1,0 +1,85 @@
+name: Frontend E2E CI
+
+on:
+  pull_request:
+    branches: [master, main]
+    paths:
+      - "apps/portal/**"
+      - "packages/**"
+      - "package.json"
+      - "pnpm-workspace.yaml"
+      - "pnpm-lock.yaml"
+      - "turbo.json"
+      - "biome.json"
+      - ".github/workflows/ci-frontend-e2e.yml"
+  push:
+    branches: [master, main]
+    paths:
+      - "apps/portal/**"
+      - "packages/**"
+      - "package.json"
+      - "pnpm-workspace.yaml"
+      - "pnpm-lock.yaml"
+      - "turbo.json"
+      - "biome.json"
+      - ".github/workflows/ci-frontend-e2e.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: frontend-e2e-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  NEXT_TELEMETRY_DISABLED: "1"
+
+jobs:
+  portal-e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright Chromium
+        run: pnpm --filter @zippy/portal exec playwright install --with-deps chromium
+
+      - name: Build portal
+        run: pnpm --filter @zippy/portal build
+
+      - name: Run Playwright smoke tests
+        run: pnpm --filter @zippy/portal test:e2e
+
+      - name: Upload Playwright report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: portal-playwright-report
+          path: apps/portal/playwright-report/
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload Playwright test results
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: portal-playwright-test-results
+          path: apps/portal/test-results/
+          if-no-files-found: ignore
+          retention-days: 14
