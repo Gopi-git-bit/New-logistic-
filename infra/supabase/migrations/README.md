@@ -1,0 +1,31 @@
+# Supabase Migrations
+
+Applied in filename order by Docker entrypoint (`db` service) or `supabase db push`.
+
+| File | Purpose |
+|------|---------|
+| `00000000000000_extensions.sql` | uuid-ossp, pgcrypto, PostGIS, pgvector |
+| `00000000000001_initial_schema.sql` | Core DDL: users, profiles, companies, vehicles, telemetry, orders, event log, payments, admin/alerts/AI observability tables, SOP sections |
+| `00000000000002_functions_triggers.sql` | `transition_order` state machine, commission/service-fee trigger, payment transaction recorder, long-halt detector, provider assignment helper |
+| `00000000000003_views.sql` | Admin dashboard, transport company dual-role stats, driver earnings views |
+| `00000000000004_auth_stub.sql` | Minimal `auth.uid()`/`auth.role()` compatibility for vanilla Postgres |
+| `00000000000005_rls_policies.sql` | Row-Level Security on all tables |
+| `00000000000006_seed_data.sql` | Local dev/E2E seed data |
+
+## Manual apply
+
+```bash
+# via docker
+docker exec -i zippy-db psql -U postgres -d postgres < infra/supabase/migrations/00000000000000_extensions.sql
+
+# or all at once
+Get-ChildItem infra/supabase/migrations/*.sql | Sort-Object Name | ForEach-Object {
+  Get-Content $_.FullName -Raw | docker exec -i zippy-db psql -U postgres -d postgres -v ON_ERROR_STOP=1
+}
+```
+
+## Notes
+
+- `00000000000004_auth_stub.sql` provides `auth.uid()`/`auth.role()` on vanilla Postgres (Supabase already has them). Simulate a user with `set_config('app.current_user_id', ...)`.
+- **Ops warning:** the container healthcheck (`pg_isready`) turns green *while init scripts are still running* on the temporary server — `healthy` does **not** mean init is complete. Gate automation on the public table count stabilizing (currently **21**), e.g. two identical consecutive polls, before running verification suites.
+- Two pricing reference tables raise the table count: 18 app tables + `spatial_ref_sys` + `pricing_rate_bands` + `pricing_toll_bands`.

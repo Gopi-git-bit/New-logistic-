@@ -1,0 +1,69 @@
+# Dependencies
+node_modules
+.pnp
+.pnp.js
+.pnpm-debug.log*
+
+# Build outputs
+.next
+dist
+build
+out
+turbo
+.turbo
+*.tsbuildinfo
+
+# Environment
+.env
+.env.local
+.env.*.local
+.env.production
+
+# Python
+__pycache__
+*.pyc
+*.pyo
+*.egg-info
+.venv
+venv
+.pytest_cache
+.mypy_cache
+.ruff_cache
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea
+.vscode/*
+!.vscode/settings.json.default
+*.swp
+*.swo
+
+# Docker volumes
+infra/docker/volumes
+infra/docker/data
+
+# Supabase
+supabase/.branches
+supabase/.temp
+
+# Odoo
+infra/odoo/addons/*
+!infra/odoo/addons/.gitkeep
+infra/odoo/data/*
+!infra/odoo/data/.gitkeep
+
+# Misc
+*.pem
+*.key
+coverage
+.nyc_output

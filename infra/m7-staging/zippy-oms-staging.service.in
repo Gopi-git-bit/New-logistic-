@@ -1,0 +1,44 @@
+# REVIEW TEMPLATE ONLY. Not installed or enabled; no [Install] section.
+# An operator must verify a sealed bundle, UID, namespace, key and hard budget.
+[Unit]
+Description=One-shot synthetic Zippy OMS staging target (not authorized)
+ConditionPathExists=/etc/zippy/m7-staging/owner-enabled
+
+[Service]
+Type=oneshot
+User=zippy-m7-oms
+DynamicUser=yes
+UMask=0077
+StateDirectory=zippy-m7-oms
+StateDirectoryMode=0700
+WorkingDirectory=/opt/zippy-m7-staging
+NetworkNamespacePath=/run/netns/zippy-oms-staging
+LoadCredential=provider-key:/etc/zippy/m7-staging/provider.key
+ExecStart=/usr/bin/env -i PATH=/usr/bin:/bin PYTHONPATH=/opt/zippy-m7-staging/workers/src PYTHONDONTWRITEBYTECODE=1 LANG=C.UTF-8 OMS_STAGING_ENDPOINT=https://api.deepseek.com/chat/completions OMS_STAGING_MODEL=deepseek-flash OMS_STAGING_TIMEOUT_SECONDS=10 OMS_STAGING_MAX_OUTPUT_TOKENS=128 /opt/zippy-m7-staging/.venv/bin/python /opt/zippy-m7-staging/workers/scripts/run_oms_recommendation.py --run-synthetic-shadow --provider-profile deepseek-direct --source-sha FUTURE_REVIEWED_SHA --approval-id FUTURE_HUMAN_GRANT --claim-directory /var/lib/zippy-m7-oms --credential-file ${CREDENTIALS_DIRECTORY}/provider-key
+NoNewPrivileges=yes
+CapabilityBoundingSet=
+AmbientCapabilities=
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+PrivateIPC=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=yes
+ProtectClock=yes
+RestrictNamespaces=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+RestrictAddressFamilies=AF_INET AF_INET6
+InaccessiblePaths=-/opt/new-logistic -/opt/paperclip -/var/lib/postgresql -/var/lib/docker -/run/docker.sock -/etc/zippy -/etc/serveravatar
+BindReadOnlyPaths=/etc/netns/zippy-oms-staging/resolv.conf:/etc/resolv.conf
+BindReadOnlyPaths=/opt/zippy-m7-staging:/opt/zippy-m7-staging
+# TimeoutStartSec bounds Type=oneshot execution, including preparation/cleanup.
+TimeoutStartSec=12
+TimeoutStopSec=2
+Restart=no
+StandardOutput=journal
+StandardError=journal

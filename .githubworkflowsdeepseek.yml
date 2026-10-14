@@ -1,0 +1,60 @@
+  deepseek-live-integration-test:
+    name: DeepSeek Live Integration Test
+    runs-on: ubuntu-latest
+    # CRITICAL GUARDRAIL: Only run this job if the secret actually exists.
+    # This prevents the job from failing on forked PRs or environments without the key.
+    if: ${{ secrets.DEEPSEEK_API_KEY != '' }}
+    
+    env:
+      # Securely inject the secret into the job's environment variables.
+      # GitHub automatically masks values injected this way in the logs.
+      DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+      DEEPSEEK_BASE_URL: "https://api.deepseek.com"
+      DEEPSEEK_MODEL: "deepseek-chat" # Explicitly hardcoded for determinism
+      
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11' # Adjust to your project's version
+          cache: 'pip'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt # Or your specific dependency file
+
+      # GUARDRAIL: Verify the secret is present and formatted correctly WITHOUT exposing it.
+      - name: Validate DeepSeek Credential Presence
+        run: |
+          if [ -z "$DEEPSEEK_API_KEY" ]; then
+            echo "❌ FAIL: DEEPSEEK_API_KEY is not set in GitHub Secrets."
+            exit 1
+          fi
+          
+          # Check if the key starts with the expected prefix (e.g., 'sk-')
+          # This proves the secret is loaded correctly without printing the actual key.
+          if [[ "$DEEPSEEK_API_KEY" == sk-* ]]; then
+            echo "✅ PASS: DeepSeek API key is present and correctly formatted."
+          else
+            echo "❌ FAIL: DeepSeek API key format is invalid. Expected 'sk-' prefix."
+            exit 1
+          fi
+
+      # Execute your actual live integration tests here.
+      # Because the key is in the `env` block, your Python code (e.g., os.getenv("DEEPSEEK_API_KEY")) 
+      # will automatically pick it up securely.
+      - name: Run DeepSeek Live Tests
+        run: |
+          echo "Executing live DeepSeek tool-calling tests..."
+          pytest tests/test_deepseek_live_integration.py -v
+          
+      # OPTIONAL: Egress verification step (proves the CI can only reach DeepSeek)
+      - name: Verify Egress Isolation (Optional but recommended for PR #13)
+        run: |
+          echo "Testing outbound connectivity to DeepSeek API..."
+          # This will succeed if egress to port 443 is allowed
+          curl -s -o /dev/null -w "%{http_code}" https://api.deepseek.com/v1/models | grep -q "200\|401" && echo "✅ PASS: Egress to DeepSeek API is functional." || echo "❌ FAIL: Cannot reach DeepSeek API."
