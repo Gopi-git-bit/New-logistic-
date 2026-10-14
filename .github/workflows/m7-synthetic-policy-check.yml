@@ -5,12 +5,16 @@ on:
     paths:
       - infra/m7-staging/synthetic-*.nft.json
       - workers/scripts/oms_synthetic_contract.py
+      - workers/tests/test_synthetic_evidence_package.py
+      - workers/tests/fixtures/nft-1.0.9-*.json
       - .github/workflows/m7-synthetic-policy-check.yml
   push:
     branches: [main]
     paths:
       - infra/m7-staging/synthetic-*.nft.json
       - workers/scripts/oms_synthetic_contract.py
+      - workers/tests/test_synthetic_evidence_package.py
+      - workers/tests/fixtures/nft-1.0.9-*.json
       - .github/workflows/m7-synthetic-policy-check.yml
 
 permissions:
@@ -55,13 +59,17 @@ jobs:
           import sys
           from pathlib import Path
           sys.path.insert(0, "workers/scripts")
-          from oms_synthetic_contract import counter_values, policy, policy_shape
+          from oms_synthetic_contract import counter_values, policy, policy_shape, snapshot_identity
           mismatches = []
           for phase in ("calibration", "restricted", "peer"):
               actual = json.loads((Path(sys.argv[1]) / f"{phase}.json").read_text())
+              assert len(counter_values(actual)) == 14
               assert all(value == (0, 0) for value in counter_values(actual).values())
+              snapshot_identity(actual)
               if policy_shape(actual) != policy_shape(policy(phase)):
                   print(f"M7_EXPORT_{phase}=" + json.dumps(actual, separators=(",", ":")))
                   mismatches.append(phase)
+              else:
+                  print(f"M7_ROUND_TRIP_PASSED: {phase}; 14 zero counters; handles present")
           assert not mismatches, f"NFT_EXPORT_MISMATCH: {mismatches}"
           PY

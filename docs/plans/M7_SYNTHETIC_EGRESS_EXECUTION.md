@@ -28,9 +28,21 @@ each synthetic challenge, not responses or exception text. The peer records the
 same fingerprint after echoing, case index and time. No credential is hashed/read.
 
 CI's `M7 synthetic policy check` validates these files using `nft --check` inside
-a disposable runner namespace and confirms the ruleset stayed empty. It does
-not apply policies, create a peer or run network controls. This is separate from
-the required VPS's own parser/kernel and effective behavior checks.
+a disposable runner namespace and confirms checking left the ruleset empty.
+It then applies each policy there and compares its kernel-exported JSON with the
+contract, requiring zero counters. This namespace has no uplink; no peer,
+listener or network control runs. Namespace cleanup removes its policies without
+changing host rules. This is separate from the required VPS's own parser/kernel
+and effective behavior checks.
+
+The comparer accepts two captured nftables 1.0.9 representations: the fixed
+`ip`/`ip6` address and `tcp`/`udp` port selectors imply their explicit family and
+transport guards, and the exact established/related reply-state set exports
+using `==` instead of `in`. Only the entire known selector prefix and exact
+reply expression are normalized. Unknown or conflicting selectors, rule order,
+ports, addresses, named counters, verdicts, comments and chain settings remain
+strict. Before/after handle identity and counter correlation are unchanged.
+The recorded CI exports are regression fixtures, not VPS egress evidence.
 
 ## Scoped setup protocol, after approval only
 
