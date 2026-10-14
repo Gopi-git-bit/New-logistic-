@@ -1,0 +1,40 @@
+# REVIEW TEMPLATE ONLY. No topology installer, activation or provider authority.
+# Instances accept only calibration/restricted phases and fixed synthetic endpoints.
+[Unit]
+Description=Bounded synthetic M7 egress controls (%i), external proof required
+ConditionPathExists=/etc/zippy/m7-staging/owner-egress-probe-enabled
+
+[Service]
+Type=oneshot
+User=zippy-m7-oms
+DynamicUser=yes
+UMask=0077
+WorkingDirectory=/opt/zippy-m7-staging
+NetworkNamespacePath=/run/netns/zippy-oms-staging
+ExecStart=/usr/bin/env -i PATH=/usr/bin:/bin PYTHONDONTWRITEBYTECODE=1 LANG=C.UTF-8 /usr/bin/python3 -I /opt/zippy-m7-staging/workers/scripts/probe_oms_synthetic_egress.py --phase %i --perform-controls
+NoNewPrivileges=yes
+CapabilityBoundingSet=
+AmbientCapabilities=
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+PrivateIPC=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=yes
+ProtectClock=yes
+RestrictNamespaces=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+RestrictAddressFamilies=AF_INET AF_INET6
+InaccessiblePaths=-/opt/new-logistic -/opt/paperclip -/var/lib/postgresql -/var/lib/docker -/run/docker.sock -/etc/zippy -/etc/serveravatar /var/lib/zippy-m7-denial-fixtures
+BindReadOnlyPaths=/etc/netns/zippy-oms-staging/resolv.conf:/etc/resolv.conf
+BindReadOnlyPaths=/opt/zippy-m7-staging:/opt/zippy-m7-staging
+TimeoutStartSec=18
+TimeoutStopSec=2
+Restart=no
+StandardOutput=journal
+StandardError=journal

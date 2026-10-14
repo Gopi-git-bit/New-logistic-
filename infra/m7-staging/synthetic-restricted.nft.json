@@ -1,0 +1,1300 @@
+{
+  "nftables": [
+    {
+      "add": {
+        "table": {
+          "family": "inet",
+          "name": "zippy_oms_staging"
+        }
+      }
+    },
+    {
+      "add": {
+        "chain": {
+          "family": "inet",
+          "table": "zippy_oms_staging",
+          "name": "input",
+          "type": "filter",
+          "hook": "input",
+          "prio": 0,
+          "policy": "drop"
+        }
+      }
+    },
+    {
+      "add": {
+        "chain": {
+          "family": "inet",
+          "table": "zippy_oms_staging",
+          "name": "output",
+          "type": "filter",
+          "hook": "output",
+          "prio": 0,
+          "policy": "drop"
+        }
+      }
+    },
+    {
+      "add": {
+        "chain": {
+          "family": "inet",
+          "table": "zippy_oms_staging",
+          "name": "forward",
+          "type": "filter",
+          "hook": "forward",
+          "prio": 0,
+          "policy": "drop"
+        }
+      }
+    },
+    {
+      "add": {
+        "rule": {
+          "family": "inet",
+          "table": "zippy_oms_staging",
+          "chain": "input",
+          "expr": [
+            {
+              "match": {
+                "op": "in",
+                "left": {
+                  "ct": {
+                    "key": "state"
+                  }
+                },
+                "right": {
+                  "set": [
+                    "established",
+                    "related"
+                  ]
+                }
+              }
+            },
+            {
+              "accept": null
+            }
+          ],
+          "comment": "M7 synthetic replies only"
+        }
+      }
+    },
+    {
+      "add": {
+        "counter": {
+          "family": "inet",
+          "table": "zippy_oms_staging",
+          "name": "m7_00",
+          "packets": 0,
+          "bytes": 0
+        }
+      }
+    },
+    {
+      "add": {
+        "rule": {
+          "family": "inet",
+          "table": "zippy_oms_staging",
+          "chain": "output",
+          "expr": [
+            {
+              "match": {
+                "op": "==",
+                "left": {
+                  "meta": {
+                    "key": "nfproto"
+                  }
+                },
+                "right": "ipv4"
+              }
+            },
+            {
+              "match": {
+                "op": "==",
+                "left": {
+                  "payload": {
+                    "protocol": "ip",
+                    "field": "saddr"
+                  }
+                },
+                "right": "192.0.2.1"
+              }
+            },
+            {
+              "match": {
+                "op": "==",
+                "left": {
+                  "payload": {
+                    "protocol": "ip",
+                    "field": "daddr"
+                  }
+                },
+                "right": "192.0.2.2"
+              }
+            },
+            {
+              "match": {
+                "op": "==",
+                "left": {
+                  "meta": {
+                    "key": "l4proto"
+                  }
+                },
+                "right": "tcp"
+              }
+            },
+            {
+              "match": {
+                "op": "==",
+                "left": {
+                  "payload": {
+                    "protocol": "tcp",
+                    "field": "dport"
+                  }
+                },
+                "right": 443
+              }
+            },
+            {
+              "counter": "m7_00"
+            },
+            {
+              "accept": null
+            }
+          ],
+          "comment": "M7 restricted 00"
+        }
+      }
+    },
+    {
+      "add": {
+        "counter": {
+          "family": "inet",
+          "table": "zippy_oms_staging",
+          "name": "m7_01",
+          "packets": 0,
+          "bytes": 0
+        }
+      }
+    },
+    {
+      "add": {
+        "rule": {
+          "family": "inet",
+          "table": "zippy_oms_staging",
+          "chain": "output",
+          "expr": [
+            {
+              "match": {
+                "op": "==",
+                "left": {
+                  "meta": {
+                    "key": "nfproto"
+                  }
+                },
+                "right": "ipv4"
+              }
+            },
+            {
+              "match": {
+                "op": "==",
+                "left": {
+                  "payload": {
+                    "protocol": "ip",
+                    "field": "saddr"
+                  }
+                },
+                "right": "192.0.2.1"
+              }
+            },
+            {
+              "match": {
+                "op": "==",
+                "left": {
+                  "payload": {
+                    "protocol": "ip",
+                    "field": "daddr"
+                  }
+                },
+                "right": "192.0.2.2"
+              }
+            },
+            {
+              "match": {
+                "op": "==",
+                "left": {
+                  "meta": {
+                    "key": "l4proto"
+                  }
+                },
+                "right": "tcp"
+              }
+            },
+            {
+              "match": {
+                "op": "==",
+                "left": {
+                  "payload": {
+                    "protocol": "tcp",
+                    "field": "dport"
+                  }
+                },
+                "right": 53
+              }
+            },
+            {
+              "counter": "m7_01"
+            },
+            {
+              "accept": null
+            }
+          ],
+          "comment": "M7 restricted 01"
+        }
+      }
+    },
+    {
+      "add": {
+        "counter": {
+          "family": "inet",
+          "table": "zippy_oms_staging",
+          "name": "m7_02",
+          "packets": 0,
+          "bytes": 0
+        }
+      }
+    },
+    {
+      "add": {
+        "rule": {
+          "family": "inet",
+          "table": "zippy_oms_staging",
+          "chain": "output",
+          "expr": [
+            {
+              "match": {
+                "op": "==",
+                "left": {
+                  "meta": {
+                    "key": "nfproto"
+                  }
+                },
+                "right": "ipv4"
+              }
+            },
+            {
+              "match": {
+                "op": "==",
+                "left": {
+                  "payload": {
+                    "protocol": "ip",
+                    "field": "saddr"
+                  }
+                },
+                "right": "192.0.2.1"
+              }
+            },
+            {
+              "match": {
+                "op": "==",
+                "left": {
+                  "payload": {
+                    "protocol": "ip",
+                    "field": "daddr"
+                  }
+                },
+                "right": "192.0.2.2"
+              }
+            },
+            {
+              "match": {
+                "op": "==",
+                "left": {
+                  "meta": {
+                    "key": "l4proto"
+                  }
+                },
+                "right": "udp"
+              }
+            },
+            {
+              "match": {
+                "op": "==",
+                "left": {
+                  "payload": {
+                    "protocol": "udp",
+                    "field": "dport"
+                  }
+                },
+                "right": 53
+              }
+            },
+            {
+              "counter": "m7_02"
+            },
+            {
+              "accept": null
+            }
+          ],
+          "comment": "M7 restricted 02"
+        }
+      }
+    },
+    {
+      "add": {
+        "counter": {
+          "family": "inet",
+          "table": "zippy_oms_staging",
+          "name": "m7_03",
+          "packets": 0,
+          "bytes": 0
+        }
+      }
+    },
+    {
+      "add": {
+        "rule": {
+          "family": "inet",
+          "table": "zippy_oms_staging",
+          "chain": "output",
+          "expr": [
+            {
+              "match": {
+                "op": "==",
+                "left": {
+                  "meta": {
+                    "key": "nfproto"
+                  }
+                },
+                "right": "ipv4"
+              }
+            },
+            {
+              "match": {
+                "op": "==",
+                "left": {
+                  "payload": {
+                    "protocol": "ip",
+                    "field": "saddr"
+                  }
+                },
+                "right": "192.0.2.1"
+              }
+            },
+            {
+              "match": {
+                "op": "==",
+                "left": {
+                  "payload": {
+                    "protocol": "ip",
+                    "field": "daddr"
+                  }
+                },
+                "right": "192.0.2.3"
+              }
+            },
+            {
+              "match": {
+                "op": "==",
+                "left": {
+                  "meta": {
+                    "key": "l4proto"
+                  }
+                },
+                "right": "tcp"
+              }
+            },
+            {
+              "match": {
+                "op": "==",
+                "left": {
+                  "payload": {
+                    "protocol": "tcp",
+                    "field": "dport"
+                  }
+                },
+                "right": 443
+              }
+            },
+            {
+              "counter": "m7_03"
+            },
+            {
+              "drop": null
+            }
+          ],
+          "comment": "M7 restricted 03"
+        }
+      }
+    },
+    {
+      "add": {
+        "counter": {
+          "family": "inet",
+          "table": "zippy_oms_staging",
+          "name": "m7_04",
+          "packets": 0,
+          "bytes": 0
+        }
+      }
+    },
+    {
+      "add": {
+        "rule": {
+          "family": "inet",
+          "table": "zippy_oms_staging",
+          "chain": "output",
+          "expr": [
+            {
+              "match": {
+                "op": "==",
+                "left": {
+                  "meta": {
+                    "key": "nfproto"
+                  }
+                },
+                "right": "ipv4"
+              }
+            },
+            {
+              "match": {
+                "op": "==",
+                "left": {
+                  "payload": {
+                    "protocol": "ip",
+                    "field": "saddr"
+                  }
+                },
+                "right": "192.0.2.1"
+              }
+            },
+            {
+              "match": {
+                "op": "==",
+                "left": {
+                  "payload": {
+                    "protocol": "ip",
+                    "field": "daddr"
+                  }
+                },
+                "right": "192.0.2.3"
+              }
+            },
+            {
+              "match": {
+                "op": "==",
+                "left": {
+                  "meta": {
+                    "key": "l4proto"
+                  }
+                },
+                "right": "tcp"
+              }
+            },
+            {
+              "match": {
+                "op": "==",
+                "left": {
+                  "payload": {
+                    "protocol": "tcp",
+                    "field": "dport"
+                  }
+                },
+                "right": 53
+              }
+            },
+            {
+              "counter": "m7_04"
+            },
+            {
+              "drop": null
+            }
+          ],
+          "comment": "M7 restricted 04"
+        }
+      }
+    },
+    {
+      "add": {
+        "counter": {
+          "family": "inet",
+          "table": "zippy_oms_staging",
+          "name": "m7_05",
+          "packets": 0,
+          "bytes": 0
+        }
+      }
+    },
+    {
+      "add": {
+        "rule": {
+          "family": "inet",
+          "table": "zippy_oms_staging",
+          "chain": "output",
+          "expr": [
+            {
+              "match": {
+                "op": "==",
+                "left": {
+                  "meta": {
+                    "key": "nfproto"
+                  }
+                },
+                "right": "ipv4"
+              }
+            },
+            {
+              "match": {
+                "op": "==",
+                "left": {
+                  "payload": {
+                    "protocol": "ip",
+                    "field": "saddr"
+                  }
+                },
+                "right": "192.0.2.1"
+              }
+            },
+            {
+              "match": {
+                "op": "==",
+                "left": {
+                  "payload": {
+                    "protocol": "ip",
+                    "field": "daddr"
+                  }
+                },
+                "right": "192.0.2.3"
+              }
+            },
+            {
+              "match": {
+                "op": "==",
+                "left": {
+                  "meta": {
+                    "key": "l4proto"
+                  }
+                },
+                "right": "udp"
+              }
+            },
+            {
+              "match": {
+                "op": "==",
+                "left": {
+                  "payload": {
+                    "protocol": "udp",
+                    "field": "dport"
+                  }
+                },
+                "right": 53
+              }
+            },
+            {
+              "counter": "m7_05"
+            },
+            {
+              "drop": null
+            }
+          ],
+          "comment": "M7 restricted 05"
+        }
+      }
+    },
+    {
+      "add": {
+        "counter": {
+          "family": "inet",
+          "table": "zippy_oms_staging",
+          "name": "m7_06",
+          "packets": 0,
+          "bytes": 0
+        }
+      }
+    },
+    {
+      "add": {
+        "rule": {
+          "family": "inet",
+          "table": "zippy_oms_staging",
+          "chain": "output",
+          "expr": [
+            {
+              "match": {
+                "op": "==",
+                "left": {
+                  "meta": {
+                    "key": "nfproto"
+                  }
+                },
+                "right": "ipv4"
+              }
+            },
+            {
+              "match": {
+                "op": "==",
+                "left": {
+                  "payload": {
+                    "protocol": "ip",
+                    "field": "saddr"
+                  }
+                },
+                "right": "192.0.2.1"
+              }
+            },
+            {
+              "match": {
+                "op": "==",
+                "left": {
+                  "payload": {
+                    "protocol": "ip",
+                    "field": "daddr"
+                  }
+                },
+                "right": "192.0.2.2"
+              }
+            },
+            {
+              "match": {
+                "op": "==",
+                "left": {
+                  "meta": {
+                    "key": "l4proto"
+                  }
+                },
+                "right": "tcp"
+              }
+            },
+            {
+              "match": {
+                "op": "==",
+                "left": {
+                  "payload": {
+                    "protocol": "tcp",
+                    "field": "dport"
+                  }
+                },
+                "right": 5432
+              }
+            },
+            {
+              "counter": "m7_06"
+            },
+            {
+              "drop": null
+            }
+          ],
+          "comment": "M7 restricted 06"
+        }
+      }
+    },
+    {
+      "add": {
+        "counter": {
+          "family": "inet",
+          "table": "zippy_oms_staging",
+          "name": "m7_07",
+          "packets": 0,
+          "bytes": 0
+        }
+      }
+    },
+    {
+      "add": {
+        "rule": {
+          "family": "inet",
+          "table": "zippy_oms_staging",
+          "chain": "output",
+          "expr": [
+            {
+              "match": {
+                "op": "==",
+                "left": {
+                  "meta": {
+                    "key": "nfproto"
+                  }
+                },
+                "right": "ipv6"
+              }
+            },
+            {
+              "match": {
+                "op": "==",
+                "left": {
+                  "payload": {
+                    "protocol": "ip6",
+                    "field": "saddr"
+                  }
+                },
+                "right": "2001:db8:7::1"
+              }
+            },
+            {
+              "match": {
+                "op": "==",
+                "left": {
+                  "payload": {
+                    "protocol": "ip6",
+                    "field": "daddr"
+                  }
+                },
+                "right": "2001:db8:7::2"
+              }
+            },
+            {
+              "match": {
+                "op": "==",
+                "left": {
+                  "meta": {
+                    "key": "l4proto"
+                  }
+                },
+                "right": "tcp"
+              }
+            },
+            {
+              "match": {
+                "op": "==",
+                "left": {
+                  "payload": {
+                    "protocol": "tcp",
+                    "field": "dport"
+                  }
+                },
+                "right": 443
+              }
+            },
+            {
+              "counter": "m7_07"
+            },
+            {
+              "accept": null
+            }
+          ],
+          "comment": "M7 restricted 07"
+        }
+      }
+    },
+    {
+      "add": {
+        "counter": {
+          "family": "inet",
+          "table": "zippy_oms_staging",
+          "name": "m7_08",
+          "packets": 0,
+          "bytes": 0
+        }
+      }
+    },
+    {
+      "add": {
+        "rule": {
+          "family": "inet",
+          "table": "zippy_oms_staging",
+          "chain": "output",
+          "expr": [
+            {
+              "match": {
+                "op": "==",
+                "left": {
+                  "meta": {
+                    "key": "nfproto"
+                  }
+                },
+                "right": "ipv6"
+              }
+            },
+            {
+              "match": {
+                "op": "==",
+                "left": {
+                  "payload": {
+                    "protocol": "ip6",
+                    "field": "saddr"
+                  }
+                },
+                "right": "2001:db8:7::1"
+              }
+            },
+            {
+              "match": {
+                "op": "==",
+                "left": {
+                  "payload": {
+                    "protocol": "ip6",
+                    "field": "daddr"
+                  }
+                },
+                "right": "2001:db8:7::2"
+              }
+            },
+            {
+              "match": {
+                "op": "==",
+                "left": {
+                  "meta": {
+                    "key": "l4proto"
+                  }
+                },
+                "right": "tcp"
+              }
+            },
+            {
+              "match": {
+                "op": "==",
+                "left": {
+                  "payload": {
+                    "protocol": "tcp",
+                    "field": "dport"
+                  }
+                },
+                "right": 53
+              }
+            },
+            {
+              "counter": "m7_08"
+            },
+            {
+              "accept": null
+            }
+          ],
+          "comment": "M7 restricted 08"
+        }
+      }
+    },
+    {
+      "add": {
+        "counter": {
+          "family": "inet",
+          "table": "zippy_oms_staging",
+          "name": "m7_09",
+          "packets": 0,
+          "bytes": 0
+        }
+      }
+    },
+    {
+      "add": {
+        "rule": {
+          "family": "inet",
+          "table": "zippy_oms_staging",
+          "chain": "output",
+          "expr": [
+            {
+              "match": {
+                "op": "==",
+                "left": {
+                  "meta": {
+                    "key": "nfproto"
+                  }
+                },
+                "right": "ipv6"
+              }
+            },
+            {
+              "match": {
+                "op": "==",
+                "left": {
+                  "payload": {
+                    "protocol": "ip6",
+                    "field": "saddr"
+                  }
+                },
+                "right": "2001:db8:7::1"
+              }
+            },
+            {
+              "match": {
+                "op": "==",
+                "left": {
+                  "payload": {
+                    "protocol": "ip6",
+                    "field": "daddr"
+                  }
+                },
+                "right": "2001:db8:7::2"
+              }
+            },
+            {
+              "match": {
+                "op": "==",
+                "left": {
+                  "meta": {
+                    "key": "l4proto"
+                  }
+                },
+                "right": "udp"
+              }
+            },
+            {
+              "match": {
+                "op": "==",
+                "left": {
+                  "payload": {
+                    "protocol": "udp",
+                    "field": "dport"
+                  }
+                },
+                "right": 53
+              }
+            },
+            {
+              "counter": "m7_09"
+            },
+            {
+              "accept": null
+            }
+          ],
+          "comment": "M7 restricted 09"
+        }
+      }
+    },
+    {
+      "add": {
+        "counter": {
+          "family": "inet",
+          "table": "zippy_oms_staging",
+          "name": "m7_10",
+          "packets": 0,
+          "bytes": 0
+        }
+      }
+    },
+    {
+      "add": {
+        "rule": {
+          "family": "inet",
+          "table": "zippy_oms_staging",
+          "chain": "output",
+          "expr": [
+            {
+              "match": {
+                "op": "==",
+                "left": {
+                  "meta": {
+                    "key": "nfproto"
+                  }
+                },
+                "right": "ipv6"
+              }
+            },
+            {
+              "match": {
+                "op": "==",
+                "left": {
+                  "payload": {
+                    "protocol": "ip6",
+                    "field": "saddr"
+                  }
+                },
+                "right": "2001:db8:7::1"
+              }
+            },
+            {
+              "match": {
+                "op": "==",
+                "left": {
+                  "payload": {
+                    "protocol": "ip6",
+                    "field": "daddr"
+                  }
+                },
+                "right": "2001:db8:7::3"
+              }
+            },
+            {
+              "match": {
+                "op": "==",
+                "left": {
+                  "meta": {
+                    "key": "l4proto"
+                  }
+                },
+                "right": "tcp"
+              }
+            },
+            {
+              "match": {
+                "op": "==",
+                "left": {
+                  "payload": {
+                    "protocol": "tcp",
+                    "field": "dport"
+                  }
+                },
+                "right": 443
+              }
+            },
+            {
+              "counter": "m7_10"
+            },
+            {
+              "drop": null
+            }
+          ],
+          "comment": "M7 restricted 10"
+        }
+      }
+    },
+    {
+      "add": {
+        "counter": {
+          "family": "inet",
+          "table": "zippy_oms_staging",
+          "name": "m7_11",
+          "packets": 0,
+          "bytes": 0
+        }
+      }
+    },
+    {
+      "add": {
+        "rule": {
+          "family": "inet",
+          "table": "zippy_oms_staging",
+          "chain": "output",
+          "expr": [
+            {
+              "match": {
+                "op": "==",
+                "left": {
+                  "meta": {
+                    "key": "nfproto"
+                  }
+                },
+                "right": "ipv6"
+              }
+            },
+            {
+              "match": {
+                "op": "==",
+                "left": {
+                  "payload": {
+                    "protocol": "ip6",
+                    "field": "saddr"
+                  }
+                },
+                "right": "2001:db8:7::1"
+              }
+            },
+            {
+              "match": {
+                "op": "==",
+                "left": {
+                  "payload": {
+                    "protocol": "ip6",
+                    "field": "daddr"
+                  }
+                },
+                "right": "2001:db8:7::3"
+              }
+            },
+            {
+              "match": {
+                "op": "==",
+                "left": {
+                  "meta": {
+                    "key": "l4proto"
+                  }
+                },
+                "right": "tcp"
+              }
+            },
+            {
+              "match": {
+                "op": "==",
+                "left": {
+                  "payload": {
+                    "protocol": "tcp",
+                    "field": "dport"
+                  }
+                },
+                "right": 53
+              }
+            },
+            {
+              "counter": "m7_11"
+            },
+            {
+              "drop": null
+            }
+          ],
+          "comment": "M7 restricted 11"
+        }
+      }
+    },
+    {
+      "add": {
+        "counter": {
+          "family": "inet",
+          "table": "zippy_oms_staging",
+          "name": "m7_12",
+          "packets": 0,
+          "bytes": 0
+        }
+      }
+    },
+    {
+      "add": {
+        "rule": {
+          "family": "inet",
+          "table": "zippy_oms_staging",
+          "chain": "output",
+          "expr": [
+            {
+              "match": {
+                "op": "==",
+                "left": {
+                  "meta": {
+                    "key": "nfproto"
+                  }
+                },
+                "right": "ipv6"
+              }
+            },
+            {
+              "match": {
+                "op": "==",
+                "left": {
+                  "payload": {
+                    "protocol": "ip6",
+                    "field": "saddr"
+                  }
+                },
+                "right": "2001:db8:7::1"
+              }
+            },
+            {
+              "match": {
+                "op": "==",
+                "left": {
+                  "payload": {
+                    "protocol": "ip6",
+                    "field": "daddr"
+                  }
+                },
+                "right": "2001:db8:7::3"
+              }
+            },
+            {
+              "match": {
+                "op": "==",
+                "left": {
+                  "meta": {
+                    "key": "l4proto"
+                  }
+                },
+                "right": "udp"
+              }
+            },
+            {
+              "match": {
+                "op": "==",
+                "left": {
+                  "payload": {
+                    "protocol": "udp",
+                    "field": "dport"
+                  }
+                },
+                "right": 53
+              }
+            },
+            {
+              "counter": "m7_12"
+            },
+            {
+              "drop": null
+            }
+          ],
+          "comment": "M7 restricted 12"
+        }
+      }
+    },
+    {
+      "add": {
+        "counter": {
+          "family": "inet",
+          "table": "zippy_oms_staging",
+          "name": "m7_13",
+          "packets": 0,
+          "bytes": 0
+        }
+      }
+    },
+    {
+      "add": {
+        "rule": {
+          "family": "inet",
+          "table": "zippy_oms_staging",
+          "chain": "output",
+          "expr": [
+            {
+              "match": {
+                "op": "==",
+                "left": {
+                  "meta": {
+                    "key": "nfproto"
+                  }
+                },
+                "right": "ipv6"
+              }
+            },
+            {
+              "match": {
+                "op": "==",
+                "left": {
+                  "payload": {
+                    "protocol": "ip6",
+                    "field": "saddr"
+                  }
+                },
+                "right": "2001:db8:7::1"
+              }
+            },
+            {
+              "match": {
+                "op": "==",
+                "left": {
+                  "payload": {
+                    "protocol": "ip6",
+                    "field": "daddr"
+                  }
+                },
+                "right": "2001:db8:7::2"
+              }
+            },
+            {
+              "match": {
+                "op": "==",
+                "left": {
+                  "meta": {
+                    "key": "l4proto"
+                  }
+                },
+                "right": "tcp"
+              }
+            },
+            {
+              "match": {
+                "op": "==",
+                "left": {
+                  "payload": {
+                    "protocol": "tcp",
+                    "field": "dport"
+                  }
+                },
+                "right": 5432
+              }
+            },
+            {
+              "counter": "m7_13"
+            },
+            {
+              "drop": null
+            }
+          ],
+          "comment": "M7 restricted 13"
+        }
+      }
+    }
+  ]
+}

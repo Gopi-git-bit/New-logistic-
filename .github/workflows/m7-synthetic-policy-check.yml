@@ -1,0 +1,44 @@
+name: M7 synthetic policy check
+
+on:
+  pull_request:
+    paths:
+      - infra/m7-staging/synthetic-*.nft.json
+      - workers/scripts/oms_synthetic_contract.py
+      - .github/workflows/m7-synthetic-policy-check.yml
+  push:
+    branches: [master]
+    paths:
+      - infra/m7-staging/synthetic-*.nft.json
+      - workers/scripts/oms_synthetic_contract.py
+      - .github/workflows/m7-synthetic-policy-check.yml
+
+permissions:
+  contents: read
+
+jobs:
+  nft-check-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install policy parser on disposable CI runner only
+        run: |
+          if ! command -v nft >/dev/null || ! command -v ip >/dev/null; then
+            sudo apt-get update
+            sudo apt-get install --no-install-recommends -y nftables iproute2
+          fi
+      - name: Kernel check in an isolated namespace without applying policies
+        shell: bash
+        run: |
+          set -euo pipefail
+          namespace="zippy-m7-policy-ci-${GITHUB_RUN_ID}"
+          sudo ip netns add "$namespace"
+          trap 'sudo ip netns del "$namespace"' EXIT
+          nft --version
+          for phase in calibration restricted peer; do
+            sudo ip netns exec "$namespace" nft --check --json --file "infra/m7-staging/synthetic-${phase}.nft.json"
+          done
+          sudo ip netns exec "$namespace" nft --json list ruleset | python3 -c 'import json,sys; data=json.load(sys.stdin); assert all(set(item)=={"metainfo"} for item in data["nftables"])'
