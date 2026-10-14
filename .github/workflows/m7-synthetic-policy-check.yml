@@ -7,7 +7,7 @@ on:
       - workers/scripts/oms_synthetic_contract.py
       - .github/workflows/m7-synthetic-policy-check.yml
   push:
-    branches: [master]
+    branches: [main]
     paths:
       - infra/m7-staging/synthetic-*.nft.json
       - workers/scripts/oms_synthetic_contract.py
