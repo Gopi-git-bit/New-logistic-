@@ -6,6 +6,7 @@ on:
       - workers/scripts/restore_oms_staging_baseline.py
       - workers/scripts/check_oms_baseline_ci.py
       - workers/tests/test_staging_baseline_restoration.py
+      - workers/tests/fixtures/nft-1.0.9-baseline.json
       - infra/m7-staging/egress.nft.in
       - .github/workflows/m7-baseline-restoration-check.yml
   push:
@@ -14,6 +15,7 @@ on:
       - workers/scripts/restore_oms_staging_baseline.py
       - workers/scripts/check_oms_baseline_ci.py
       - workers/tests/test_staging_baseline_restoration.py
+      - workers/tests/fixtures/nft-1.0.9-baseline.json
       - infra/m7-staging/egress.nft.in
       - .github/workflows/m7-baseline-restoration-check.yml
 

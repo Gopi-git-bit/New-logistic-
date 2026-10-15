@@ -7,6 +7,7 @@ import hashlib
 import json
 import os
 import platform
+import re
 import stat
 import subprocess
 import tempfile
@@ -244,8 +245,24 @@ def host_state(commands: Commands, folder: Path) -> dict[str, str]:
     }
     # iptables-save adds wall-clock comments even when its rules are unchanged.
     for name in ("iptables", "ip6tables"):
-        outputs[name] = "\n".join(x for x in outputs[name].splitlines() if not x.startswith("#"))
+        outputs[name] = iptables_policy(outputs[name])
     return {**{k: digest(v.encode()) for k, v in outputs.items()}, "files": preserved_files()}
+
+
+def iptables_policy(text: str) -> str:
+    return "\n".join(
+        re.sub(r"^(:\S+ \S+) \[\d+:\d+\]$", r"\1 [runtime-counters]", line)
+        for line in text.splitlines()
+        if not line.startswith("#")
+    )
+
+
+def preserved_host(commands: Commands, folder: Path, before: dict[str, str]) -> None:
+    after = host_state(commands, folder)
+    changed = sorted(
+        key for key in before.keys() | after.keys() if before.get(key) != after.get(key)
+    )
+    require(not changed, "HOST_PRESERVATION_UNVERIFIED:" + ",".join(changed))
 
 
 def boot_id() -> str:
@@ -294,6 +311,9 @@ def read_receipt(folder: Path) -> dict[str, Any]:
         )
         result: dict[str, Any] = json.loads(handle.read(65_537))
     require(
+        type(result.get("version")) is int and result["version"] == 1, "RECEIPT_VERSION_UNSUPPORTED"
+    )
+    require(
         result["namespace"] == NAMESPACE and result["boot_id"] == boot_id(),
         "RECEIPT_IDENTITY_MISMATCH",
     )
@@ -322,7 +342,7 @@ def verify(commands: Commands, folder: Path, value: dict[str, Any]) -> None:
     )
     require(policy_shape(actual) == policy_shape(expected_policy()), "BASELINE_POLICY_MISMATCH")
     require(not commands.run([IP, "netns", "pids", NAMESPACE]).strip(), "NAMESPACE_HAS_USERS")
-    require(host_state(commands, folder) == value["host_before"], "HOST_PRESERVATION_UNVERIFIED")
+    preserved_host(commands, folder, value["host_before"])
     owned(value)
 
 
@@ -400,7 +420,7 @@ def rollback(commands: Commands, folder: Path, value: dict[str, Any]) -> None:
     require(not os.path.lexists(NS_PATH), "NAMESPACE_REMOVAL_UNVERIFIED")
     value["state"] = "REMOVED"
     record(folder, value)
-    require(host_state(commands, folder) == value["host_before"], "HOST_PRESERVATION_UNVERIFIED")
+    preserved_host(commands, folder, value["host_before"])
 
 
 def main(argv: list[str] | None = None) -> int:

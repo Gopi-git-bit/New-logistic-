@@ -64,6 +64,9 @@ Passive plan (no host inspection, commands or writes):
 
 After separate explicit namespace-restoration approval only:
 
+First require separately authorized merge into `main` and green resulting-merge
+CI. Repository integration does not itself authorize any VPS execution.
+
 ```sh
 /usr/bin/python3 -I /REVIEWED_CHECKOUT/workers/scripts/restore_oms_staging_baseline.py apply
 ```
@@ -120,7 +123,8 @@ changed ports/verdicts/selectors and boolean priority substitutions fail.
 Host preservation compares before/after SHA-256 observations of stateless nft
 policy (including handles), IPv4/IPv6 iptables rules, host links, local Docker
 network inspection and the fixed diagnostic unit/script/resolver/marker/fixture.
-Only generated `iptables-save` comment lines are omitted. Raw host/Docker data
+Only generated `iptables-save` comment lines and numeric base-chain packet/byte
+counters are omitted; chain names/policies and all rule text remain exact. Raw host/Docker data
 is not persisted or printed; receipt contains hashes. Docker reads use the fixed
 local Unix socket and an explicit empty config directory, not inherited endpoint
 or operator configuration. These are local read operations, not registry calls.
