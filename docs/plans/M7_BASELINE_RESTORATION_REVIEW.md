@@ -5,6 +5,27 @@ a new, tested, explicitly reviewed namespace-only procedure. This authorizes
 preparation and disposable tests, not VPS installation/execution, merge,
 diagnostic start, synthetic activation, credentials or live inference.
 
+The owner's subsequent instruction on 15 October authorizes completion of review,
+merge of the reviewed restoration code and verification of resulting main CI.
+Namespace-only restoration still requires separate authorization after that gate.
+
+## Integrated-head review correction
+
+Main independently gained `tests/test_external_apis.py`, whose direct HTTP calls
+used generic provider environment variables outside the M7 runner's authority,
+isolation and spending controls. This PR replaces those live probes with four
+offline denial regressions against the real runner and selects them explicitly
+in CI. They use synthetic configuration and tripwires against credential reads,
+provider construction and network connection attempts. They prove that generic
+keys and caller-supplied profile/source/approval claims cannot authorize execution.
+They do not validate real keys or provider endpoints. No HTTP probes remain in
+that file, and no live-test opt-in switch is introduced.
+
+The original seven-file restoration slice and its helper/policy bytes remain
+unchanged apart from this review document. Current-main integration also preserves
+the independently merged presence-only workflow. Its pending staging-secret-name
+correction in PR #22 is separate from namespace restoration.
+
 ## Provenance and why this is new
 
 The historical source was PR #17 merge
