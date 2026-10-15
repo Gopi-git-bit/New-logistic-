@@ -252,7 +252,7 @@ def boot_id() -> str:
     return Path("/proc/sys/kernel/random/boot_id").read_text().strip()
 
 
-def private_folder(folder: Path) -> None:
+def trusted_parents(folder: Path) -> None:
     for path in (folder, *folder.parents):
         info = path.lstat()
         require(
@@ -261,6 +261,10 @@ def private_folder(folder: Path) -> None:
             and (not info.st_mode & 0o022 or info.st_mode & stat.S_ISVTX),
             "EVIDENCE_PARENT_UNSAFE",
         )
+
+
+def private_folder(folder: Path) -> None:
+    trusted_parents(folder)
     require(stat.S_IMODE(folder.stat().st_mode) == 0o700, "EVIDENCE_MODE_UNSAFE")
 
 
@@ -326,6 +330,7 @@ def apply(commands: Commands, parent: Path) -> Path:
     require(not os.path.lexists(NS_PATH), "EXISTING_NAMESPACE_REFUSED")
     policy = POLICY.read_bytes()
     require(digest(policy) == POLICY_SHA, "POLICY_SOURCE_MISMATCH")
+    trusted_parents(parent)
     folder = Path(tempfile.mkdtemp(prefix="zippy-m7-restore-", dir=parent))
     private_folder(folder)
     (folder / "docker-config").mkdir(mode=0o700)

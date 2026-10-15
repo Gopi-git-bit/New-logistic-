@@ -115,7 +115,7 @@ def main() -> None:
     baseline.require(not os.path.lexists(baseline.NS_PATH), "PREEXISTING_CI_NAMESPACE")
     # Test the operational core after the separate CI host gate. Production CLI
     # has no test flag or host bypass and still requires the exact VPS context.
-    with tempfile.TemporaryDirectory(prefix="m7-baseline-ci-", dir="/opt") as directory:
+    with tempfile.TemporaryDirectory(prefix="m7-baseline-ci-", dir="/root") as directory:
         parent = Path(directory)
         exercise(parent)
 

@@ -76,6 +76,7 @@ def flow(monkeypatch, tmp_path):
 
     monkeypatch.setattr(baseline, "NS_PATH", path)
     monkeypatch.setattr(baseline, "private_folder", lambda folder: None)
+    monkeypatch.setattr(baseline, "trusted_parents", lambda folder: None)
     monkeypatch.setattr(baseline, "identity", lambda path: state["identity"])
     monkeypatch.setattr(baseline, "host_state", lambda *args: copy.deepcopy(state["host"]))
     monkeypatch.setattr(baseline, "topology", lambda commands: state["topology"])
@@ -249,3 +250,22 @@ def test_receipt_replay_and_unsafe_file_refused(monkeypatch, tmp_path, mutation)
     monkeypatch.setattr(baseline.os, "fstat", fstat)
     with pytest.raises((OSError, baseline.Refused)):
         baseline.read_receipt(tmp_path)
+
+
+@pytest.mark.parametrize(
+    "mode,uid,valid",
+    [
+        (0o40755, 0, True),
+        (0o41777, 0, True),
+        (0o40777, 0, False),
+        (0o40755, 1000, False),
+        (0o120777, 0, False),
+    ],
+)
+def test_parent_ownership_and_link_guards(mode, uid, valid):
+    path = SimpleNamespace(parents=(), lstat=lambda: SimpleNamespace(st_mode=mode, st_uid=uid))
+    if valid:
+        baseline.trusted_parents(path)
+    else:
+        with pytest.raises(baseline.Refused, match="EVIDENCE_PARENT_UNSAFE"):
+            baseline.trusted_parents(path)
