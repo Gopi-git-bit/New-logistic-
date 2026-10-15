@@ -148,9 +148,9 @@ def expected_policy() -> dict[str, Any]:
                 "expr": [
                     {
                         "match": {
-                            "op": "==",
+                            "op": "in",
                             "left": {"ct": {"key": "state"}},
-                            "right": {"set": ["established", "related"]},
+                            "right": ["established", "related"],
                         }
                     },
                     {"accept": None},

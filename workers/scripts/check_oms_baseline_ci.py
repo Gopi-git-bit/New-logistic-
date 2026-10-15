@@ -31,7 +31,23 @@ def rejected(call: Any, reason: str) -> None:
 
 
 def exercise(parent: Path) -> None:
-    commands = baseline.Commands()
+    class ObservedCommands:
+        def __init__(self) -> None:
+            self.commands = baseline.Commands()
+            self.exported = False
+
+        def run(self, args: list[str], data: str | None = None) -> str:
+            return str(self.commands.run(args, data))
+
+        def read_json(self, args: list[str]) -> Any:
+            value = self.commands.read_json(args)
+            if args[:4] == [baseline.IP, "netns", "exec", baseline.NAMESPACE] and not self.exported:
+                if any("rule" in item for item in value.get("nftables", [])):
+                    print("M7_BASELINE_EXPORT=" + baseline.canonical(value))
+                    self.exported = True
+            return value
+
+    commands = ObservedCommands()
     folder: Path | None = None
     value: dict[str, Any] | None = None
     try:
