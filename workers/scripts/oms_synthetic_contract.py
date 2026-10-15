@@ -136,8 +136,35 @@ def digest(value: bytes) -> str:
     return hashlib.sha256(value).hexdigest()
 
 
+def _export_expressions(expressions: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Normalize only the fixed contract forms captured from nftables 1.0.9."""
+    # The exported ip/ip6 address and tcp/udp port payloads retain the family
+    # and transport constraints. nft removes their redundant explicit guards.
+    # Require the entire exact contract prefix before removing either guard:
+    # conflicting, partial, reordered or unknown matches remain unequal.
+    for case in cases():
+        prefix = selector(case)
+        if expressions[:5] == prefix:
+            return [prefix[1], prefix[2], prefix[4], *expressions[5:]]
+    replies: list[dict[str, Any]] = [
+        {
+            "match": {
+                "op": "in",
+                "left": {"ct": {"key": "state"}},
+                "right": {"set": ["established", "related"]},
+            }
+        },
+        {"accept": None},
+    ]
+    if expressions == replies:
+        match = dict(replies[0]["match"])
+        match["op"] = "=="
+        return [{"match": match}, {"accept": None}]
+    return expressions
+
+
 def policy_shape(document: dict[str, Any]) -> dict[str, Any]:
-    """Keep selectors, order and all security fields; drop only runtime metadata."""
+    """Preserve security fields/order; normalize captured equivalent exports."""
     objects: dict[str, list[dict[str, Any]]] = {
         k: [] for k in ("table", "chain", "counter", "rule")
     }
@@ -155,6 +182,8 @@ def policy_shape(document: dict[str, Any]) -> dict[str, Any]:
         if kind == "counter":
             cleaned.pop("packets", None)
             cleaned.pop("bytes", None)
+        if kind == "rule":
+            cleaned["expr"] = _export_expressions(cleaned["expr"])
         objects[kind].append(cleaned)
     # nft lists counters/chains by kernel enumeration, not source creation order.
     for kind in ("table", "chain", "counter"):

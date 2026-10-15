@@ -1,0 +1,966 @@
+{
+  "nftables": [
+    {
+      "metainfo": {
+        "version": "1.0.9",
+        "release_name": "Old Doc Yak #3",
+        "json_schema_version": 1
+      }
+    },
+    {
+      "table": {
+        "family": "inet",
+        "name": "zippy_oms_staging",
+        "handle": 6
+      }
+    },
+    {
+      "counter": {
+        "family": "inet",
+        "name": "m7_00",
+        "table": "zippy_oms_staging",
+        "handle": 6,
+        "packets": 0,
+        "bytes": 0
+      }
+    },
+    {
+      "counter": {
+        "family": "inet",
+        "name": "m7_01",
+        "table": "zippy_oms_staging",
+        "handle": 8,
+        "packets": 0,
+        "bytes": 0
+      }
+    },
+    {
+      "counter": {
+        "family": "inet",
+        "name": "m7_02",
+        "table": "zippy_oms_staging",
+        "handle": 10,
+        "packets": 0,
+        "bytes": 0
+      }
+    },
+    {
+      "counter": {
+        "family": "inet",
+        "name": "m7_03",
+        "table": "zippy_oms_staging",
+        "handle": 12,
+        "packets": 0,
+        "bytes": 0
+      }
+    },
+    {
+      "counter": {
+        "family": "inet",
+        "name": "m7_04",
+        "table": "zippy_oms_staging",
+        "handle": 14,
+        "packets": 0,
+        "bytes": 0
+      }
+    },
+    {
+      "counter": {
+        "family": "inet",
+        "name": "m7_05",
+        "table": "zippy_oms_staging",
+        "handle": 16,
+        "packets": 0,
+        "bytes": 0
+      }
+    },
+    {
+      "counter": {
+        "family": "inet",
+        "name": "m7_06",
+        "table": "zippy_oms_staging",
+        "handle": 18,
+        "packets": 0,
+        "bytes": 0
+      }
+    },
+    {
+      "counter": {
+        "family": "inet",
+        "name": "m7_07",
+        "table": "zippy_oms_staging",
+        "handle": 20,
+        "packets": 0,
+        "bytes": 0
+      }
+    },
+    {
+      "counter": {
+        "family": "inet",
+        "name": "m7_08",
+        "table": "zippy_oms_staging",
+        "handle": 22,
+        "packets": 0,
+        "bytes": 0
+      }
+    },
+    {
+      "counter": {
+        "family": "inet",
+        "name": "m7_09",
+        "table": "zippy_oms_staging",
+        "handle": 24,
+        "packets": 0,
+        "bytes": 0
+      }
+    },
+    {
+      "counter": {
+        "family": "inet",
+        "name": "m7_10",
+        "table": "zippy_oms_staging",
+        "handle": 26,
+        "packets": 0,
+        "bytes": 0
+      }
+    },
+    {
+      "counter": {
+        "family": "inet",
+        "name": "m7_11",
+        "table": "zippy_oms_staging",
+        "handle": 28,
+        "packets": 0,
+        "bytes": 0
+      }
+    },
+    {
+      "counter": {
+        "family": "inet",
+        "name": "m7_12",
+        "table": "zippy_oms_staging",
+        "handle": 30,
+        "packets": 0,
+        "bytes": 0
+      }
+    },
+    {
+      "counter": {
+        "family": "inet",
+        "name": "m7_13",
+        "table": "zippy_oms_staging",
+        "handle": 32,
+        "packets": 0,
+        "bytes": 0
+      }
+    },
+    {
+      "chain": {
+        "family": "inet",
+        "table": "zippy_oms_staging",
+        "name": "input",
+        "handle": 1,
+        "type": "filter",
+        "hook": "input",
+        "prio": 0,
+        "policy": "drop"
+      }
+    },
+    {
+      "chain": {
+        "family": "inet",
+        "table": "zippy_oms_staging",
+        "name": "output",
+        "handle": 2,
+        "type": "filter",
+        "hook": "output",
+        "prio": 0,
+        "policy": "drop"
+      }
+    },
+    {
+      "chain": {
+        "family": "inet",
+        "table": "zippy_oms_staging",
+        "name": "forward",
+        "handle": 3,
+        "type": "filter",
+        "hook": "forward",
+        "prio": 0,
+        "policy": "drop"
+      }
+    },
+    {
+      "rule": {
+        "family": "inet",
+        "table": "zippy_oms_staging",
+        "chain": "input",
+        "handle": 5,
+        "comment": "M7 synthetic replies only",
+        "expr": [
+          {
+            "match": {
+              "op": "==",
+              "left": {
+                "ct": {
+                  "key": "state"
+                }
+              },
+              "right": {
+                "set": [
+                  "established",
+                  "related"
+                ]
+              }
+            }
+          },
+          {
+            "accept": null
+          }
+        ]
+      }
+    },
+    {
+      "rule": {
+        "family": "inet",
+        "table": "zippy_oms_staging",
+        "chain": "output",
+        "handle": 7,
+        "comment": "M7 calibration 00",
+        "expr": [
+          {
+            "match": {
+              "op": "==",
+              "left": {
+                "payload": {
+                  "protocol": "ip",
+                  "field": "saddr"
+                }
+              },
+              "right": "192.0.2.1"
+            }
+          },
+          {
+            "match": {
+              "op": "==",
+              "left": {
+                "payload": {
+                  "protocol": "ip",
+                  "field": "daddr"
+                }
+              },
+              "right": "192.0.2.2"
+            }
+          },
+          {
+            "match": {
+              "op": "==",
+              "left": {
+                "payload": {
+                  "protocol": "tcp",
+                  "field": "dport"
+                }
+              },
+              "right": 443
+            }
+          },
+          {
+            "counter": "m7_00"
+          },
+          {
+            "accept": null
+          }
+        ]
+      }
+    },
+    {
+      "rule": {
+        "family": "inet",
+        "table": "zippy_oms_staging",
+        "chain": "output",
+        "handle": 9,
+        "comment": "M7 calibration 01",
+        "expr": [
+          {
+            "match": {
+              "op": "==",
+              "left": {
+                "payload": {
+                  "protocol": "ip",
+                  "field": "saddr"
+                }
+              },
+              "right": "192.0.2.1"
+            }
+          },
+          {
+            "match": {
+              "op": "==",
+              "left": {
+                "payload": {
+                  "protocol": "ip",
+                  "field": "daddr"
+                }
+              },
+              "right": "192.0.2.2"
+            }
+          },
+          {
+            "match": {
+              "op": "==",
+              "left": {
+                "payload": {
+                  "protocol": "tcp",
+                  "field": "dport"
+                }
+              },
+              "right": 53
+            }
+          },
+          {
+            "counter": "m7_01"
+          },
+          {
+            "accept": null
+          }
+        ]
+      }
+    },
+    {
+      "rule": {
+        "family": "inet",
+        "table": "zippy_oms_staging",
+        "chain": "output",
+        "handle": 11,
+        "comment": "M7 calibration 02",
+        "expr": [
+          {
+            "match": {
+              "op": "==",
+              "left": {
+                "payload": {
+                  "protocol": "ip",
+                  "field": "saddr"
+                }
+              },
+              "right": "192.0.2.1"
+            }
+          },
+          {
+            "match": {
+              "op": "==",
+              "left": {
+                "payload": {
+                  "protocol": "ip",
+                  "field": "daddr"
+                }
+              },
+              "right": "192.0.2.2"
+            }
+          },
+          {
+            "match": {
+              "op": "==",
+              "left": {
+                "payload": {
+                  "protocol": "udp",
+                  "field": "dport"
+                }
+              },
+              "right": 53
+            }
+          },
+          {
+            "counter": "m7_02"
+          },
+          {
+            "accept": null
+          }
+        ]
+      }
+    },
+    {
+      "rule": {
+        "family": "inet",
+        "table": "zippy_oms_staging",
+        "chain": "output",
+        "handle": 13,
+        "comment": "M7 calibration 03",
+        "expr": [
+          {
+            "match": {
+              "op": "==",
+              "left": {
+                "payload": {
+                  "protocol": "ip",
+                  "field": "saddr"
+                }
+              },
+              "right": "192.0.2.1"
+            }
+          },
+          {
+            "match": {
+              "op": "==",
+              "left": {
+                "payload": {
+                  "protocol": "ip",
+                  "field": "daddr"
+                }
+              },
+              "right": "192.0.2.3"
+            }
+          },
+          {
+            "match": {
+              "op": "==",
+              "left": {
+                "payload": {
+                  "protocol": "tcp",
+                  "field": "dport"
+                }
+              },
+              "right": 443
+            }
+          },
+          {
+            "counter": "m7_03"
+          },
+          {
+            "accept": null
+          }
+        ]
+      }
+    },
+    {
+      "rule": {
+        "family": "inet",
+        "table": "zippy_oms_staging",
+        "chain": "output",
+        "handle": 15,
+        "comment": "M7 calibration 04",
+        "expr": [
+          {
+            "match": {
+              "op": "==",
+              "left": {
+                "payload": {
+                  "protocol": "ip",
+                  "field": "saddr"
+                }
+              },
+              "right": "192.0.2.1"
+            }
+          },
+          {
+            "match": {
+              "op": "==",
+              "left": {
+                "payload": {
+                  "protocol": "ip",
+                  "field": "daddr"
+                }
+              },
+              "right": "192.0.2.3"
+            }
+          },
+          {
+            "match": {
+              "op": "==",
+              "left": {
+                "payload": {
+                  "protocol": "tcp",
+                  "field": "dport"
+                }
+              },
+              "right": 53
+            }
+          },
+          {
+            "counter": "m7_04"
+          },
+          {
+            "accept": null
+          }
+        ]
+      }
+    },
+    {
+      "rule": {
+        "family": "inet",
+        "table": "zippy_oms_staging",
+        "chain": "output",
+        "handle": 17,
+        "comment": "M7 calibration 05",
+        "expr": [
+          {
+            "match": {
+              "op": "==",
+              "left": {
+                "payload": {
+                  "protocol": "ip",
+                  "field": "saddr"
+                }
+              },
+              "right": "192.0.2.1"
+            }
+          },
+          {
+            "match": {
+              "op": "==",
+              "left": {
+                "payload": {
+                  "protocol": "ip",
+                  "field": "daddr"
+                }
+              },
+              "right": "192.0.2.3"
+            }
+          },
+          {
+            "match": {
+              "op": "==",
+              "left": {
+                "payload": {
+                  "protocol": "udp",
+                  "field": "dport"
+                }
+              },
+              "right": 53
+            }
+          },
+          {
+            "counter": "m7_05"
+          },
+          {
+            "accept": null
+          }
+        ]
+      }
+    },
+    {
+      "rule": {
+        "family": "inet",
+        "table": "zippy_oms_staging",
+        "chain": "output",
+        "handle": 19,
+        "comment": "M7 calibration 06",
+        "expr": [
+          {
+            "match": {
+              "op": "==",
+              "left": {
+                "payload": {
+                  "protocol": "ip",
+                  "field": "saddr"
+                }
+              },
+              "right": "192.0.2.1"
+            }
+          },
+          {
+            "match": {
+              "op": "==",
+              "left": {
+                "payload": {
+                  "protocol": "ip",
+                  "field": "daddr"
+                }
+              },
+              "right": "192.0.2.2"
+            }
+          },
+          {
+            "match": {
+              "op": "==",
+              "left": {
+                "payload": {
+                  "protocol": "tcp",
+                  "field": "dport"
+                }
+              },
+              "right": 5432
+            }
+          },
+          {
+            "counter": "m7_06"
+          },
+          {
+            "accept": null
+          }
+        ]
+      }
+    },
+    {
+      "rule": {
+        "family": "inet",
+        "table": "zippy_oms_staging",
+        "chain": "output",
+        "handle": 21,
+        "comment": "M7 calibration 07",
+        "expr": [
+          {
+            "match": {
+              "op": "==",
+              "left": {
+                "payload": {
+                  "protocol": "ip6",
+                  "field": "saddr"
+                }
+              },
+              "right": "2001:db8:7::1"
+            }
+          },
+          {
+            "match": {
+              "op": "==",
+              "left": {
+                "payload": {
+                  "protocol": "ip6",
+                  "field": "daddr"
+                }
+              },
+              "right": "2001:db8:7::2"
+            }
+          },
+          {
+            "match": {
+              "op": "==",
+              "left": {
+                "payload": {
+                  "protocol": "tcp",
+                  "field": "dport"
+                }
+              },
+              "right": 443
+            }
+          },
+          {
+            "counter": "m7_07"
+          },
+          {
+            "accept": null
+          }
+        ]
+      }
+    },
+    {
+      "rule": {
+        "family": "inet",
+        "table": "zippy_oms_staging",
+        "chain": "output",
+        "handle": 23,
+        "comment": "M7 calibration 08",
+        "expr": [
+          {
+            "match": {
+              "op": "==",
+              "left": {
+                "payload": {
+                  "protocol": "ip6",
+                  "field": "saddr"
+                }
+              },
+              "right": "2001:db8:7::1"
+            }
+          },
+          {
+            "match": {
+              "op": "==",
+              "left": {
+                "payload": {
+                  "protocol": "ip6",
+                  "field": "daddr"
+                }
+              },
+              "right": "2001:db8:7::2"
+            }
+          },
+          {
+            "match": {
+              "op": "==",
+              "left": {
+                "payload": {
+                  "protocol": "tcp",
+                  "field": "dport"
+                }
+              },
+              "right": 53
+            }
+          },
+          {
+            "counter": "m7_08"
+          },
+          {
+            "accept": null
+          }
+        ]
+      }
+    },
+    {
+      "rule": {
+        "family": "inet",
+        "table": "zippy_oms_staging",
+        "chain": "output",
+        "handle": 25,
+        "comment": "M7 calibration 09",
+        "expr": [
+          {
+            "match": {
+              "op": "==",
+              "left": {
+                "payload": {
+                  "protocol": "ip6",
+                  "field": "saddr"
+                }
+              },
+              "right": "2001:db8:7::1"
+            }
+          },
+          {
+            "match": {
+              "op": "==",
+              "left": {
+                "payload": {
+                  "protocol": "ip6",
+                  "field": "daddr"
+                }
+              },
+              "right": "2001:db8:7::2"
+            }
+          },
+          {
+            "match": {
+              "op": "==",
+              "left": {
+                "payload": {
+                  "protocol": "udp",
+                  "field": "dport"
+                }
+              },
+              "right": 53
+            }
+          },
+          {
+            "counter": "m7_09"
+          },
+          {
+            "accept": null
+          }
+        ]
+      }
+    },
+    {
+      "rule": {
+        "family": "inet",
+        "table": "zippy_oms_staging",
+        "chain": "output",
+        "handle": 27,
+        "comment": "M7 calibration 10",
+        "expr": [
+          {
+            "match": {
+              "op": "==",
+              "left": {
+                "payload": {
+                  "protocol": "ip6",
+                  "field": "saddr"
+                }
+              },
+              "right": "2001:db8:7::1"
+            }
+          },
+          {
+            "match": {
+              "op": "==",
+              "left": {
+                "payload": {
+                  "protocol": "ip6",
+                  "field": "daddr"
+                }
+              },
+              "right": "2001:db8:7::3"
+            }
+          },
+          {
+            "match": {
+              "op": "==",
+              "left": {
+                "payload": {
+                  "protocol": "tcp",
+                  "field": "dport"
+                }
+              },
+              "right": 443
+            }
+          },
+          {
+            "counter": "m7_10"
+          },
+          {
+            "accept": null
+          }
+        ]
+      }
+    },
+    {
+      "rule": {
+        "family": "inet",
+        "table": "zippy_oms_staging",
+        "chain": "output",
+        "handle": 29,
+        "comment": "M7 calibration 11",
+        "expr": [
+          {
+            "match": {
+              "op": "==",
+              "left": {
+                "payload": {
+                  "protocol": "ip6",
+                  "field": "saddr"
+                }
+              },
+              "right": "2001:db8:7::1"
+            }
+          },
+          {
+            "match": {
+              "op": "==",
+              "left": {
+                "payload": {
+                  "protocol": "ip6",
+                  "field": "daddr"
+                }
+              },
+              "right": "2001:db8:7::3"
+            }
+          },
+          {
+            "match": {
+              "op": "==",
+              "left": {
+                "payload": {
+                  "protocol": "tcp",
+                  "field": "dport"
+                }
+              },
+              "right": 53
+            }
+          },
+          {
+            "counter": "m7_11"
+          },
+          {
+            "accept": null
+          }
+        ]
+      }
+    },
+    {
+      "rule": {
+        "family": "inet",
+        "table": "zippy_oms_staging",
+        "chain": "output",
+        "handle": 31,
+        "comment": "M7 calibration 12",
+        "expr": [
+          {
+            "match": {
+              "op": "==",
+              "left": {
+                "payload": {
+                  "protocol": "ip6",
+                  "field": "saddr"
+                }
+              },
+              "right": "2001:db8:7::1"
+            }
+          },
+          {
+            "match": {
+              "op": "==",
+              "left": {
+                "payload": {
+                  "protocol": "ip6",
+                  "field": "daddr"
+                }
+              },
+              "right": "2001:db8:7::3"
+            }
+          },
+          {
+            "match": {
+              "op": "==",
+              "left": {
+                "payload": {
+                  "protocol": "udp",
+                  "field": "dport"
+                }
+              },
+              "right": 53
+            }
+          },
+          {
+            "counter": "m7_12"
+          },
+          {
+            "accept": null
+          }
+        ]
+      }
+    },
+    {
+      "rule": {
+        "family": "inet",
+        "table": "zippy_oms_staging",
+        "chain": "output",
+        "handle": 33,
+        "comment": "M7 calibration 13",
+        "expr": [
+          {
+            "match": {
+              "op": "==",
+              "left": {
+                "payload": {
+                  "protocol": "ip6",
+                  "field": "saddr"
+                }
+              },
+              "right": "2001:db8:7::1"
+            }
+          },
+          {
+            "match": {
+              "op": "==",
+              "left": {
+                "payload": {
+                  "protocol": "ip6",
+                  "field": "daddr"
+                }
+              },
+              "right": "2001:db8:7::2"
+            }
+          },
+          {
+            "match": {
+              "op": "==",
+              "left": {
+                "payload": {
+                  "protocol": "tcp",
+                  "field": "dport"
+                }
+              },
+              "right": 5432
+            }
+          },
+          {
+            "counter": "m7_13"
+          },
+          {
+            "accept": null
+          }
+        ]
+      }
+    }
+  ]
+}

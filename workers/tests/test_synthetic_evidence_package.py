@@ -28,6 +28,168 @@ contract = module("oms_synthetic_contract")
 NOW = datetime(2026, 10, 13, 13, tzinfo=UTC)
 
 
+def captured_export(phase):
+    return json.loads((ROOT / f"workers/tests/fixtures/nft-1.0.9-{phase}.json").read_text())
+
+
+@pytest.mark.parametrize("phase", ["calibration", "restricted", "peer"])
+def test_real_nft_109_exports_match_without_mutating_evidence(phase):
+    actual = captured_export(phase)
+    original = copy.deepcopy(actual)
+    expected = contract.policy(phase)
+    original_expected = copy.deepcopy(expected)
+    assert contract.policy_shape(actual) == contract.policy_shape(expected)
+    assert actual == original
+    assert expected == original_expected
+    assert len(contract.counter_values(actual)) == 14
+    assert all(value == (0, 0) for value in contract.counter_values(actual).values())
+
+
+@pytest.mark.parametrize("phase", ["calibration", "restricted", "peer"])
+@pytest.mark.parametrize("representation", ["source", "export"])
+@pytest.mark.parametrize(
+    "mutation",
+    [
+        "source_address",
+        "destination_address",
+        "family",
+        "transport",
+        "port",
+        "missing_source",
+        "missing_destination",
+        "missing_port",
+        "selector_order",
+        "counter_name",
+        "missing_counter",
+        "verdict",
+        "extra_accept",
+        "rule_order",
+        "extra_rule",
+        "chain_policy",
+        "chain_hook",
+        "chain_priority",
+        "table",
+        "comment",
+        "unknown_expression",
+        "reply_state",
+        "reply_operator",
+        "reply_verdict",
+        "conflicting_family_guard",
+        "conflicting_transport_guard",
+    ],
+)
+def test_normalization_preserves_security_differences(phase, representation, mutation):
+    document = contract.policy(phase) if representation == "source" else captured_export(phase)
+    items = document["nftables"]
+    rules = [item["rule"] for item in items if "rule" in item]
+    rule = next(rule for rule in rules if rule["comment"] == f"M7 {phase} 00")
+    expr = rule["expr"]
+    payloads = [item for item in expr if "payload" in item.get("match", {}).get("left", {})]
+    source, destination, port = payloads
+    reply = next(rule for rule in rules if rule["comment"] == "M7 synthetic replies only")
+    if mutation == "source_address":
+        source["match"]["right"] = "192.0.2.9"
+    elif mutation == "destination_address":
+        destination["match"]["right"] = "192.0.2.9"
+    elif mutation == "family":
+        source["match"]["left"]["payload"]["protocol"] = "ip6"
+    elif mutation == "transport":
+        port["match"]["left"]["payload"]["protocol"] = "udp"
+    elif mutation == "port":
+        port["match"]["right"] = 444
+    elif mutation.startswith("missing_"):
+        removed = {
+            "missing_source": source,
+            "missing_destination": destination,
+            "missing_port": port,
+            "missing_counter": expr[-2],
+        }[mutation]
+        expr.remove(removed)
+    elif mutation == "selector_order":
+        a, b = expr.index(source), expr.index(destination)
+        expr[a], expr[b] = expr[b], expr[a]
+    elif mutation == "counter_name":
+        expr[-2]["counter"] = "m7_01"
+    elif mutation == "verdict":
+        expr[-1] = {"drop": None}
+    elif mutation == "extra_accept":
+        expr.insert(0, {"accept": None})
+    elif mutation == "rule_order":
+        entries = [
+            i
+            for i, item in enumerate(items)
+            if "rule" in item and item["rule"]["chain"] == rule["chain"]
+        ]
+        a, b = entries[:2]
+        items[a], items[b] = items[b], items[a]
+    elif mutation == "extra_rule":
+        items.append({"rule": copy.deepcopy(rule)})
+    elif mutation.startswith("chain_"):
+        chain = next(item["chain"] for item in items if "chain" in item)
+        key, value = {
+            "chain_policy": ("policy", "accept"),
+            "chain_hook": ("hook", "prerouting"),
+            "chain_priority": ("prio", 1),
+        }[mutation]
+        chain[key] = value
+    elif mutation == "table":
+        rule["table"] = "bypass"
+    elif mutation == "comment":
+        rule["comment"] = "unknown"
+    elif mutation == "unknown_expression":
+        expr.insert(-1, {"log": {"prefix": "unknown"}})
+    elif mutation == "reply_state":
+        reply["expr"][0]["match"]["right"]["set"].append("new")
+    elif mutation == "reply_operator":
+        reply["expr"][0]["match"]["op"] = "!="
+    elif mutation == "reply_verdict":
+        reply["expr"][-1] = {"drop": None}
+    elif mutation == "conflicting_family_guard":
+        if representation == "source":
+            expr[0]["match"]["right"] = "ipv6"
+        else:
+            expr.insert(
+                0, {"match": {"op": "==", "left": {"meta": {"key": "nfproto"}}, "right": "ipv6"}}
+            )
+    elif mutation == "conflicting_transport_guard":
+        if representation == "source":
+            expr[3]["match"]["right"] = "udp"
+        else:
+            expr.insert(
+                2, {"match": {"op": "==", "left": {"meta": {"key": "l4proto"}}, "right": "udp"}}
+            )
+    else:
+        pytest.fail("unhandled mutation")
+    assert contract.policy_shape(document) != contract.policy_shape(contract.policy(phase))
+
+
+def test_collector_accepts_captured_export_shapes_but_keeps_readiness_denied(evidence):
+    for phase in ("calibration", "restricted"):
+        for side in ("before", "after"):
+            for prefix, exported_phase in (("", phase), ("peer-", "peer")):
+                envelope = evidence[f"{prefix}{phase}-{side}.json"]
+                old = contract.counter_values(envelope["ruleset"])
+                actual = captured_export(exported_phase)
+                for item in actual["nftables"]:
+                    if "counter" in item:
+                        value = item["counter"]
+                        value["packets"], value["bytes"] = old[value["name"]]
+                envelope["ruleset"] = actual
+    result = collector.evaluate(evidence)
+    assert result["status"] == "SYNTHETIC_CONTROLS_CORRELATED_REVIEW_REQUIRED"
+    assert result["readiness"] == "UNVERIFIED"
+    assert result["provider_calls"] == 0
+
+
+def test_export_normalization_does_not_relax_snapshot_replacement_detection():
+    actual = captured_export("restricted")
+    replaced = copy.deepcopy(actual)
+    rule = next(item["rule"] for item in replaced["nftables"] if "rule" in item)
+    rule["handle"] += 100
+    assert contract.policy_shape(actual) == contract.policy_shape(replaced)
+    assert contract.snapshot_identity(actual) != contract.snapshot_identity(replaced)
+
+
 def at(seconds):
     return (NOW + timedelta(seconds=seconds)).isoformat()
 
