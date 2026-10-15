@@ -1,0 +1,41 @@
+name: M7 baseline restoration check
+
+on:
+  pull_request:
+    paths:
+      - workers/scripts/restore_oms_staging_baseline.py
+      - workers/scripts/check_oms_baseline_ci.py
+      - workers/tests/test_staging_baseline_restoration.py
+      - infra/m7-staging/egress.nft.in
+      - .github/workflows/m7-baseline-restoration-check.yml
+  push:
+    branches: [main]
+    paths:
+      - workers/scripts/restore_oms_staging_baseline.py
+      - workers/scripts/check_oms_baseline_ci.py
+      - workers/tests/test_staging_baseline_restoration.py
+      - infra/m7-staging/egress.nft.in
+      - .github/workflows/m7-baseline-restoration-check.yml
+
+permissions:
+  contents: read
+
+jobs:
+  disposable-baseline-proof:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Ensure local policy tools on disposable runner
+        run: |
+          if ! command -v nft >/dev/null || ! command -v ip >/dev/null || ! command -v iptables-save >/dev/null; then
+            sudo apt-get update
+            sudo apt-get install --no-install-recommends -y nftables iproute2 iptables
+          fi
+          nft --version
+      - name: Prove new namespace baseline and guarded rollback without traffic
+        run: |
+          sudo env -i PATH=/usr/sbin:/usr/bin:/sbin:/bin GITHUB_ACTIONS=true RUNNER_ENVIRONMENT=github-hosted \
+            /usr/bin/python3 -I workers/scripts/check_oms_baseline_ci.py
