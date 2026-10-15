@@ -26,6 +26,9 @@ jobs:
       - name: Run worker regressions
         run: python -m pytest tests -q
         working-directory: workers
+      - name: Prove provider denial offline
+        run: python -m pytest -c pyproject.toml ../tests/test_external_apis.py -q
+        working-directory: workers
       - run: ruff check src tests
         working-directory: workers
       - run: ruff format src tests

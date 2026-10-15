@@ -20,3 +20,15 @@ set. No other security fields were discarded to obtain agreement.
 No interfaces, uplink, listeners, clients or provider calls were created. The
 namespace was deleted by the workflow's exit trap. These fixtures reproduce
 serialization compatibility, not runtime network isolation or effective egress.
+
+## New namespace baseline fixture
+
+`nft-1.0.9-baseline.json` was captured from the unchanged approved text policy
+in [CI run 38679868450](https://github.com/Gopi-git-bit/New-logistic-/actions/runs/38679868450),
+head `a9997f3dc7e6260018b273c07f67dc12d94fe880`. It preserves the real exported
+objects and handles, with indentation changed. The full baseline policy matched;
+that run then failed host-preservation comparison, so this fixture is not a
+passing overall restoration result or VPS evidence. The text policy exports the
+reply-state flags as `in` with an array, unlike the earlier synthetic JSON-input
+policy's anonymous-set representation. The new comparator uses that exact
+captured baseline form and does not discard differences in rule expressions.

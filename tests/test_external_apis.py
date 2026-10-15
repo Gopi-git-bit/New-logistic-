@@ -1,44 +1,92 @@
-import os
-import requests
+"""Offline M7 denial regressions; never probe live provider endpoints."""
 
-DEEPSEEK_URL = os.getenv("DEEPSEEK_API_URL")
-DEEPSEEK_KEY = os.getenv("DEEPSEEK_API_KEY")
-OPENROUTER_URL = os.getenv("OPENROUTER_API_URL")
-OPENROUTER_KEY = os.getenv("OPENROUTER_API_KEY")
+import importlib.util
+import json
+import socket
+import sys
+from pathlib import Path
+from unittest.mock import Mock
 
+import pytest
 
-def assert_env(var, name):
-    if not var:
-        raise RuntimeError(f"Missing environment variable: {name}")
-
-
-def test_deepseek_health_and_query():
-    assert_env(DEEPSEEK_URL, "DEEPSEEK_API_URL")
-    assert_env(DEEPSEEK_KEY, "DEEPSEEK_API_KEY")
-
-    # Health / ping (adjust path as your API expects)
-    r = requests.get(f"{DEEPSEEK_URL}/health", headers={"Authorization": f"Bearer {DEEPSEEK_KEY}"}, timeout=10)
-    assert r.status_code in (200, 204), f"Deepseek health check failed: {r.status_code} {r.text}"
-
-    # Small example query (adjust endpoint/payload to match API)
-    payload = {"query": "test"}
-    r = requests.post(f"{DEEPSEEK_URL}/search", json=payload, headers={"Authorization": f"Bearer {DEEPSEEK_KEY}"}, timeout=10)
-    assert r.status_code == 200, f"Deepseek search failed: {r.status_code} {r.text}"
-    data = r.json()
-    assert isinstance(data, (dict, list)), "Deepseek returned unexpected body"
+RUNNER = Path(__file__).resolve().parents[1] / "workers/scripts/run_oms_recommendation.py"
 
 
-def test_openrouter_health_and_inference():
-    assert_env(OPENROUTER_URL, "OPENROUTER_API_URL")
-    assert_env(OPENROUTER_KEY, "OPENROUTER_API_KEY")
+@pytest.fixture
+def denied_runner(monkeypatch):
+    spec = importlib.util.spec_from_file_location("offline_m7_runner", RUNNER)
+    assert spec and spec.loader
+    runner = importlib.util.module_from_spec(spec)
+    # Dataclass construction resolves its defining module through sys.modules.
+    monkeypatch.setitem(sys.modules, spec.name, runner)
+    spec.loader.exec_module(runner)
+    tripwires = []
+    for target, attribute in (
+        (runner, "_read_credential"),
+        (runner, "OpenAIRecommendationAgent"),
+        (runner.httpx, "Client"),
+        (runner.httpx, "AsyncClient"),
+        (socket, "create_connection"),
+        (socket.socket, "connect"),
+    ):
+        forbidden = Mock(side_effect=AssertionError("unauthorized credential or network access"))
+        monkeypatch.setattr(target, attribute, forbidden)
+        tripwires.append(forbidden)
+    yield runner
+    for forbidden in tripwires:
+        forbidden.assert_not_called()
 
-    # Health
-    r = requests.get(f"{OPENROUTER_URL}/health", headers={"Authorization": f"Bearer {OPENROUTER_KEY}"}, timeout=10)
-    assert r.status_code in (200, 204), f"OpenRouter health check failed: {r.status_code} {r.text}"
 
-    # Example inference / route request (adjust to real endpoint)
-    payload = {"text": "hello"}
-    r = requests.post(f"{OPENROUTER_URL}/v1/route", json=payload, headers={"Authorization": f"Bearer {OPENROUTER_KEY}"}, timeout=15)
-    assert r.status_code == 200, f"OpenRouter request failed: {r.status_code} {r.text}"
-    data = r.json()
-    assert data, "OpenRouter returned empty response"
+@pytest.mark.parametrize("provider", ["deepseek", "unapproved-qwen"])
+def test_provider_configuration_cannot_grant_execution(
+    provider, denied_runner, monkeypatch, tmp_path, capsys
+):
+    # Set only synthetic fixtures, even if the invoking shell contains real keys.
+    monkeypatch.setenv("DEEPSEEK_API_KEY", "synthetic-deepseek-key")
+    monkeypatch.setenv("OPENROUTER_API_KEY", "synthetic-openrouter-key")
+    claims = tmp_path / "claims"
+    credential = tmp_path / "unread-credential"
+    environment = {
+        "OMS_STAGING_ENDPOINT": (
+            "https://api.deepseek.com/chat/completions"
+            if provider == "deepseek"
+            else "https://provider.invalid/chat/completions"
+        ),
+        "OMS_STAGING_MODEL": "deepseek-flash" if provider == "deepseek" else provider,
+        "OMS_STAGING_TIMEOUT_SECONDS": "1",
+        "OMS_STAGING_MAX_OUTPUT_TOKENS": "16",
+    }
+    args = [
+        "--run-synthetic-shadow",
+        "--source-sha",
+        "f" * 40,
+        "--approval-id",
+        "untrusted-synthetic-approval",
+        "--claim-directory",
+        str(claims),
+        "--credential-file",
+        str(credential),
+    ]
+    if provider == "deepseek":
+        args.extend(["--provider-profile", "deepseek-direct"])
+    assert denied_runner.main(args, environment=environment) == 1
+    captured = capsys.readouterr()
+    assert json.loads(captured.out) == {
+        "status": "ERROR",
+        "reason_code": "OMS_STAGING_PROVIDER_NOT_AUTHORIZED",
+    }
+    assert not claims.exists() and not credential.exists()
+    assert "synthetic-deepseek-key" not in captured.out + captured.err
+    assert "synthetic-openrouter-key" not in captured.out + captured.err
+
+
+@pytest.mark.parametrize("name", ["DEEPSEEK_API_KEY", "OPENROUTER_API_KEY"])
+def test_generic_provider_secret_is_not_staging_configuration(name, denied_runner, capsys):
+    key = "synthetic-generic-provider-key"
+    assert denied_runner.main(["--run-synthetic-shadow"], environment={name: key}) == 1
+    captured = capsys.readouterr()
+    assert json.loads(captured.out) == {
+        "status": "ERROR",
+        "reason_code": "ISOLATION_VIOLATION",
+    }
+    assert key not in captured.out + captured.err
