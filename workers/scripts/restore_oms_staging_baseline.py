@@ -240,7 +240,7 @@ def host_state(commands: Commands, folder: Path) -> dict[str, str]:
         "nft": commands.run([NFT, "--json", "--stateless", "--handle", "list", "ruleset"]),
         "iptables": commands.run(["/usr/sbin/iptables-save"]),
         "ip6tables": commands.run(["/usr/sbin/ip6tables-save"]),
-        "links": canonical(commands.read_json([IP, "-json", "-details", "link", "show"])),
+        "links": host_links(commands.read_json([IP, "-json", "-details", "link", "show"])),
         "docker_networks": canonical(network_data),
     }
     # iptables-save adds wall-clock comments even when its rules are unchanged.
@@ -255,6 +255,18 @@ def iptables_policy(text: str) -> str:
         for line in text.splitlines()
         if not line.startswith("#")
     )
+
+
+def host_links(links: list[dict[str, Any]]) -> str:
+    # iproute2 exports four read-only bridge countdown observations alongside
+    # configuration. Preserve configured hello_time/max_age/ageing_time, etc.
+    cleaned: list[dict[str, Any]] = json.loads(canonical(links))
+    for link in cleaned:
+        info = link.get("linkinfo", {})
+        if info.get("info_kind") == "bridge":
+            for field in ("hello_timer", "tcn_timer", "topology_change_timer", "gc_timer"):
+                info.get("info_data", {}).pop(field, None)
+    return canonical(cleaned)
 
 
 def preserved_host(commands: Commands, folder: Path, before: dict[str, str]) -> None:

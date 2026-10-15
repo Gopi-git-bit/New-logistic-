@@ -124,7 +124,13 @@ Host preservation compares before/after SHA-256 observations of stateless nft
 policy (including handles), IPv4/IPv6 iptables rules, host links, local Docker
 network inspection and the fixed diagnostic unit/script/resolver/marker/fixture.
 Only generated `iptables-save` comment lines and numeric base-chain packet/byte
-counters are omitted; chain names/policies and all rule text remain exact. Raw host/Docker data
+counters are omitted; chain names/policies and all rule text remain exact.
+For link observations, only a bridge's read-only
+`hello_timer`, `tcn_timer`, `topology_change_timer` and `gc_timer` countdowns are
+omitted. Configured `hello_time`, `max_age`, `ageing_time`, topology-change flags,
+addresses, membership, MTU and all other fields remain compared. See the
+[upstream bridge formatter](https://github.com/iproute2/iproute2/blob/main/ip/iplink_bridge.c).
+Raw host/Docker data
 is not persisted or printed; receipt contains hashes. Docker reads use the fixed
 local Unix socket and an explicit empty config directory, not inherited endpoint
 or operator configuration. These are local read operations, not registry calls.

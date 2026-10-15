@@ -30,17 +30,40 @@ def rejected(call: Any, reason: str) -> None:
         raise baseline.Refused("EXPECTED_REJECTION_MISSING")
 
 
+def changed_paths(before: Any, after: Any, path: str = "") -> list[str]:
+    if isinstance(before, dict) and isinstance(after, dict):
+        return [
+            item
+            for key in sorted(before.keys() | after.keys())
+            for item in changed_paths(before.get(key), after.get(key), path + "/" + key)
+        ]
+    if isinstance(before, list) and isinstance(after, list) and len(before) == len(after):
+        return [
+            item
+            for i, (a, b) in enumerate(zip(before, after, strict=True))
+            for item in changed_paths(a, b, path + "/" + str(i))
+        ]
+    return [path] if before != after else []
+
+
 def exercise(parent: Path) -> None:
     class ObservedCommands:
         def __init__(self) -> None:
             self.commands = baseline.Commands()
             self.exported = False
+            self.host_links: Any = None
 
         def run(self, args: list[str], data: str | None = None) -> str:
             return str(self.commands.run(args, data))
 
         def read_json(self, args: list[str]) -> Any:
             value = self.commands.read_json(args)
+            if args == [baseline.IP, "-json", "-details", "link", "show"]:
+                if self.host_links is not None:
+                    changed = changed_paths(self.host_links, value)
+                    if changed:
+                        print("HOST_LINK_OBSERVATION_PATHS_CHANGED=" + baseline.canonical(changed))
+                self.host_links = copy.deepcopy(value)
             if args[:4] == [baseline.IP, "netns", "exec", baseline.NAMESPACE] and not self.exported:
                 if any("rule" in item for item in value.get("nftables", [])):
                     print("M7_BASELINE_EXPORT=" + baseline.canonical(value))

@@ -288,3 +288,34 @@ def test_recorded_real_baseline_export_matches_contract():
     fixture = Path(__file__).parent / "fixtures/nft-1.0.9-baseline.json"
     actual = json.loads(fixture.read_text())
     assert baseline.policy_shape(actual) == baseline.policy_shape(baseline.expected_policy())
+
+
+def test_bridge_countdowns_do_not_hide_configuration_changes():
+    before = [
+        {
+            "ifindex": 3,
+            "ifname": "docker0",
+            "mtu": 1500,
+            "linkinfo": {
+                "info_kind": "bridge",
+                "info_data": {
+                    "hello_time": 200,
+                    "ageing_time": 30000,
+                    "hello_timer": 0,
+                    "tcn_timer": 0,
+                    "topology_change_timer": 0,
+                    "gc_timer": 123,
+                },
+            },
+        }
+    ]
+    after = copy.deepcopy(before)
+    after[0]["linkinfo"]["info_data"]["gc_timer"] = 122
+    assert baseline.host_links(before) == baseline.host_links(after)
+    assert before[0]["linkinfo"]["info_data"]["gc_timer"] == 123
+    for field in ("hello_time", "ageing_time", "unexpected_timer"):
+        changed = copy.deepcopy(after)
+        changed[0]["linkinfo"]["info_data"][field] = -1
+        assert baseline.host_links(changed) != baseline.host_links(before)
+    after[0]["mtu"] = 1400
+    assert baseline.host_links(before) != baseline.host_links(after)
