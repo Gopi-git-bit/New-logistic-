@@ -3,6 +3,7 @@
 **Version:** 1.0
 **Status:** Authoritative execution guide with human gates
 **Date:** 2026-09-03
+**Latest bounded development update:** 2026-10-16 — GitHub PR/CI preparation only; see sections 11.1 and 17.1.
 **Owner:** Gopinathan
 **Target:** Zippy Logistics production foundation on the Hostinger VPS
 
@@ -215,6 +216,27 @@ Repository files may contain `.env.example` with names and safe placeholders onl
 
 Do not hardcode hypothetical model names such as `deepseek-v4-pro`. Validate actual provider model IDs at startup and keep them configurable.
 
+### 11.1 Staging-secret scope and GitHub execution gate
+
+PR #22's presence-only workflow references `DEEPSEEK_STAGING_API_KEY` or
+`OPENROUTER_STAGING_API_KEY` in the `Production` GitHub environment. Only the
+explicitly selected provider's step receives its key. Global token permissions
+are empty; the workflow has no checkout, dependencies, API calls or deployment.
+Admission requires manual dispatch, the canonical repository and main branch.
+Offline CI must retain missing-key, redaction, input and trigger regressions.
+
+Environment binding and a nonempty value do not establish environment-exclusive
+origin, dedicated account scope, key validity or target injection. Before any
+real-secret dispatch, audit names/scopes and environment/branch protections,
+review the exact merged workflow SHA and its CI, and obtain explicit authorization
+for the selected presence-only run. Do not broaden the job's permissions to read
+administrative secret metadata or treat presence as live M7 readiness.
+
+The [M7 CI/CD execution gate](plans/M7_CICD_EXECUTION_GATE.md) defines the next
+post-merge acceptance/metadata/approval/presence sequence and a separate future
+secret-free build/deployment-dry-run design. These are gates to satisfy, not
+claims that account protections or deployment infrastructure are installed.
+
 ## 12. Repository expectations
 
 The agent must first inspect the existing repository. It may propose, but must not blindly impose, this logical layout:
@@ -375,3 +397,17 @@ A milestone is done only when its code, tests, security evidence, observability,
 ## 17. Immediate authorization
 
 The coding agent is authorized now to execute **M0 read-only discovery** and prepare its reports. It is not authorized by this document to install packages, change the server, migrate a database, expose a port, modify secrets, deploy Langfuse, replace Paperclip, activate payments, change DNS, or cut over production.
+
+### 17.1 Controlling bounded development instruction — 16 October 2026
+
+The owner authorizes GitHub PR development and secret-free CI, PR #22 staging-secret,
+least-privilege and trigger-safety review, this PRD update, the next CI/CD gate
+design, and promotion of the validated head to Ready for review. VPS configuration
+work is paused. This supersedes the initial M0-only work limit for this repository
+slice; it does not approve a merge, real-secret workflow dispatch, credential
+provisioning, deployment, provider call, live M7 execution or Qwen fallback.
+
+Preserve accepted evidence without rerunning completed probes. Prior VPS records
+are historical observations, not proof of today's target state. Keep production
+deployment disabled and D-33 pending; no business, financial or architecture
+invariant is changed by adopting GitHub as the development and review path.
