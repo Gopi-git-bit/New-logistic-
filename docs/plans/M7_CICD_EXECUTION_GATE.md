@@ -15,6 +15,21 @@ trigger is `workflow_dispatch`; the job also requires the canonical repository
 PR, push, tag, fork and reusable-workflow events cannot admit this job under
 the reviewed definition. Invalid provider input fails before a secret step.
 
+The owner-authorized follow-up also requires original actor ID `200721521`,
+original actor login `Gopi-git-bit`, triggering actor login `Gopi-git-bit`, and
+run attempt `1`. Other actors, missing identity fields and all reruns are denied
+at the job condition before runner allocation or a secret-bearing step. Account
+renames require a reviewed allowlist update. A fresh manual run still requires
+its own bounded authorization; the condition is not a durable one-use ledger.
+
+GitHub may accept a dispatch request from another repository writer; YAML cannot
+change who can submit that request. The job condition restricts execution and
+secret access under this workflow revision. A skipped job is not a successful
+presence check. Repository administrators can edit settings, and someone with
+workflow write access could propose another revision; keep branch review and
+environment approval controls in place. This is not protection against an
+administrator deliberately removing those controls.
+
 The workflow has `permissions: {}`: no repository writes, package publication,
 deployment permissions or OIDC issuance are requested. It has one two-minute
 Ubuntu-hosted job, references `Production`, performs no checkout or dependency
@@ -59,6 +74,14 @@ The following sequence is a design, not an instruction to execute it in PR #22.
    account plan or exposed tools cannot enforce a requested protection, record
    the precise gap and keep dispatch blocked until a separately reviewed
    enforceable alternative is accepted; do not silently remove the requirement.
+   The owner has explicitly selected administrator bypass allowed for
+   `Production`; retain and report that setting, and do not exercise a bypass.
+   Gopinathan's verified account `Gopi-git-bit` / `200721521` is the designated
+   environment reviewer. Self-review is permitted so this same human can
+   dispatch and approve; this supplies owner approval, not independent review.
+   The coding agent must not submit the environment approval on the owner's
+   behalf. Keep main's administrator enforcement separate from environment
+   bypass: main still requires one PR approval and all five strict CI checks.
 4. Verify `DEEPSEEK_STAGING_API_KEY` exists in `Production`, with no same-named
    repository or applicable organization secret. Record only names, scopes,
    metadata timestamps and sanitized ownership evidence. Existing generic keys
@@ -75,6 +98,14 @@ The following sequence is a design, not an instruction to execute it in PR #22.
    Unexpected skips or a missing key are failures. After an uncertain dispatch,
    inspect existing runs instead of dispatching again. Finish after this one
    run; success grants no subsequent provider, deployment or VPS authority.
+
+The 16 October 2026 owner follow-up authorizes preparation/publication of the
+actor restriction and names the environment approver. The owner's bounded
+DeepSeek-only acknowledgement is recorded; no dispatch occurs during this code
+change. Review and merge the corrected head through main's enforced PR controls,
+verify post-merge CI and fresh settings/secret metadata, then present the one
+resolved run to the owner for the actual environment approval. This does not
+authorize OpenRouter, a rerun, a bypass, deployment or live inference.
 
 Expected outcome: `PRESENCE_OBSERVED_REVIEW_REQUIRED`, an operator assessment,
 not a new workflow-emitted readiness status. If any prerequisite is unverified,
@@ -124,3 +155,4 @@ repository slice. D-33 remains pending; every refund requires manual approval.
 References: [workflow syntax](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax),
 [environment protections](https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments),
 and [secret scope](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets).
+See also [actor and triggering-actor context](https://docs.github.com/en/actions/reference/workflows-and-actions/contexts).

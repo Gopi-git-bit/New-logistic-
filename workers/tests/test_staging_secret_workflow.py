@@ -32,7 +32,7 @@ class TestStagingSecretWorkflow(unittest.TestCase):
         self.assertEqual(inputs["provider"]["default"], "deepseek")
         self.assertEqual(inputs["provider"]["options"], ["deepseek", "openrouter"])
 
-    def test_job_guard_denies_other_events_repositories_and_refs(self):
+    def test_job_guard_denies_other_events_repositories_refs_and_actors(self):
         expression = self.job["if"].strip()
         self.assertTrue(expression.startswith("${{") and expression.endswith("}}"))
         clauses = expression[3:-2].split("&&")
@@ -40,6 +40,10 @@ class TestStagingSecretWorkflow(unittest.TestCase):
             "event_name": "workflow_dispatch",
             "repository": "Gopi-git-bit/New-logistic-",
             "ref": "refs/heads/main",
+            "actor_id": "200721521",
+            "actor": "Gopi-git-bit",
+            "triggering_actor": "Gopi-git-bit",
+            "run_attempt": "1",
         }
         actual = {}
         for clause in clauses:
@@ -58,6 +62,15 @@ class TestStagingSecretWorkflow(unittest.TestCase):
             ({"repository": "fork-owner/New-logistic-"}, False),
             ({"ref": "refs/heads/feature"}, False),
             ({"ref": "refs/tags/main"}, False),
+            ({"actor_id": "999999"}, False),
+            ({"actor_id": ""}, False),
+            ({"actor": "another-maintainer"}, False),
+            ({"triggering_actor": "another-maintainer"}, False),
+            ({"triggering_actor": ""}, False),
+            ({"actor": "github-actions[bot]", "actor_id": "41898282"}, False),
+            ({"actor": "another-maintainer", "triggering_actor": "Gopi-git-bit"}, False),
+            ({"run_attempt": "2"}, False),
+            ({"run_attempt": ""}, False),
         ]
         for overrides, allowed in cases:
             with self.subTest(overrides=overrides):
