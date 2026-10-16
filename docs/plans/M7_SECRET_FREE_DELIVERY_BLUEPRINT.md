@@ -1,9 +1,10 @@
 # M7 next development phase: secret-free delivery preparation
 
-**Status:** BLUEPRINT PREPARED; IMPLEMENTATION PENDING OWNER SCOPE APPROVAL.
+**Status:** CONTINUATION AUTHORIZED (D-43); INPUT INVENTORY RECORDED; BUILD/VALIDATION IMPLEMENTATION SEQUENCED.
 **Owner:** Gopinathan. **Date:** 16 October 2026.
-**Decision/evidence:** [D-42](../DECISIONS.md) / [M7-E006](../TEST_EVIDENCE.md).
-**Tracker:** M7-DELIVERY-BLUEPRINT COMPLETE; M7-DELIVERY-DRYRUN PENDING.
+**Decision/evidence:** [D-42/D-43](../DECISIONS.md) / [M7-E006/M7-E007](../TEST_EVIDENCE.md).
+**Tracker:** M7-DELIVERY-BLUEPRINT and M7-DELIVERY-INVENTORY COMPLETE;
+M7-DELIVERY-DRYRUN PENDING implementation and execution evidence.
 
 ## Starting checkpoint
 
@@ -27,18 +28,22 @@ Prepare a separate GitHub PR that can build a local application image from
 reviewed source and validate a staging configuration contract with placeholders.
 A passing dry run would establish build/configuration evidence only.
 
-The current owner instruction authorizes this blueprint and the accompanying
-documentation closeout, not that implementation. Obtain a concrete scope
-approval before adding workflows, manifests, build tooling or tests. Keep merge
-approval, registry publication and target execution separate. Do not interpret
-a manual GitHub event or environment approval as a provider capability grant.
+D-43 records the owner's subsequent continuation approval for Docker/build
+contexts, dependency locks, API configuration, staging templates and gap records.
+The first [input inventory](../reports/M7_DELIVERY_INPUT_INVENTORY.md) selects the
+API and records eleven gaps, including explicit input identities, declared download
+operations and unverified platform/toolchain/download provenance. This records-only PR does not implement or execute
+the proposed workflow/build/manifest steps below. Continue with the bounded
+API context/lock/placeholder-validation slice through reviewed feature PRs;
+keep merge approval, registry publication and target execution separate. Do not
+interpret a manual event or environment approval as a provider capability grant.
 
-## Proposed implementation sequence
+## Implementation sequence
 
-| Step | Work proposed for the future PR | Acceptance / stop condition |
+| Step | Sequenced work | Acceptance / stop condition |
 |---|---|---|
-| 1. Inventory | Read current Dockerfiles, dependency locks, API configuration and staging templates at the new PR's actual base SHA | Identify the smallest buildable target; preserve dirty worktrees and accepted database proofs; record missing production auth/pricing/Compose contracts without inventing them |
-| 2. Build contract | Specify exact source, runtime/toolchain, lockfile and base-image identity; document dependency downloads | Missing lock coverage or mutable inputs must be recorded as reproducibility gaps; do not claim bit-for-bit reproducibility without evidence |
+| 1. Inventory — RECORDED | M7-E007 / reports/M7_DELIVERY_INPUT_INVENTORY.md at `6a6f5acd00a6aafa115f1e470821512f5434021f` | API selected as smallest build candidate; actual build not run. Missing context/locks/configuration and production contracts recorded; source behavior and accepted proofs preserved |
+| 2. Build contract — STATIC INPUTS IDENTIFIED | Inventory records exact source/tree, API input blob/content hashes, declared runtime/tools/base, download operations and DELIVERY-01 through DELIVERY-11 | Actual platform/toolchain versions, downloaded artifacts/origins and full-image reproducibility remain unverified; capture them in the future bounded build, not by claiming declared selectors were observed |
 | 3. Secret-free CI route | Propose a manual canonical-repository/main route with the designated owner identity, immutable reviewed source binding, finite timeout and explicit input validation | Read-only contents permission only where checkout needs it; no real-secret or Production environment binding; checkout credentials not persisted; actions pinned to verified commit SHAs |
 | 4. Local image build | Build on an ephemeral GitHub-hosted runner without registry login or push; pass no credentials or production URLs into image arguments/layers | Record local image ID and build report; an unpushed image ID is not a registry manifest digest or an accepted deployment artifact |
 | 5. Manifest validation | Render/validate an explicitly staging-only manifest and environment contract using synthetic placeholders | Configuration parsing only; no compose up/run, service start, SSH, database connection, target mutation or provider request; reject missing required fields and production secret references |

@@ -1,5 +1,39 @@
 # Zippy Test and Discovery Evidence
 
+### M7-E007: Delivery Input Inventory and Gap Register
+
+**Scope:** D-43 continuation; first records-only slice, 16 October 2026.
+[Inventory and implementation handoff](reports/M7_DELIVERY_INPUT_INVENTORY.md).
+
+| Field | Observation / limit |
+|---|---|
+| Pinned main | `6a6f5acd00a6aafa115f1e470821512f5434021f`; tree `6d15373d8aa4b2180bc730abc33add6d22db2ef5`; complete recursive tree, 315 tracked files |
+| Docker inputs | Five Dockerfiles and their declared Compose contexts inspected; no tracked dockerignore; API selected as the smallest build-only candidate, not proven buildable |
+| Runtime lock | 17 exact distributions; SHA-256 hash syntax on every entry; all five direct API pins agree |
+| Dev lock | 31 exact distributions; SHA-256 hash syntax on every entry; four dev plus five inherited runtime pins agree |
+| Lock limits | Static parsing only; no resolution, installation, hash download verification, vulnerability assessment or regeneration |
+| Missing coverage | No tracked Node lock or worker lock/constraints; root workspace dependencies outside frontend app contexts |
+| API contract | 14 of 15 explicit required names missing from root Compose API environment; examples also incomplete; production auth/pricing remains deliberately rejected |
+| Staging source | Five distinct systemd templates, not an application deployment manifest; production Compose referenced by disabled deployment workflow is absent |
+| Static checks | Lock syntax/direct-version comparison and tracked-path inventory executed locally; scoped documentation/link/status checks recorded on the resulting PR |
+| Original-head CI | [38915184473](https://github.com/Gopi-git-bit/New-logistic-/actions/runs/38915184473), attempt 1, all five jobs successful for `318f99ffef8fcbda80e36336b33e83b096aa4a53`; root Compose parse passed |
+| Corrected-head acceptance | The identity/download and review corrections require their own five successful checks; record the exact final head/run in [PR #25](https://github.com/Gopi-git-bit/New-logistic-/pull/25) before merging. The original run is not evidence for a later head. |
+| Input identities / downloads | Git blob and full-file SHA-256 identities checked for API build/lock inputs; exact declared tools/pins listed; source-defined download operations separated from observed transfers. Platform/toolchain resolution, origins/cache outcomes and downloaded artifact receipts remain unverified (DELIVERY-10/11). |
+| Not run in this inventory | Docker build, new staging-manifest render, service start, database/provider call, real-secret dispatch, VPS command or deployment |
+| Preserved | Accepted presence/disposable DB evidence, source behavior, disabled deployment, denied live M7/Qwen and D-33 pending |
+
+This entry records completed static input inventory only. Corrected-head review/CI
+and merge acceptance remain separate conditions until the linked PR audit records
+their actual results; completion here must not substitute for those checks.
+
+The two initial Codex findings (missing committed CI provenance and conflicting
+current tracker authorization) are addressed by this evidence and the updated
+Current Authorized Work section. Historical review and CI are preserved.
+
+This completes no build or runtime gate. The authorized delivery build and
+placeholder-manifest work remains sequenced implementation, not completed
+runtime evidence. No new provider capability or business authority is granted.
+
 ### M7-E006: Staging Secret Availability — DeepSeek
 
 **Gate: COMPLETE for the bounded GitHub Actions presence-only scope.**
