@@ -439,3 +439,24 @@ the next logical gate after review and fresh verification. No dispatch occurs
 in this preparation slice, and no rerun, OpenRouter check, real credential value
 inspection, VPS change, deployment, provider request, M7 or Qwen activation is
 authorized by this follow-up. D-33 and financial approval controls are unchanged.
+
+### 17.3 Staging Secret Availability closeout — 16 October 2026
+
+Under D-42/M7-E006, the owner accepts **Staging Secret Availability COMPLETE
+for DeepSeek presence only**. Run [38903102158](https://github.com/Gopi-git-bit/New-logistic-/actions/runs/38903102158)
+passed on attempt 1 at reviewed merge `bc135b8b605cd96c2bacaf228953d1cbf14ba3ca` after
+explicitly delegated owner approval of its Production gate. OpenRouter was
+intentionally skipped; key validity and live readiness remain unverified.
+
+The later solo-owner instruction sets main's required approving reviews to 0,
+retaining mandatory PRs, five strict CI checks and administrator enforcement.
+This supersedes the one-review checkpoint in section 17.2. Production retains
+main-only access and the required owner reviewer; self-review and administrator
+bypass are allowed. The run-specific delegation does not authorize future
+approvals or weaken refund/governance controls.
+
+The [next-phase blueprint](plans/M7_SECRET_FREE_DELIVERY_BLUEPRINT.md) is
+prepared as documentation. Future implementation is PENDING separate scope
+approval. Do not repeat accepted probes, dispatch real secrets, publish an image,
+start services, change the VPS, call providers or activate M7/Qwen under this
+closeout. No architecture decision is changed; D-33 stays pending.

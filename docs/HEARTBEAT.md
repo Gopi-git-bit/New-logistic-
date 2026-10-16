@@ -4,6 +4,23 @@
 
 ## Current Task
 
+**Controlling closeout, 2026-10-16 (D-42):** Staging Secret Availability is
+**COMPLETE for DeepSeek presence only**, supported by M7-E006 and
+[run 38903102158](https://github.com/Gopi-git-bit/New-logistic-/actions/runs/38903102158) on reviewed merge `bc135b8b605cd96c2bacaf228953d1cbf14ba3ca`.
+The selected key was available to its GitHub Actions step; provider validity,
+dedicated ownership, target injection, effective egress, spending enforcement and
+trusted live authorization remain unverified. OpenRouter presence was skipped,
+not accepted. Live M7 and Qwen remain **BLOCKED**; D-33 remains pending.
+
+The [next development blueprint](plans/M7_SECRET_FREE_DELIVERY_BLUEPRINT.md)
+is prepared. Next proposed implementation: secret-free build and staging-manifest
+validation in a separate PR, **PENDING owner scope approval**. No new workflow,
+build, registry publication, service activation, credential use, deployment or
+provider test is authorized by this documentation closeout. Reuse accepted
+evidence; do not repeat the presence run or VPS diagnostic.
+
+### Historical development checkpoints
+
 **2026-10-09 recommendation-review update:** D-38 authorizes an isolated
 `feat/m7-recommendation-review` worktree from published master
 `a3b4d97542d55fa39c5b738504783ae2f40703ba`, fake-only review lifecycle development,
@@ -48,6 +65,7 @@ The M6-A boundary remains limited to repository-tracked telemetry contracts, red
 
 | Task | Milestone | Date |
 |------|-----------|------|
+| DeepSeek Staging Secret Availability accepted; next delivery blueprint prepared (D-42/M7-E006) | M7 bounded gate only | 2026-10-16 |
 | M6-A owner acceptance (D-32, M6-E004) | M6 | 2026-09-27 |
 | M6-A implementation and proof (62 focused + 122 regression, `m6a_proof=PASS`, M6-E003) | M6 | 2026-09-27 |
 | M6-A telemetry boundary approved (D-31, M6-E002) | M6 | 2026-09-27 |
@@ -56,7 +74,7 @@ The M6-A boundary remains limited to repository-tracked telemetry contracts, red
 
 Historical legacy entries (M6 implementation claimed 2026-08-28) are superseded by `EXECUTION_TRACKER.md` and `DECISIONS.md`: `M5-PAPERCLIP` is the most recently completed authorized milestone; any prior M6-complete statement is void and must be treated as stale/placeholder content pending explicit owner re-authorization of M6 scope.
 
-## Next Steps (M6)
+## Historical Next Steps (M6, superseded by D-42 handoff)
 
 1. Await owner decision on whether M6-LANGFUSE is complete or whether additional M6 scope is authorized.
 2. If M6 completion is approved, perform a documentation-only milestone transition; no M7 implementation is authorized by that transition.
@@ -71,7 +89,7 @@ No implementation, deployment, live credential use, external telemetry transmiss
 | R4: Razorpay live keys | Human decision | @Gopi |
 | R5: Permit verification API | Human decision | @Gopi |
 
-## Context for Next Session
+## Historical Context for Next Session (2026-09-27; superseded above)
 
 - M5-PAPERCLIP is complete and owner-accepted (`D-30`, `M5-E012`).
 - `M6-LANGFUSE` is the sole `IN_PROGRESS` tracker task; M6-A boundary approved by D-31 (`M6-E002`).

@@ -1,5 +1,51 @@
 # Zippy Test and Discovery Evidence
 
+### M7-E006: Staging Secret Availability — DeepSeek
+
+**Gate: COMPLETE for the bounded GitHub Actions presence-only scope.**
+Owner-authorized closeout: 16 October 2026 (D-42). This is not M7 activation,
+provider authentication, deployment or full staging acceptance.
+
+| Field | Verified observation |
+|---|---|
+| Approved source | PR #23 merged at `bc135b8b605cd96c2bacaf228953d1cbf14ba3ca`; reviewed head `99bef35a1957bfcbe2a20366edb5bba6b3ba822a` |
+| Post-merge acceptance | [Exact-merge CI](https://github.com/Gopi-git-bit/New-logistic-/actions/runs/38901637850), attempt 1; all five jobs passed |
+| Workflow source | `.github/workflows/validate-secrets.yml`; blob `81586e3ff3d7aeeb619b0628e4a1429b6f22bf15` |
+| Execution | [Run 38903102158](https://github.com/Gopi-git-bit/New-logistic-/actions/runs/38903102158), attempt 1; manual dispatch on main with `provider=deepseek`; exact source SHA above |
+| Identity | Actor and triggering actor `Gopi-git-bit`; original actor ID `200721521` |
+| Approval | Production environment `21066732303`; review history records approved under that owner account, after the owner's explicit ChatGPT instruction to submit this run-specific approval |
+| Approval limits | Delegated owner approval, not independent review or a standing grant; self-review and administrator bypass allowed by owner configuration; no bypass used |
+| Job | `116979931170`, Check selected secret availability; success; 2026-10-16 12:56:12–12:56:15 UTC; within the two-minute bound |
+| Step outcomes | Selection validation PASS; DeepSeek presence PASS; OpenRouter presence SKIPPED as intended for the selected provider |
+| Scope metadata | Production lists `DEEPSEEK_STAGING_API_KEY`, updated 2026-10-15 04:32:27 UTC; same name absent from the complete repository secret inventory at preflight; personal-account repository, no organization inheritance |
+| Workflow controls | Manual canonical-main admission; fixed owner ID/login and triggering actor; attempt 1 only; empty token permissions; selected-step secret injection; no checkout, dependency installation or external calls |
+| Branch policy checkpoint | Mandatory PRs; required review count 0 by explicit solo-owner authorization; all five GitHub Actions checks required with strict freshness and administrator enforcement |
+| Environment checkpoint | Exactly one allowed branch, main; no allowed tags; required owner reviewer was restored and verified before dispatch |
+| Assessment | `PRESENCE_OBSERVED_REVIEW_REQUIRED` recorded and accepted as completion of this narrow gate only |
+| Repetition / effects | One dispatch, no rerun; no provider request, application deployment, VPS change, business mutation or fallback activation |
+| Audit | [PR #23 execution record](https://github.com/Gopi-git-bit/New-logistic-/pull/23); run metadata, approval history, job conclusions and sanitized output inspected |
+
+Sanitized observed output:
+
+> DEEPSEEK_STAGING_API_KEY is present. Validity, staging scope and M7 readiness remain unverified.
+
+The required review for recording this bounded availability result is complete
+by the owner's current closeout instruction. The historical assessment label is
+preserved; it does not leave this gate pending or turn it into live authority.
+
+**Not established:** key validity or dedicated provider ownership, target
+credential injection, effective synthetic egress, provider claim/circuit-state
+isolation, a provider-enforced monetary cap or trusted endpoint-bound one-use
+execution authority. OpenRouter availability is not completed by its skipped
+step. No secret values, prefixes, lengths or hashes were retrieved or published.
+
+This dated evidence remains historical after key rotation, workflow-reference or
+environment-scope changes; it must not attest availability of a replacement key.
+Any new real-secret run needs its own explicit authorization. Do not rerun this
+accepted proof for documentation maintenance. Existing disposable database
+proofs and the separately recorded credential-free VPS diagnostic are retained;
+this entry neither repeats nor upgrades them to production acceptance.
+
 ### M7-E005: PR #12 Expiry Review Correction
 
 2026-10-12; independent GitHub Codex review of `ab1ed7d1dd7315c811ca55adf01d3c8f30cbaa03`
@@ -42,11 +88,11 @@ This is development/preparation evidence, not host setup or live acceptance.
 
 ## Evidence Policy
 
-- Current verdict: **BLOCKED FOR PRODUCTION — M3 DETERMINISTIC CORE COMPLETE IN DISPOSABLE TEST ENVIRONMENTS**.
+- Current verdict: **BLOCKED FOR PRODUCTION — M6 DEVELOPMENT COMPLETE; M7 STAGING SECRET AVAILABILITY COMPLETE FOR DEEPSEEK PRESENCE ONLY (M7-E006); LIVE M7 AND QWEN DENIED**.
 - This file distinguishes read-only discovery evidence from executable test evidence.
 - Historical repository counts are not current results.
 - No application, SQL, integration, build, lint, security, container, or database test was executed during M0 discovery.
-- No container or database is marked operational.
+- This ledger does not certify any production container or database as operational; retain separately accepted disposable proofs as development evidence.
 - Secret values, credentials, authorization headers, private keys, database URLs, and sensitive SSH endpoint details must never be recorded here.
 
 ## Production PRD Precedence
