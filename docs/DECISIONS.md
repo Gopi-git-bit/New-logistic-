@@ -62,7 +62,8 @@ presence/database/VPS evidence is reused. D-33 and financial controls are unchan
 authorizes review, scoped corrections and merging the reviewed head after its
 checks pass, followed by verified post-merge CI and confirmation. This supplies
 the separate merge instruction required above for PR #26 only. Correct the
-received lock-name finding with a failing regression first; preserve original
+received lock-name finding and the independently reproduced comment-continuation
+mismatch with failing regressions first; preserve original
 commits, merge normally using an exact-head guard, and log actual CI/results.
 No image, VPS, secret, deployment or provider execution is added to this scope.
 

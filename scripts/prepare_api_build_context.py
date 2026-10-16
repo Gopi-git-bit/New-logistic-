@@ -46,7 +46,14 @@ def git(repo: Path, *args: str) -> bytes:
 def validate_lock(content: bytes) -> int:
     """Require exact registry pins and SHA-256 constraints, not arbitrary pip flags."""
     names: set[str] = set()
-    for line in content.decode("utf-8").replace("\\\n", " ").splitlines():
+    text = content.decode("utf-8")
+    # Pip does not continue full-line comments. Refuse this ambiguous form rather
+    # than joining a following option into a comment and silently dropping it.
+    if any(
+        line.lstrip().startswith("#") and line.rstrip().endswith("\\") for line in text.splitlines()
+    ):
+        raise ContextError("UNSAFE_OR_UNHASHED_LOCK")
+    for line in text.replace("\\\n", " ").splitlines():
         line = line.strip()
         if not line or line.startswith("#"):
             continue

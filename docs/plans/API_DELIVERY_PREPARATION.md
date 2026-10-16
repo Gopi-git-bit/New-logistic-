@@ -90,7 +90,7 @@ environment/secret reference is introduced. Existing disposable DB proofs are
 not rerun for these paths; their install policy remains a separate follow-up.
 
 Initial local evidence: 16 unittest cases passed on Python 3.12.14.
-The PR #26 lock-name review correction now passes 17 cases, zero skips/warnings;
+The PR #26 lock-name review correction now passes 18 cases, zero skips/warnings;
 Ruff check/format and strict helper MyPy pass. Subcases cover all 17 missing
 environment names, unsafe service controls, malformed settings and locks, CLI
 redaction, environment restoration, dirty/untracked source exclusion, symlink
@@ -108,7 +108,12 @@ the correction. Names now require alphanumeric first and last characters, while
 single-character names and internal dots/underscores/hyphens remain accepted.
 Integration cases prove option-shaped entries are rejected before creating a
 context; normalized duplicate-name rejection and the real runtime lock still pass.
-No lock contents, pip flags, runtime capabilities or provider route changed.
+The implementing review also reproduced a comment/continuation mismatch: a
+backslash-ending full-line comment could swallow a following option in this
+parser while pip still processed it. Such comment lines are now refused; direct
+LF/CRLF and context-creation regressions pass. The original LF case failed before
+the guard was added. No lock contents, pip flags, runtime capabilities or provider
+route changed.
 
 Original-head CI [38920878701](https://github.com/Gopi-git-bit/New-logistic-/actions/runs/38920878701) passed at
 `a17dd6b2e8c82e61bb30a95fcd0f009a350bbc70`. The review correction requires its

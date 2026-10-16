@@ -147,6 +147,9 @@ class TestCommittedBuildContext(unittest.TestCase):
             "example==1.0\n",
             "-r==foo --hash=sha256:" + "a" * 64 + "\n",
             "--extra-index-url==evil --hash=sha256:" + "a" * 64 + "\n",
+            "example==1.0 --hash=sha256:"
+            + "a" * 64
+            + "\n# comment \\\n--extra-index-url https://synthetic.invalid\n",
         ):
             with self.subTest(lock=lock):
                 self.write("requirements-api.lock", lock)
@@ -177,6 +180,20 @@ class TestCommittedBuildContext(unittest.TestCase):
             context.validate_lock(
                 ("Package.Name==1.0" + digest + "\npackage-name==1.0" + digest).encode()
             )
+
+    def test_comment_continuation_cannot_hide_pip_option(self):
+        for newline in ("\n", "\r\n"):
+            with self.subTest(newline=newline), self.assertRaises(context.ContextError):
+                content = (
+                    "example==1.0 --hash=sha256:"
+                    + "a" * 64
+                    + newline
+                    + "# comment \\"
+                    + newline
+                    + "--extra-index-url https://synthetic.invalid"
+                    + newline
+                )
+                context.validate_lock(content.encode())
 
     def test_lock_rejects_unhashed_urls_options_and_duplicates(self):
         for raw in (

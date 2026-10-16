@@ -9,7 +9,7 @@
 | Item | Actual result / limit |
 |---|---|
 | Initial local regression | `python -m unittest discover -s workers/tests -p test_api_delivery_preparation.py -v`: 16 passed on Python 3.12.14, zero skips/warnings |
-| PR #26 corrected local regression | 17 passed, zero skips/warnings; nine invalid-name cases reproduced failures before the parser correction. New name-edge cases, valid one-character/internal-separator names, normalized duplicates and integration refusal before context creation pass. Scoped Ruff lint/format and strict helper MyPy pass. |
+| PR #26 corrected local regression | 18 passed, zero skips/warnings; nine invalid-name cases reproduced failures before the parser correction. New name-edge cases, valid one-character/internal-separator names, normalized duplicates and integration refusal before context creation pass. An independently reproduced LF comment-continuation bypass is also rejected, with LF/CRLF and pre-context integration cases. Scoped Ruff lint/format and strict helper MyPy pass. |
 | Export boundary | Tests prove committed-object selection, ignored dirty/untracked files, deterministic identity, no overwrite, and refusal of mismatched SHA, symlinks, unsupported tracked files, unsafe locks and in-checkout output |
 | Staging validation | Real api/config.py loaded directly from source with only synthetic settings; socket-blocked/import-blocked positive control, all 17 missing names, unsafe service options, malformed/live settings, redaction and environment restoration cases pass |
 | Quality | Touched helper/test Ruff lint/format PASS; strict MyPy on both helpers PASS |
