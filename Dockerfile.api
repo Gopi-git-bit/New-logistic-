@@ -13,7 +13,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # Install Python deps
 COPY requirements-api.lock ./
-RUN pip install --no-cache-dir --require-hashes -r requirements-api.lock
+COPY scripts/emit_api_build_metadata.py /tmp/emit_api_build_metadata.py
+RUN pip --isolated install --index-url https://pypi.org/simple --only-binary=:all: \
+      --no-cache-dir --force-reinstall --require-hashes \
+      --report /tmp/api-pip-report.json -r requirements-api.lock \
+    && python -I /tmp/emit_api_build_metadata.py /tmp/api-pip-report.json \
+    && rm /tmp/api-pip-report.json /tmp/emit_api_build_metadata.py
 
 # Copy source
 COPY api/ ./api/
@@ -24,3 +29,4 @@ RUN groupadd --system --gid 10001 zippy \
 USER 10001:10001
 
 CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000"]
+

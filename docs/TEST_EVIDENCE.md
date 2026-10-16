@@ -1,5 +1,30 @@
 # Zippy Test and Discovery Evidence
 
+### M7-E009: Manual API Build Route — Offline Preparation Evidence
+
+**Scope:** D-45, 16 October 2026; base main
+`f8e7cb9a548e9956a0f1f74edc6f73e8fd2a76ef`, tree
+`61fca5826a4fdcf018d1df077d10eea4681639ab`.
+[Build-only contract](plans/API_IMAGE_BUILD_ONLY.md).
+
+| Item | Actual result / limit |
+|---|---|
+| PR #26 completion | Merged at the base above; [post-merge CI 38924063418](https://github.com/Gopi-git-bit/New-logistic-/actions/runs/38924063418) passed all five jobs. Workers 840 passed / 94 subtests; offline provider denial 4 passed; API 92 passed / 72 database skips / 2 warnings. Inherited preparation evidence, not an image build. |
+| Local regression | `python3 -m unittest discover -s workers/tests -p 'test_api_*.py' -v`: 31 passed on Python 3.12.14, zero skips/warnings: 19 context/settings cases and 12 build-control cases |
+| Admission | Missing/mismatched owner, repository, event, ref, attempt, workflow/source and hosted-runner identity denied before commands; named/mismatched source selectors and reruns refused |
+| Failure and cleanup | Fake commands prove dirty source, remote builder and wrong base platform stop before build; nonzero exit, timeout, bad receipt and cleanup failure cannot pass. New iidfile image removed; preexisting image preserved; no broad prune or application start. |
+| Receipt correlation/redaction | Exactly one receipt required; selected names/versions/hashes match the lock. Unknown schema/origin, duplicate/missing downloads, hash/version mismatch and extra metadata fail. Userinfo/query/fragment, arbitrary metadata, raw logs and image environment excluded. |
+| Context extension | Metadata helper must be a required regular Git blob; missing/symlink helper rejected before context creation. Existing source/lock/settings regressions preserved. |
+| Quality | Scoped Ruff lint/format and strict MyPy on all four delivery helpers PASS. CI extends those checks without invoking the build route. |
+| Action identity | Official checkout v4 Git ref resolved to `11d5960a326750d5838078e36cf38b85af677262`; route pins it and disables persisted credentials. |
+| Resulting-head CI | Pending publication/execution; actual head/tree/run and five-check results must be recorded in the feature PR audit after they exist. Fake success is not a Docker/image build result. |
+| Not run | New workflow, actual Docker build/downloads, image runtime, registry/artifact publication, real-secret dispatch, VPS changes, database/provider requests or live M7/Qwen |
+| Remaining gaps | Apt archive receipts/snapshots; redirects/mirrors/effective egress; unpinned hosted tools; bit reproducibility; runtime/deployment/production contracts; live M7 gates. Existing database gaps/warnings remain unverified, not waived. |
+
+Runtime/dev lock bytes, the selected DeepSeek profile and accepted presence
+evidence are unchanged. No target/provider authority is granted. D-33 and
+manual approval for every refund remain controlling.
+
 ### M7-E008: API Delivery Preparation — Offline Contract Evidence
 
 **Scope:** D-44, 16 October 2026; base main
@@ -1670,3 +1695,4 @@ FAIL history below are retained; no staging/live item is upgraded to PASS.
 **FAIL history, not a current acceptance claim:** the missing correlation and escaping classification error failed the new probes. The corrected focused checks and affected-module regression above pass. Historical M6 proof failures and their accepted resolution remain unchanged.
 
 **Exact next owner decision:** accept or reject M6-E005, and explicitly resolve whether M6 completion is limited to D-31's synthetic development scope with separate deployed storage and real cost-ledger reconciliation deferred to approved staging, or whether M6 stays incomplete pending those checks. Do not infer either choice from passing tests or draft PR CI. Before staging/live telemetry, separately approve cloud versus self-hosting, deployment, live emitters/credentials, data residency, retention and sampling; no production settings are chosen here. Gopinathan remains the only approved initial observability administrator. M6 remains `IN_PROGRESS` and M7 activation `BLOCKED` until the explicit acceptance/transition decision.
+

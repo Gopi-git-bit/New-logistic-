@@ -1,8 +1,15 @@
 # Zippy Logistics — Memory
 
+**D-45, 2026-10-16:** PR #26 merged at
+`f8e7cb9a548e9956a0f1f74edc6f73e8fd2a76ef`; post-merge CI 38924063418 passed
+all five jobs. Next [manual build route](plans/API_IMAGE_BUILD_ONLY.md) prepared
+for a separate PR, with 31 offline cases (M7-E009). Merge and dispatch remain
+separate; no actual build, publication/start, real-secret run, VPS/provider action.
+Delivery stays IN_PROGRESS; live M7/Qwen denied. Older checkpoints are historical.
+
 > Current state of the project. Updated after each milestone completion.
 
-## Current Phase: DeepSeek Presence Complete; API Delivery Preparation in Review; Live M7 Blocked
+## Current Phase: DeepSeek Presence Complete; API Preparation Merged; Manual Build Route in Review; Live M7 Blocked
 
 **Last updated**: 2026-10-16
 
@@ -128,3 +135,4 @@ Backend execution model corrected:
 5. **`agent_registry` CHECK constraint** — Hard-coded; adding new agent requires `DROP CONSTRAINT` + `ADD CONSTRAINT`
 6. **Docker healthcheck race** — Container turns green while init scripts still run; gate on stable table count
 7. **`validate_payment_plan` full mode** — Requires `advance == total`, not just non-zero
+

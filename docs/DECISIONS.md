@@ -35,6 +35,27 @@
 
 ## Bounded Development Authorizations
 
+### D-45: Manual Secret-Free API Build Route Preparation
+
+**Status:** Owner continuation instruction, 16 October 2026, after PR #26 merge
+and verified post-merge CI. Prepare the next bounded GitHub-only build gate
+through a separate feature PR. Merge and actual dispatch remain separate.
+
+Implement owner/main/exact-source admission, first-attempt-only manual triggering,
+read-only checkout pinned to a verified action commit, a hosted local image build
+without registry publication, and sanitized source/tool/platform/download/image
+evidence. Add offline denial, failure, timeout and scoped cleanup regressions.
+Retain the existing API base digest and runtime lock; require public binary pip
+artifacts with hashes and correlate the installation receipt to that lock.
+Record mutable apt/toolchain and whole-image reproducibility gaps explicitly.
+
+[API_IMAGE_BUILD_ONLY.md](plans/API_IMAGE_BUILD_ONLY.md) and M7-E009 define the
+contract and actual evidence. PR CI tests the route offline; it does not dispatch
+the workflow or build an image. M7-DELIVERY-DRYRUN remains IN_PROGRESS. No image
+publication/start, real-secret workflow, credential provisioning, VPS change,
+provider call, live M7 or Qwen execution is included. D-33, API guards and
+financial/governance controls remain unchanged.
+
 ### D-44: API Delivery Preparation Implementation
 
 **Status:** Owner continuation instruction, 16 October 2026: move to the next
@@ -774,3 +795,4 @@ These directions are **OWNER APPROVED** by Gopinathan on 2026-09-08. Implementat
 - This acceptance changed only the five authorized documents; no code, tests, proof scripts, dependencies, workflows, Docker files, production configuration, or retained proof logs were modified.
 - No test, proof, installation, deployment, live credential use, external telemetry transmission, or production action occurred during this acceptance.
 - External spending during and after M6-A acceptance remains ₹0.
+

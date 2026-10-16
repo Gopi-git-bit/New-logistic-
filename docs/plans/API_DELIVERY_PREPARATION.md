@@ -2,7 +2,7 @@
 
 **Date:** 16 October 2026. **Decision/evidence:** D-44 / M7-E008.
 **Base main:** `5ce410e954661e58cc07e1c211ebd37ed0309180`.
-**State:** implementation prepared for PR review; image build/publication NOT RUN.
+**State:** PR #26 merged with green post-merge CI; image build/publication NOT RUN.
 This slice implements the first API context/lock/configuration follow-up to the
 [pinned inventory](../reports/M7_DELIVERY_INPUT_INVENTORY.md).
 
@@ -122,6 +122,16 @@ must be recorded on [PR #26](https://github.com/Gopi-git-bit/New-logistic-/pull/
 
 ## Gap disposition and next gate
 
+**D-45 continuation:** PR #26 merged at
+`f8e7cb9a548e9956a0f1f74edc6f73e8fd2a76ef` with five passing post-merge CI jobs
+([38924063418](https://github.com/Gopi-git-bit/New-logistic-/actions/runs/38924063418)).
+The [manual build-only follow-up](API_IMAGE_BUILD_ONLY.md) prepares the next route
+and receipt collection through a new PR. Its context additionally requires
+scripts/emit_api_build_metadata.py. Its Dockerfile adds an explicit public index,
+binary-only artifacts, isolated pip, forced reinstall and a sanitized receipt;
+lock versions and base digest stay fixed. These later changes supersede the
+earlier future-route statements. No actual build or dispatch has occurred.
+
 | Inventory gap | Change in this slice / remaining evidence |
 |---|---|
 | DELIVERY-01 | Isolated staged context implemented and regression-tested. Root Compose's raw context is unchanged; use the staged route for the future reviewed build. |
@@ -150,3 +160,4 @@ for a build. Before merge, discard/correct this feature slice only; after merge,
 propose a reviewed revert. No server, database or credential rollback is involved.
 D-33 remains pending; deterministic assignment, RPC/RLS, idempotency, governance,
 settlement and manual approval for every refund remain controlling.
+

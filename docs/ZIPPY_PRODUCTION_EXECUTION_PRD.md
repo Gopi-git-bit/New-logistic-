@@ -492,3 +492,14 @@ remain unchanged. No image build/start or publication, real-secret workflow,
 VPS/service/synthetic activation, deployment or provider call follows from this
 slice. Live M7 and Qwen stay disabled. Future build/download/runtime evidence
 and each merge/execution gate remain distinct.
+
+### 17.6 Manual API build-only preparation — 16 October 2026
+
+D-45 follows PR #26 merge `f8e7cb9a548e9956a0f1f74edc6f73e8fd2a76ef` and
+five passing post-merge CI jobs (38924063418). The
+[build-only contract](plans/API_IMAGE_BUILD_ONLY.md) prepares an owner/main/source
+bound manual route, sanitized dependency/image evidence and scoped local cleanup.
+M7-E009 records 31 offline cases. Feature review/CI, merge and actual dispatch
+remain separate. The image has not been built or published; no production
+configuration is invented. Delivery remains IN_PROGRESS; no VPS/provider action
+or live M7/Qwen execution. D-33 and financial/governance controls persist.
