@@ -2,9 +2,26 @@
 
 > Current state of the project. Updated after each milestone completion.
 
-## Current Phase: M6 Development Complete; M7 Synthetic Development Only
+## Current Phase: DeepSeek Secret Availability Complete; Delivery Blueprint Prepared; Live M7 Blocked
 
-**Last updated**: 2026-10-09
+**Last updated**: 2026-10-16
+
+**Controlling closeout, 2026-10-16 (D-42):** Staging Secret Availability is
+**COMPLETE for DeepSeek presence only**, supported by M7-E006 and
+[run 38903102158](https://github.com/Gopi-git-bit/New-logistic-/actions/runs/38903102158) on reviewed merge `bc135b8b605cd96c2bacaf228953d1cbf14ba3ca`.
+The selected key was available to its GitHub Actions step; provider validity,
+dedicated ownership, target injection, effective egress, spending enforcement and
+trusted live authorization remain unverified. OpenRouter presence was skipped,
+not accepted. Live M7 and Qwen remain **BLOCKED**; D-33 remains pending.
+
+The [next development blueprint](plans/M7_SECRET_FREE_DELIVERY_BLUEPRINT.md)
+is prepared. Next proposed implementation: secret-free build and staging-manifest
+validation in a separate PR, **PENDING owner scope approval**. No new workflow,
+build, registry publication, service activation, credential use, deployment or
+provider test is authorized by this documentation closeout. Reuse accepted
+evidence; do not repeat the presence run or VPS diagnostic.
+
+### Historical development checkpoints
 
 D-36 accepts M6 development only (D-31 plus M6-E005). PR #8 is merged at
 `dfd3f35167972755322a3746c5628ac9e0b7189f`; exact-master CI run

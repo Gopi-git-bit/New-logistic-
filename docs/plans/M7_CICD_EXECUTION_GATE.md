@@ -1,5 +1,29 @@
 # M7 GitHub CI/CD execution gate
 
+## Accepted status — 16 October 2026 (D-42 / M7-E006)
+
+**Staging Secret Availability: COMPLETE, DeepSeek presence-only scope.**
+[Run 38903102158](https://github.com/Gopi-git-bit/New-logistic-/actions/runs/38903102158), attempt 1, succeeded at reviewed merge
+`bc135b8b605cd96c2bacaf228953d1cbf14ba3ca`; [post-merge CI](https://github.com/Gopi-git-bit/New-logistic-/actions/runs/38901637850) passed all five jobs.
+The owner explicitly authorized the run-specific Production approval through the
+connected owner account. DeepSeek presence passed; OpenRouter was intentionally
+skipped. Preserve the historical `PRESENCE_OBSERVED_REVIEW_REQUIRED` assessment;
+the owner's current instruction completes its bounded documentation review.
+
+Main's current verified policy requires a PR and **zero** approving reviews,
+all five strict checks and administrator enforcement. Production's owner reviewer
+is configured; self-review and administrator bypass are allowed, with no bypass
+used. The owner later explicitly delegated this one approval, superseding the
+earlier instruction below to leave the approval click to the owner. This supplies
+no standing permission for another approval, dispatch, rerun or provider call.
+
+The chronology below is retained as the design and earlier instruction record;
+statements that PR #23 is unmerged, presence is unexecuted or main requires one
+approval are historical. Use M7-E006 and D-42 for this accepted checkpoint.
+The [secret-free delivery blueprint](M7_SECRET_FREE_DELIVERY_BLUEPRINT.md) is
+the next proposed phase; implementation is PENDING separate scope authorization.
+No VPS, deployment, provider-state, hard-cap or live-authority gate is completed.
+
 Owner instruction, 16 October 2026: continue development through GitHub PRs,
 pause VPS configuration, review PR #22 for staging-secret scope, least privilege
 and safe triggers, update the canonical PRD, and promote the validated head to
@@ -57,7 +81,7 @@ provider socket or live workflow dispatch is used by those tests. These are
 regressions for the reviewed workflow contract, not a general shell sandbox or
 an attestation of GitHub account settings.
 
-## Next execution gate: one authorized DeepSeek presence check
+## Completed sequence: one authorized DeepSeek presence check (historical design)
 
 The following sequence is a design, not an instruction to execute it in PR #22.
 
@@ -111,7 +135,7 @@ Expected outcome: `PRESENCE_OBSERVED_REVIEW_REQUIRED`, an operator assessment,
 not a new workflow-emitted readiness status. If any prerequisite is unverified,
 the gate remains `NOT_AUTHORIZED_OR_NOT_VERIFIED` without a dispatch.
 
-## Subsequent delivery gate: reproducible build and deployment dry run
+## Next proposed delivery gate: secret-free build and manifest validation
 
 Design a separate PR for a secret-free build/test route before enabling CD:
 

@@ -2,7 +2,7 @@
 
 ## Control Rules
 
-- Current verdict: **BLOCKED FOR PRODUCTION — M6 DEVELOPMENT COMPLETE UNDER D-36; M7 LIVE ACTIVATION BLOCKED; D-37/D-38 SYNTHETIC CONTRACTS AND D-39 MOCKED BRIDGE DEVELOPMENT ONLY**.
+- Current verdict: **BLOCKED FOR PRODUCTION — STAGING SECRET AVAILABILITY COMPLETE FOR DEEPSEEK PRESENCE ONLY (D-42/M7-E006); NEXT DELIVERY BLUEPRINT PREPARED; LIVE M7 AND QWEN BLOCKED**.
 - Only one tracker row may be active at a time.
 - M1 is complete and owner-approved for the bounded M2 implementation recorded below.
 - Every milestone still requires its own dependency-correct scope and approval; no tracker transition authorizes production work.
@@ -13,7 +13,7 @@
 ## Status Values
 
 - `COMPLETE`: Evidence exists for the authorized scope.
-- Active: currently authorized work; exactly one tracker row uses the active status token.
+- Active: currently authorized work; at most one row may be active. A completed handoff may have no active row while the next implementation awaits approval.
 - `PENDING`: Sequenced but not started; remains within planning scope.
 - `BLOCKED`: Cannot begin until dependencies and human approvals are satisfied.
 
@@ -57,12 +57,32 @@
 | M7-SHADOW-DEV | M7 | Capability/allowlist and synthetic shadow evaluation | COMPLETE | M6-LANGFUSE, D-34, D-37 | Built-in fake agents and synthetic eligible shortlists only; exact agent/action/tool allowlist plus existing read capability; advisory comparison through recommendations.py; outside API/worker registry | M7-E001: 93 focused tests; 301 host regression tests passed, 72 database-gated skips remain UNVERIFIED; lint/format/strict types and static Compose PASS | D-37 bounded development, tests, scoped commit/push and draft PR only; no merge | Remove unwired harness or revert reviewed feature commit | Published master at a3b4d97542d55fa39c5b738504783ae2f40703ba; exact-master CI 37903563023 passed, not PR-head CI; no republishing or empty PR |
 | M7-REVIEW-DEV | M7 | Synthetic recommendation-review contract | COMPLETE | M7-SHADOW-DEV, D-38 | Immutable versioned candidate snapshots, explicit fake human identities, fake memory only; pending/accepted/rejected/expired; advisory preference only; no runtime wiring | M7-E002: 165 focused tests passed, no skips; full worker lint, affected format and strict implementation types PASS | D-38 scoped development/checks/feature commit/push and draft PR only; no merge | Remove unwired contract or revert reviewed feature commit | Local development checks complete; publication and exact-head PR CI pending; deterministic assignment/manual refunds/governance unchanged |
 | M7-STAGING-BRIDGE-DEV | M7 | Isolated OMS provider adapter and finite runner | COMPLETE | M7-REVIEW-DEV, D-39 | Explicit OpenAI-compatible configuration; one-request synthetic runner outside registration; mocked HTTP only | M7-E003: finalization 260 affected tests passed, zero skips; 95 bridge cases executed; touched-file lint/format and strict implementation types PASS | D-39 implementation/mock checks plus separately authorized commit/push/draft PR; no live request authorization | Remove standalone runner and adapter; no operational state to roll back | Based on reviewed PR #9 head 70c372fdd1f1328eb09a4175f028d4a7755fa77d; inherited review changes must be identified in master diff; no telemetry/live activation |
+| M7-STAGING-SECRET-AVAILABILITY | M7 | Staging Secret Availability (DeepSeek) | COMPLETE | Reviewed PR #23 merge and exact-merge CI; owner-authorized presence run | Record accepted GitHub step availability only; no provider call | M7-E006; run 38903102158 attempt 1; DeepSeek PASS, OpenRouter intentionally skipped | Owner-authorized dispatch, run-specific environment approval and D-42 closeout | Revert documentation through review; do not revoke or rotate keys as rollback | No key validity, target injection, spending or live authority proven |
+| M7-DELIVERY-BLUEPRINT | M7 | Next secret-free delivery blueprint | COMPLETE | M7-STAGING-SECRET-AVAILABILITY, D-42 | Documentation design only | plans/M7_SECRET_FREE_DELIVERY_BLUEPRINT.md with scope, acceptance, stop conditions and handoff | Current owner instruction authorizes blueprint preparation only | Revert documentation through review | No workflow or deployment route implemented by this row |
+| M7-DELIVERY-DRYRUN | M7 | Secret-free build and staging-manifest validation | PENDING | M7-DELIVERY-BLUEPRINT; explicit implementation scope approval | None yet; proposed separate GitHub PR only | Reviewed source, toolchain/lock provenance, local image ID and placeholder manifest report; no publish/start steps | Separate owner authorization before implementation; merge and later publication/deployment remain distinct | Proposed branch revert and ephemeral runner cleanup | No real-secret dispatch, registry login/push, SSH, VPS or provider execution |
 | M7-AGENTS | M7 | Agent activation | BLOCKED | M6-LANGFUSE staging/live gates, open provider decisions | D-34/D-37/D-38/D-39 permit recommendation, synthetic shadow/review and mocked staging-bridge development only; live activation unauthorized | Model/provider validation, capability/allowlist, shadow, HITL, and narrow-automation evidence | Product, governance, and owner approval required for activation | Pause agents and revoke capabilities | Honcho remains contextual only; M6 staging/live gates are not waived; D-33 pending |
 | M8-STAGING-E2E | M8 | Staging E2E and resilience | BLOCKED | M7-AGENTS | None currently authorized | Clean-environment unit/integration/contract/E2E/security/failure and backup-restore evidence | Engineering, security, operations approval required | Restore/tear down staging per runbook | Includes outage, retry, duplicate, lock, and rollback drills |
 | M9-READINESS | M9 | Production readiness review | BLOCKED | M8-STAGING-E2E | None currently authorized | No unresolved critical/high security findings; secrets, monitoring, backups, restores, runbook, rollback, external-system evidence | Owner, security, finance, and operations approval required | Remain in staging | Explicit human go-live decision required |
 | M10-ROLLOUT | M10 | Controlled production rollout | BLOCKED | M9-READINESS | None currently authorized | Shadow, internal pilot, canary, monitored expansion, thresholds, smoke, and rollback evidence | Explicit per-stage human approval required | Execute approved stage rollback | Live payments, DNS, financial autonomy, and irreversible actions need explicit approval |
 
 ## Current Authorized Work
+
+**Controlling closeout, 2026-10-16 (D-42):** Staging Secret Availability is
+**COMPLETE for DeepSeek presence only**, supported by M7-E006 and
+[run 38903102158](https://github.com/Gopi-git-bit/New-logistic-/actions/runs/38903102158) on reviewed merge `bc135b8b605cd96c2bacaf228953d1cbf14ba3ca`.
+The selected key was available to its GitHub Actions step; provider validity,
+dedicated ownership, target injection, effective egress, spending enforcement and
+trusted live authorization remain unverified. OpenRouter presence was skipped,
+not accepted. Live M7 and Qwen remain **BLOCKED**; D-33 remains pending.
+
+The [next development blueprint](plans/M7_SECRET_FREE_DELIVERY_BLUEPRINT.md)
+is prepared. Next proposed implementation: secret-free build and staging-manifest
+validation in a separate PR, **PENDING owner scope approval**. No new workflow,
+build, registry publication, service activation, credential use, deployment or
+provider test is authorized by this documentation closeout. Reuse accepted
+evidence; do not repeat the presence run or VPS diagnostic.
+
+### Historical 2026-10-09 checkpoint
 
 **Controlling update, 2026-10-09:** D-36 makes M6 development complete after
 PR #8 merge and exact-master green CI; staging/live evidence remains UNVERIFIED.
@@ -80,7 +100,7 @@ The smallest remaining staging gate is explicit owner approval of an isolated
 validation scope plus hosting, credentials/live emitters, residency, retention
 and sampling choices; deployed proof remains mandatory afterward.
 
-### Historical authorization and evidence checkpoints (superseded where noted)
+### Earlier authorization and evidence checkpoints (superseded where noted)
 
 Statements below that M6 remains IN_PROGRESS or M6 acceptance is pending reflect
 their checkpoint dates, not the current D-36/D-37 status. They are preserved
