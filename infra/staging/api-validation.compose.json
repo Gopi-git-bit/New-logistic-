@@ -1,0 +1,35 @@
+{
+  "name": "zippy-api-validation",
+  "services": {
+    "api-validation": {
+      "profiles": ["validation-only"],
+      "image": "zippy-api-validation:unpublished",
+      "entrypoint": ["/bin/false"],
+      "network_mode": "none",
+      "user": "10001:10001",
+      "read_only": true,
+      "cap_drop": ["ALL"],
+      "security_opt": ["no-new-privileges:true"],
+      "restart": "no",
+      "environment": {
+        "DATABASE_URL": "postgresql://validation.invalid/operational",
+        "PAPERCLIP_DATABASE_URL": "postgresql://validation.invalid/governance",
+        "APP_ENV": "test",
+        "AUTH_MODE": "test_jwt",
+        "AUTH_JWT_SECRET": "NOT_A_SECRET_ONLY_FOR_OFFLINE_VALIDATION",
+        "ZIPPY_PLATFORM_ID": "00000000-0000-0000-0000-000000000001",
+        "M3_PRICING_POLICY_VERSION": "test-delivery-validation-v1",
+        "M3_PRICING_CURRENCY": "INR",
+        "M3_PRICING_BASE_AMOUNT": "0",
+        "M3_PRICING_PER_KM": "0",
+        "M3_PRICING_PER_KG": "0",
+        "PAPERCLIP_OWNER_SUBJECT": "synthetic-owner",
+        "PAPERCLIP_EXECUTOR_SUBJECT": "synthetic-executor",
+        "PAPERCLIP_POLICY_ID": "00000000-0000-0000-0000-000000000002",
+        "PAPERCLIP_AGENT_BINDINGS_JSON": "{\"synthetic-agent\":\"00000000-0000-0000-0000-000000000003\"}",
+        "PAPERCLIP_ENVELOPE_SIGNING_KEY": "NOT_A_SECRET_ONLY_FOR_OFFLINE_VALIDATION",
+        "PAPERCLIP_ENVELOPE_TTL_SECONDS": "300"
+      }
+    }
+  }
+}

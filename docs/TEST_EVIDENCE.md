@@ -1,5 +1,31 @@
 # Zippy Test and Discovery Evidence
 
+### M7-E008: API Delivery Preparation — Offline Contract Evidence
+
+**Scope:** D-44, 16 October 2026; base main
+`5ce410e954661e58cc07e1c211ebd37ed0309180`. Implementation prepared for review;
+[contract and gap disposition](plans/API_DELIVERY_PREPARATION.md).
+
+| Item | Actual result / limit |
+|---|---|
+| Initial local regression | `python -m unittest discover -s workers/tests -p test_api_delivery_preparation.py -v`: 16 passed on Python 3.12.14, zero skips/warnings |
+| PR #26 corrected local regression | 18 passed, zero skips/warnings; nine invalid-name cases reproduced failures before the parser correction. New name-edge cases, valid one-character/internal-separator names, normalized duplicates and integration refusal before context creation pass. An independently reproduced LF comment-continuation bypass is also rejected, with LF/CRLF and pre-context integration cases. Scoped Ruff lint/format and strict helper MyPy pass. |
+| Export boundary | Tests prove committed-object selection, ignored dirty/untracked files, deterministic identity, no overwrite, and refusal of mismatched SHA, symlinks, unsupported tracked files, unsafe locks and in-checkout output |
+| Staging validation | Real api/config.py loaded directly from source with only synthetic settings; socket-blocked/import-blocked positive control, all 17 missing names, unsafe service options, malformed/live settings, redaction and environment restoration cases pass |
+| Quality | Touched helper/test Ruff lint/format PASS; strict MyPy on both helpers PASS |
+| CI implementation | Existing compose-config stages actual checkout objects, validates settings and parses the fixture; API CI switches to unchanged dev lock with --require-hashes; both jobs bounded, read-only checkout without persisted credentials |
+| Original-head CI | [38920878701](https://github.com/Gopi-git-bit/New-logistic-/actions/runs/38920878701), attempt 1, all five jobs passed for `a17dd6b2e8c82e61bb30a95fcd0f009a350bbc70`. Workers: 838 passed / 75 subtests; offline denial: 4 passed; API: 92 passed / 72 database skips / 2 deprecation warnings. New context, synthetic Compose parse and hash-lock install steps passed. |
+| Corrected-head / merge acceptance | The parser correction needs fresh five-check success on its exact head and separate post-merge CI. Record actual SHAs/runs on [PR #26](https://github.com/Gopi-git-bit/New-logistic-/pull/26) after execution; do not reuse the original run for the corrected head or claim a future result. |
+| Not run locally | Docker Compose CLI parse, application image build/start, artifact download verification or runtime health |
+| Preserved | API runtime guards, migrations/RPC/RLS, accepted proofs, disabled production workflow and denied M7/Qwen |
+
+The existing lockfiles are not modified. Locked API CI installation, when it
+passes, verifies artifacts selected in that CI environment; it does not prove
+an API image build, an OS/package snapshot or a complete download-origin ledger.
+New context manifests identify source files only, not OCI images. See the plan's
+explicit dispositions for DELIVERY-01 through DELIVERY-11. No real secret,
+service/database/provider call, VPS action or deployment was performed locally.
+
 ### M7-E007: Delivery Input Inventory and Gap Register
 
 **Scope:** D-43 continuation; first records-only slice, 16 October 2026.

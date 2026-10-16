@@ -2,7 +2,7 @@
 
 ## Control Rules
 
-- Current verdict: **BLOCKED FOR PRODUCTION — STAGING SECRET AVAILABILITY COMPLETE FOR DEEPSEEK PRESENCE ONLY (D-42/M7-E006); DELIVERY INPUT INVENTORY RECORDED (D-43/M7-E007); IMPLEMENTATION SEQUENCED; LIVE M7 AND QWEN BLOCKED**.
+- Current verdict: **BLOCKED FOR PRODUCTION — STAGING SECRET AVAILABILITY COMPLETE FOR DEEPSEEK PRESENCE ONLY (D-42/M7-E006); DELIVERY INPUT INVENTORY RECORDED (D-43/M7-E007); API DELIVERY PREPARATION IN REVIEW (D-44/M7-E008); LIVE M7 AND QWEN BLOCKED**.
 - Only one tracker row may be active at a time.
 - M1 is complete and owner-approved for the bounded M2 implementation recorded below.
 - Every milestone still requires its own dependency-correct scope and approval; no tracker transition authorizes production work.
@@ -60,7 +60,7 @@
 | M7-STAGING-SECRET-AVAILABILITY | M7 | Staging Secret Availability (DeepSeek) | COMPLETE | Reviewed PR #23 merge and exact-merge CI; owner-authorized presence run | Record accepted GitHub step availability only; no provider call | M7-E006; run 38903102158 attempt 1; DeepSeek PASS, OpenRouter intentionally skipped | Owner-authorized dispatch, run-specific environment approval and D-42 closeout | Revert documentation through review; do not revoke or rotate keys as rollback | No key validity, target injection, spending or live authority proven |
 | M7-DELIVERY-BLUEPRINT | M7 | Next secret-free delivery blueprint | COMPLETE | M7-STAGING-SECRET-AVAILABILITY, D-42 | Documentation design only | plans/M7_SECRET_FREE_DELIVERY_BLUEPRINT.md with scope, acceptance, stop conditions and handoff | Current owner instruction authorizes blueprint preparation only | Revert documentation through review | No workflow or deployment route implemented by this row |
 | M7-DELIVERY-INVENTORY | M7 | Docker, lock, API and staging input inventory | COMPLETE | M7-DELIVERY-BLUEPRINT, D-43 | Static input inventory and records-only feature PR | Report, M7-E007, object/content identities, lock/name/path checks; corrected-head CI is a separate pre-merge condition | Continuation authorized; current PR #25 review/correction precedes conditional merge | Reviewed documentation revert | Static completion only; original CI 38915184473 is not proof for corrected heads; no image build or new staging-manifest render |
-| M7-DELIVERY-DRYRUN | M7 | Secret-free build and staging-manifest validation | PENDING | M7-DELIVERY-INVENTORY; reviewed build/configuration contract | D-43 authorizes bounded delivery preparation through separate GitHub PRs; implementation sequenced | Reviewed source, toolchain/lock provenance, local image ID and placeholder manifest report; no publish/start steps | Continuation authorized; each reviewed merge and later publication/deployment remain separate | Feature revert and ephemeral runner cleanup | No real-secret dispatch, registry login/push, SSH, VPS or provider execution |
+| M7-DELIVERY-DRYRUN | M7 | Secret-free build and staging-manifest validation | IN_PROGRESS | M7-DELIVERY-INVENTORY, D-44 | Implement committed API context, existing lock consumption and synthetic configuration validation through a feature PR | M7-E008; local regression/quality checks; exact-head CI; actual image/download evidence remains pending | Current owner continuation authorizes implementation/publication; feature merge and later build/publication/deployment remain separate | Reviewed feature revert and scoped temporary-context cleanup | API preparation implemented for review; no image build, publish, real-secret dispatch, SSH, VPS or provider execution |
 | M7-AGENTS | M7 | Agent activation | BLOCKED | M6-LANGFUSE staging/live gates, open provider decisions | D-34/D-37/D-38/D-39 permit recommendation, synthetic shadow/review and mocked staging-bridge development only; live activation unauthorized | Model/provider validation, capability/allowlist, shadow, HITL, and narrow-automation evidence | Product, governance, and owner approval required for activation | Pause agents and revoke capabilities | Honcho remains contextual only; M6 staging/live gates are not waived; D-33 pending |
 | M8-STAGING-E2E | M8 | Staging E2E and resilience | BLOCKED | M7-AGENTS | None currently authorized | Clean-environment unit/integration/contract/E2E/security/failure and backup-restore evidence | Engineering, security, operations approval required | Restore/tear down staging per runbook | Includes outage, retry, duplicate, lock, and rollback drills |
 | M9-READINESS | M9 | Production readiness review | BLOCKED | M8-STAGING-E2E | None currently authorized | No unresolved critical/high security findings; secrets, monitoring, backups, restores, runbook, rollback, external-system evidence | Owner, security, finance, and operations approval required | Remain in staging | Explicit human go-live decision required |
@@ -68,29 +68,21 @@
 
 ## Current Authorized Work
 
-**Controlling closeout, 2026-10-16 (D-42):** Staging Secret Availability is
-**COMPLETE for DeepSeek presence only**, supported by M7-E006 and
-[run 38903102158](https://github.com/Gopi-git-bit/New-logistic-/actions/runs/38903102158) on reviewed merge `bc135b8b605cd96c2bacaf228953d1cbf14ba3ca`.
-The selected key was available to its GitHub Actions step; provider validity,
-dedicated ownership, target injection, effective egress, spending enforcement and
-trusted live authorization remain unverified. OpenRouter presence was skipped,
-not accepted. Live M7 and Qwen remain **BLOCKED**; D-33 remains pending.
+**D-44 continuation, 2026-10-16:** after PR #25 merge and post-merge CI, the
+owner authorizes the next API preparation stage. The
+[delivery preparation contract](plans/API_DELIVERY_PREPARATION.md) implements
+an isolated context from committed Git objects, existing API hash-lock consumption
+and synthetic Compose/settings validation. M7-E008 records 16 passing offline
+tests and scoped lint/format/strict-type checks. Exact resulting-head CI must be
+recorded on the feature PR after execution; review and merge remain separate.
+The parent delivery task is IN_PROGRESS because image build/download provenance,
+the bounded manual build route and later acceptance remain unfinished.
 
-**D-43 continuation, 2026-10-16:** the owner authorizes bounded delivery
-preparation through GitHub PRs under the
-[blueprint](plans/M7_SECRET_FREE_DELIVERY_BLUEPRINT.md). M7-E007 records the
-[input inventory](reports/M7_DELIVERY_INPUT_INVENTORY.md), exact declared input
-identities, download operations and eleven reproducibility/configuration gaps.
-The next implementation is API context filtering, existing lock consumption and
-placeholder-only staging validation, then the bounded secret-free build route.
-This scope approval is received; implementation/execution evidence is still
-pending. Static inventory completion does not satisfy corrected-head CI or the
-merge gate. The owner now requests PR #25 review/correction before merge; require
-all five checks on its exact final head and verify post-merge CI separately.
-
-Reuse accepted presence/database/VPS proofs. No registry publication, real-secret
-dispatch/provisioning, VPS change, service/synthetic activation, deployment or
-provider request is authorized by this scope. Live M7 and Qwen remain blocked.
+The accepted DeepSeek presence gate remains complete under M7-E006; do not rerun
+accepted presence/database/VPS proofs. No API guard is weakened and no production
+contract is invented. No real-secret dispatch/injection, image start/publication,
+VPS/service/synthetic activation, deployment, provider call, live M7 or Qwen
+execution is included. D-33 and manual refund approval remain controlling.
 
 ### Historical 2026-10-09 checkpoint
 

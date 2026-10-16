@@ -1,10 +1,11 @@
 # M7 next development phase: secret-free delivery preparation
 
-**Status:** CONTINUATION AUTHORIZED (D-43); INPUT INVENTORY RECORDED; BUILD/VALIDATION IMPLEMENTATION SEQUENCED.
+**Status:** API CONTEXT/LOCK/STAGING CONTRACT IMPLEMENTED FOR REVIEW (D-44);
+ACTUAL IMAGE BUILD NOT RUN.
 **Owner:** Gopinathan. **Date:** 16 October 2026.
 **Decision/evidence:** [D-42/D-43](../DECISIONS.md) / [M7-E006/M7-E007](../TEST_EVIDENCE.md).
 **Tracker:** M7-DELIVERY-BLUEPRINT and M7-DELIVERY-INVENTORY COMPLETE;
-M7-DELIVERY-DRYRUN PENDING implementation and execution evidence.
+M7-DELIVERY-DRYRUN IN_PROGRESS; M7-E008 records local preparation evidence.
 
 ## Starting checkpoint
 
@@ -32,9 +33,10 @@ D-43 records the owner's subsequent continuation approval for Docker/build
 contexts, dependency locks, API configuration, staging templates and gap records.
 The first [input inventory](../reports/M7_DELIVERY_INPUT_INVENTORY.md) selects the
 API and records eleven gaps, including explicit input identities, declared download
-operations and unverified platform/toolchain/download provenance. This records-only PR does not implement or execute
-the proposed workflow/build/manifest steps below. Continue with the bounded
-API context/lock/placeholder-validation slice through reviewed feature PRs;
+operations and unverified platform/toolchain/download provenance. The subsequent D-44 slice implements the
+[API context/lock/placeholder-validation contract](API_DELIVERY_PREPARATION.md)
+for review. It integrates validation into existing CI, without adding the manual
+image-build route or executing an image build. Continue through reviewed PRs;
 keep merge approval, registry publication and target execution separate. Do not
 interpret a manual event or environment approval as a provider capability grant.
 
@@ -46,8 +48,8 @@ interpret a manual event or environment approval as a provider capability grant.
 | 2. Build contract — STATIC INPUTS IDENTIFIED | Inventory records exact source/tree, API input blob/content hashes, declared runtime/tools/base, download operations and DELIVERY-01 through DELIVERY-11 | Actual platform/toolchain versions, downloaded artifacts/origins and full-image reproducibility remain unverified; capture them in the future bounded build, not by claiming declared selectors were observed |
 | 3. Secret-free CI route | Propose a manual canonical-repository/main route with the designated owner identity, immutable reviewed source binding, finite timeout and explicit input validation | Read-only contents permission only where checkout needs it; no real-secret or Production environment binding; checkout credentials not persisted; actions pinned to verified commit SHAs |
 | 4. Local image build | Build on an ephemeral GitHub-hosted runner without registry login or push; pass no credentials or production URLs into image arguments/layers | Record local image ID and build report; an unpushed image ID is not a registry manifest digest or an accepted deployment artifact |
-| 5. Manifest validation | Render/validate an explicitly staging-only manifest and environment contract using synthetic placeholders | Configuration parsing only; no compose up/run, service start, SSH, database connection, target mutation or provider request; reject missing required fields and production secret references |
-| 6. Offline regression | Check the selected configuration's denial defaults, malformed/missing inputs and secret-free outputs; retain existing M7 refusal and business-invariant tests | Report actual results and skips with provenance; do not weaken checks, invent production credentials or rerun accepted VPS/provider proofs |
+| 5. Manifest validation — IMPLEMENTED FOR REVIEW | Strict synthetic JSON Compose/settings contract and bounded existing-CI parse step; local semantic regressions recorded in M7-E008 | Actual Compose CLI result must come from resulting-head CI; no up/run, startup, SSH, database connection, target mutation, real secret or provider request |
+| 6. Offline regression — LOCAL PASS | M7-E008: 16 cases for context isolation, unsafe/missing configuration, canonical settings compatibility and output redaction | No local skips/warnings; resulting-head CI remains separately required. Existing M7/business controls and accepted proofs preserved |
 | 7. Review handoff | Publish the actual diff, source identity, local image ID, versions, sanitized reports and residual gaps | Exact-head CI green and owner acceptance; no registry/package publishing or deployment follows automatically |
 
 Dependency/base-image retrieval during a future build is not proof of restricted

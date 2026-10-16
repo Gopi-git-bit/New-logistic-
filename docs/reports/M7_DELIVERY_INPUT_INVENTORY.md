@@ -262,3 +262,12 @@ After merge, propose a reviewed documentation revert. There is no infrastructure
 or application rollback to execute for this records-only PR. D-33 stays pending;
 manual refund approval, deterministic assignment, RPC/RLS, settlement and
 governance controls are unchanged.
+
+## Subsequent implementation checkpoint — D-44
+
+The inventory above remains the historical snapshot at its pinned baseline.
+The later [API delivery preparation](../plans/API_DELIVERY_PREPARATION.md)
+implements a committed-source context route, existing API lock consumption in CI
+and a synthetic settings/Compose fixture. Its gap-disposition table distinguishes
+partial fixes from unresolved image/download/production/live evidence. It does
+not change the original file identities or claim that every gap is closed.

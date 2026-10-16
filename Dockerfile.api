@@ -12,7 +12,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python deps
-COPY api/ ./api/
 COPY requirements-api.lock ./
 RUN pip install --no-cache-dir --require-hashes -r requirements-api.lock
 

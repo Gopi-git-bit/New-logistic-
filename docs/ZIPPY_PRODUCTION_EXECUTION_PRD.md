@@ -477,3 +477,18 @@ VPS/service/synthetic activation, provider requests and production remain outsid
 this grant. A placeholder staging contract must retain test-only authentication
 and pricing and must not open operational or governance databases. Live M7 and
 Qwen remain disabled. D-33 and all financial approval controls are unchanged.
+
+### 17.5 API delivery preparation implementation — 16 October 2026
+
+D-44 records the owner's continuation after PR #25 merge. The
+[API delivery contract](plans/API_DELIVERY_PREPARATION.md) implements committed
+source-only context export, unchanged API hash-lock consumption in CI and
+placeholder-only Compose/settings validation. M7-E008 records local tests and
+quality evidence; resulting-head CI is accepted only when its actual run is
+logged on the feature PR. The feature is prepared for review, not merged here.
+
+API test-only authentication/pricing, financial/governance boundaries and D-33
+remain unchanged. No image build/start or publication, real-secret workflow,
+VPS/service/synthetic activation, deployment or provider call follows from this
+slice. Live M7 and Qwen stay disabled. Future build/download/runtime evidence
+and each merge/execution gate remain distinct.
