@@ -1,5 +1,29 @@
 # Zippy Test and Discovery Evidence
 
+### M7-E007: Delivery Input Inventory and Gap Register
+
+**Scope:** D-43 continuation; first records-only slice, 16 October 2026.
+[Inventory and implementation handoff](reports/M7_DELIVERY_INPUT_INVENTORY.md).
+
+| Field | Observation / limit |
+|---|---|
+| Pinned main | `6a6f5acd00a6aafa115f1e470821512f5434021f`; tree `6d15373d8aa4b2180bc730abc33add6d22db2ef5`; complete recursive tree, 315 tracked files |
+| Docker inputs | Five Dockerfiles and their declared Compose contexts inspected; no tracked dockerignore; API selected as the smallest build-only candidate, not proven buildable |
+| Runtime lock | 17 exact distributions; SHA-256 hash syntax on every entry; all five direct API pins agree |
+| Dev lock | 31 exact distributions; SHA-256 hash syntax on every entry; four dev plus five inherited runtime pins agree |
+| Lock limits | Static parsing only; no resolution, installation, hash download verification, vulnerability assessment or regeneration |
+| Missing coverage | No tracked Node lock or worker lock/constraints; root workspace dependencies outside frontend app contexts |
+| API contract | 14 of 15 explicit required names missing from root Compose API environment; examples also incomplete; production auth/pricing remains deliberately rejected |
+| Staging source | Five distinct systemd templates, not an application deployment manifest; production Compose referenced by disabled deployment workflow is absent |
+| Static checks | Lock syntax/direct-version comparison and tracked-path inventory executed locally; scoped documentation/link/status checks recorded on the resulting PR |
+| CI | Exact resulting-head ordinary CI to be recorded on the inventory PR; no claim that its Compose parse builds images or starts services |
+| Not run | Docker build, manifest render, service start, database/provider call, real-secret dispatch, VPS command or deployment |
+| Preserved | Accepted presence/disposable DB evidence, source behavior, disabled deployment, denied live M7/Qwen and D-33 pending |
+
+This entry completes input inventory only. The authorized delivery build and
+placeholder-manifest work remains sequenced implementation, not completed
+runtime evidence. No new provider capability or business authority is granted.
+
 ### M7-E006: Staging Secret Availability — DeepSeek
 
 **Gate: COMPLETE for the bounded GitHub Actions presence-only scope.**

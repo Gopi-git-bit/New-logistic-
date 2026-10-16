@@ -35,6 +35,30 @@
 
 ## Bounded Development Authorizations
 
+### D-43: Delivery Preparation Continuation and Input Inventory
+
+**Status:** Owner-authorized continuation, 16 October 2026. The owner grants
+permission to continue the next phase on main, naming Dockerfiles/build contexts,
+dependency locks, API configuration, staging templates and gap records.
+
+Continue through GitHub feature PRs and secret-free validation under the
+[delivery blueprint](plans/M7_SECRET_FREE_DELIVERY_BLUEPRINT.md). The first
+slice records the pinned input inventory, gap register and smallest API build
+candidate in [M7_DELIVERY_INPUT_INVENTORY.md](reports/M7_DELIVERY_INPUT_INVENTORY.md).
+M7-E007 records static source evidence only: no image build, dependency download,
+manifest render or application startup occurred in this inventory slice.
+
+This continuation supersedes D-42's pending implementation-authorization wording
+for that bounded delivery-preparation phase. It is not a merge or execution grant
+for future unpublished changes. Sequence implementation using the inventory;
+retain exact-head review/CI and the separate merge gate. Do not repeat accepted
+presence/database/VPS proofs or use a green build as target-readiness evidence.
+
+Registry publication, real-secret dispatch/injection, VPS changes, service or
+synthetic activation, provider requests, live M7 and Qwen fallback remain outside
+this scope. Keep deployment disabled and API test-only auth/pricing guards
+intact. D-33, manual refunds and all operational/governance boundaries are unchanged.
+
 ### D-42: Staging Secret Availability Closeout and Next-Phase Blueprint
 
 **Status:** Owner-authorized documentation closeout, 16 October 2026.

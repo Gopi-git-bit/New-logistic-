@@ -21,7 +21,9 @@ The chronology below is retained as the design and earlier instruction record;
 statements that PR #23 is unmerged, presence is unexecuted or main requires one
 approval are historical. Use M7-E006 and D-42 for this accepted checkpoint.
 The [secret-free delivery blueprint](M7_SECRET_FREE_DELIVERY_BLUEPRINT.md) is
-the next proposed phase; implementation is PENDING separate scope authorization.
+the next phase. D-43 subsequently authorizes bounded delivery preparation;
+[M7-E007's input inventory](../reports/M7_DELIVERY_INPUT_INVENTORY.md) is recorded.
+Build and placeholder-manifest validation are sequenced, not executed here.
 No VPS, deployment, provider-state, hard-cap or live-authority gate is completed.
 
 Owner instruction, 16 October 2026: continue development through GitHub PRs,
@@ -135,16 +137,18 @@ Expected outcome: `PRESENCE_OBSERVED_REVIEW_REQUIRED`, an operator assessment,
 not a new workflow-emitted readiness status. If any prerequisite is unverified,
 the gate remains `NOT_AUTHORIZED_OR_NOT_VERIFIED` without a dispatch.
 
-## Next proposed delivery gate: secret-free build and manifest validation
+## Delivery gate: secret-free build and manifest validation
 
-Design a separate PR for a secret-free build/test route before enabling CD:
+D-43 authorizes bounded preparation through separate PRs. The first inventory
+records the current gaps; implement and review the build/test route before CD:
 
 - PR CI checks applicable unit/integration/security tests and formatting without
   modifying source. Preserve accepted disposable database evidence and make
   unexecuted database cases explicit; mock success does not certify a live DB.
 - Build from an exact reviewed SHA on a GitHub-hosted runner, with read-only
   checkout credentials not persisted. Use verified action SHAs and record the
-  toolchain/dependency/image versions, image digest and sanitized test reports.
+  toolchain/dependency/image versions, local image ID and sanitized test reports.
+  An unpushed local image ID is not a registry manifest digest.
 - Validate a reviewed staging deployment manifest and configuration contract
   using placeholders. Do not infer the missing production Compose/authentication/
   pricing contract or insert secret values into image layers or build arguments.

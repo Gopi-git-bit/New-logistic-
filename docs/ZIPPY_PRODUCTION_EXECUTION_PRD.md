@@ -456,7 +456,24 @@ bypass are allowed. The run-specific delegation does not authorize future
 approvals or weaken refund/governance controls.
 
 The [next-phase blueprint](plans/M7_SECRET_FREE_DELIVERY_BLUEPRINT.md) is
-prepared as documentation. Future implementation is PENDING separate scope
-approval. Do not repeat accepted probes, dispatch real secrets, publish an image,
+prepared as documentation. D-43's later continuation approval and section 17.4
+supersede the implementation-pending checkpoint for bounded delivery preparation.
+Do not repeat accepted probes, dispatch real secrets, publish an image,
 start services, change the VPS, call providers or activate M7/Qwen under this
 closeout. No architecture decision is changed; D-33 stays pending.
+
+### 17.4 Delivery input inventory and continuation — 16 October 2026
+
+The owner grants continuation for Dockerfiles/build contexts, dependency locks,
+API configuration, staging templates and gap records under D-43. The first
+[delivery input inventory](reports/M7_DELIVERY_INPUT_INVENTORY.md) is recorded
+as M7-E007. It selects the API build-only candidate and records context, lock,
+configuration and deployment gaps without altering runtime guards or source
+behavior. No image build, manifest render or startup is claimed by this slice.
+
+Proceed with bounded secret-free preparation through reviewed GitHub feature
+PRs. Review/CI and merge remain distinct; registry publication, real-secret use,
+VPS/service/synthetic activation, provider requests and production remain outside
+this grant. A placeholder staging contract must retain test-only authentication
+and pricing and must not open operational or governance databases. Live M7 and
+Qwen remain disabled. D-33 and all financial approval controls are unchanged.

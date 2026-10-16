@@ -1,5 +1,12 @@
 # M1 Dependency Lock Strategy
 
+> Historical snapshot at the baseline below. The 16 October 2026
+> [M7 delivery input inventory](M7_DELIVERY_INPUT_INVENTORY.md) supersedes its
+> no-Python-lock, missing-PyJWT and mutable-API-base observations for current
+> source. API runtime/dev hash locks and a digest-pinned API base now exist;
+> Node/worker locks and other reproducibility gaps remain. Preserve this report's
+> original findings as historical evidence, not a current implementation verdict.
+
 ## Scope and Verdict
 
 **Task:** `M1-LOCK-STRATEGY`

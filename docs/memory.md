@@ -2,7 +2,7 @@
 
 > Current state of the project. Updated after each milestone completion.
 
-## Current Phase: DeepSeek Secret Availability Complete; Delivery Blueprint Prepared; Live M7 Blocked
+## Current Phase: DeepSeek Presence Complete; Delivery Inputs Inventoried; Live M7 Blocked
 
 **Last updated**: 2026-10-16
 
@@ -14,12 +14,15 @@ dedicated ownership, target injection, effective egress, spending enforcement an
 trusted live authorization remain unverified. OpenRouter presence was skipped,
 not accepted. Live M7 and Qwen remain **BLOCKED**; D-33 remains pending.
 
-The [next development blueprint](plans/M7_SECRET_FREE_DELIVERY_BLUEPRINT.md)
-is prepared. Next proposed implementation: secret-free build and staging-manifest
-validation in a separate PR, **PENDING owner scope approval**. No new workflow,
-build, registry publication, service activation, credential use, deployment or
-provider test is authorized by this documentation closeout. Reuse accepted
-evidence; do not repeat the presence run or VPS diagnostic.
+**D-43 continuation, 2026-10-16:** the owner now authorizes bounded delivery
+preparation under the [blueprint](plans/M7_SECRET_FREE_DELIVERY_BLUEPRINT.md).
+The first [input inventory and gap register](reports/M7_DELIVERY_INPUT_INVENTORY.md)
+is recorded as M7-E007. API context filtering, existing lock consumption and
+placeholder-only staging validation are the next engineering slice; image build
+and manifest validation are not completed by this inventory. Keep each PR's
+review/CI and merge gate distinct. Reuse accepted presence/database/VPS evidence.
+No real-secret dispatch, registry publication, service activation, VPS change,
+deployment or provider test is included; live M7 and Qwen remain blocked.
 
 ### Historical development checkpoints
 
