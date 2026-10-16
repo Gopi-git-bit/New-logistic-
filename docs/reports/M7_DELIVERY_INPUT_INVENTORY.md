@@ -24,6 +24,82 @@ This PR changes records only. Dockerfiles, dependencies, configuration, template
 and workflows retain their source behavior. Existing accepted database and
 presence proofs are reused without rerunning them.
 
+## Identified inputs and declared toolchain
+
+The identities below refer to the pinned inventory baseline above. The original
+PR #25 head `318f99ffef8fcbda80e36336b33e83b096aa4a53` changed documentation only,
+so these build inputs have the same bytes there. Git blob IDs use Git's SHA-1
+object format; content SHA-256 values below hash the complete UTF-8 file bytes,
+including their existing final newline where present. Neither is a secret hash.
+
+| Input | Exact Git blob SHA-1 |
+|---|---|
+| Dockerfile.api | `a8951ffbd4baf28b38c883ed1aa4a23d0ad58381` |
+| requirements-api.txt | `bcaa9da12385c196976bad660f1a5cdf0e6fa6e6` |
+| requirements-api.lock | `1d738675da827537bef8484a000b3b24b1a023ec` |
+| requirements-api-dev.txt | `c1931cb524497199da99413f25efae7cc80e0792` |
+| requirements-api-dev.lock | `afdd606755d5cc7cd92704509b11280e2377e122` |
+| workers/pyproject.toml | `0c75c46dde2519860f1b2283a16788a5b28bb15f` |
+| package.json | `d20f07c9e5dfac4ba19fb215bf2f5b38441485dd` |
+| docker-compose.yml | `606960f276d106af94d2e3b15f79e608ec8e914f` |
+| .github/workflows/ci.yml | `c1e71db4fc691dea87aefa3b101816822b984a6a` |
+
+| API build/lock input | Content SHA-256 |
+|---|---|
+| Dockerfile.api | `68e1bf98509a26ae17990a7070877ec4c79606ad070c5dee060c6a0e1c1ce018` |
+| requirements-api.txt | `3975cc0813deba2408d3faee3ffb9e5d4a6f0cf038ed3fe584c3b90b16957362` |
+| requirements-api.lock | `851d4200ac029aa7dbb104328a2208efec6cc5e2631a11b5e6c8efa8cad65b2d` |
+| requirements-api-dev.txt | `7fd99295401eed50278ddf7f5bd2ae73638aeb0eb1acb310b51dbfd0fedf7bef` |
+| requirements-api-dev.lock | `7ffdeb9ba3219af6030933961445707f0e71dbcd8823b3d92e0d21c8f8bf133a` |
+
+| Component | Declared identity | Observation still required for an image build |
+|---|---|---|
+| API base | `python:3.12-slim@sha256:78387bc3881b8273120a12ebe6c1ab22b018ccc2c9adf565ae1ac9b536e184ea` | Registry response, digest object type, selected platform/child manifest, OS release and actual Python patch version; no pull performed |
+| API direct runtime packages | FastAPI 0.141.1; PyJWT 2.13.0; psycopg binary/pool extras 3.3.5; Pydantic 2.13.5; Uvicorn 0.52.4 | Exact selected wheel/source artifacts and verified bytes; full transitive pins stay in the identified runtime lock |
+| API dev tools | httpx 0.28.1; mypy 2.3.1; pytest 9.1.1; Ruff 0.16.6 | These are declaration versions, not observed installed versions; full dev graph stays in its identified lock |
+| Installer / lock generator | Dockerfile invokes `pip`; lock headers state pip-compile with Python 3.12 | Pip, pip-tools, resolver and build-backend versions/provenance are not recorded by those declarations |
+| Root Node workspace | pnpm 9.14.0; Node >=20; Dockerfiles use node:20-alpine | Actual Node/Corepack/pnpm versions and bootstrap artifacts; app contexts do not inherit the root package-manager pin |
+| CI runtime | ubuntu-latest and setup-python's 3.12 selector | Hosted image revision, architecture, runner/tool versions and cache behavior for the actual accepted run |
+| CI actions | actions/checkout@v4; actions/setup-python@v5; aquasecurity/trivy-action@master | Immutable action commit identities and any transitive tool/download identities; these references remain mutable |
+
+The base digest is the **declared** base-image reference, not an observed local
+image/config ID, platform-specific manifest or published application digest.
+No target platform was selected or inspected in this inventory. Follow-up must
+choose and record it explicitly; it must not infer an architecture from a local
+development machine or the hosted-runner label.
+
+## Downloads: declared operations versus observed transfers
+
+This review fetched repository source through the GitHub connector. It did not
+pull images or install/resolve build dependencies. Existing ordinary CI did run;
+its passing installation/setup steps are not a byte-level download manifest.
+Cache hits, actual package origins, redirects and selected artifact bytes were
+not collected. The table distinguishes source-defined operations from evidence
+that a particular network transfer occurred.
+
+| Source-defined operation | Logical source / requested material | Execution evidence and remaining provenance |
+|---|---|---|
+| Future API base retrieval | Container registry serving the exact Python reference above | NOT RUN for this inventory. Actual registry/mirror/CDN route and selected platform manifest UNVERIFIED. |
+| API `apt-get update` and `apt-get install` | Repositories configured inside that base; build-essential, libpq-dev and their dependencies | Image build NOT RUN. Repository/snapshot, release metadata, signatures and resolved package versions/artifacts UNVERIFIED; package names alone do not pin versions. |
+| API `pip install --require-hashes -r requirements-api.lock` | Indexes, mirrors or local caches selected by the image/pip configuration; locked Python artifacts | Image build NOT RUN. Lock hashes are declared constraints, not receipts. Exact index/mirror origin, filenames, platform tags and downloaded-byte matches UNVERIFIED. |
+| Existing CI checkout/setup-python and pip installs | GitHub action/runtime distribution and effective Python package sources | [CI 38915184473](https://github.com/Gopi-git-bit/New-logistic-/actions/runs/38915184473) passed on the original PR head, attempt 1. Actual transfers versus cache use and resolved download origins were not captured; API CI uses the input file, workers use floating editable dev requirements. |
+| Existing Trivy action | Action-selected scanner and any vulnerability data it obtains | The same CI's scan job passed. Tool/database identities, cache use and any download receipts were not collected here; scan success does not prove image build or dependency provenance. |
+| Deferred Node/worker/database images | Node/Corepack/pnpm, pip/Hatchling, apt/apk and their respective base registries | NOT BUILT here. These remain outside the selected API build candidate; no successful resolution or download is inferred. |
+
+The lock header's `--no-index` describes its recorded generation command. The
+Dockerfile's installation command does **not** include that flag. The header
+does not prove that a later image build is offline or uses a particular index.
+
+For the future build, retain a sanitized download ledger bound to source and
+workflow commit, run ID/attempt and selected platform. Record requested input,
+effective origin (omit credentials and signed query strings), cache/download
+outcome, resolved artifact/version, expected versus observed SHA-256 and
+verification outcome. Record apt repository/snapshot and installed OS package
+versions separately from Python artifacts. Record tool/action/runner identities
+and the local image ID; do not print environments, credentials or request
+headers. Missing origins, versions, receipts or reproducibility controls remain
+named gaps. Do not invent a verified download from a green install step.
+
 ## Dockerfiles and build contexts
 
 Contexts below are the ones declared by [docker-compose.yml](../../docker-compose.yml).
@@ -161,6 +237,8 @@ resulting change still needs its own reviewed head, CI and separate merge gate.
 | DELIVERY-07 | No implemented bounded secret-free delivery workflow | Use the blueprint's manual canonical-main, fixed-owner, source-bound, finite-time route; pin action identities, use minimum checkout read permission with no persisted credentials, no Production environment or secret binding. No automatic deployment. |
 | DELIVERY-08 | Console target port mismatch and portal public COPY source absent | Resolve separately with frontend scope and actual build evidence; do not claim either app builds successfully. |
 | DELIVERY-09 | M7 live credential, egress, state, cap and authorization evidence incomplete; Qwen disabled | Independent live gates remain blocked. GitHub secret presence and a future image build cannot clear them. |
+| DELIVERY-10 | Base manifest type/platform, exact Python patch, installer/resolver and hosted toolchain identities unobserved | Keep declared selectors separate from measured identities; capture actual platform, image/tool/runner/action provenance during the bounded build. This records the gap, not its closure. |
+| DELIVERY-11 | No per-artifact build download ledger or fixed OS repository snapshot | Capture sanitized origins/cache outcomes, resolved artifacts and hash verification; define apt snapshot/package control. Hash-locked Python inputs alone do not prove whole-image reproducibility. |
 
 **Selected next engineering slice:** API context boundary, existing lock
 consumption, placeholder-only API configuration/manifest validation and their
@@ -169,11 +247,15 @@ offline negative regressions, followed by bounded build preparation under the
 manual build must use its exact reviewed/merged source and leave the image
 unpublished. Do not start API, worker, database, synthetic peer or M7 services.
 
-**Review acceptance for this inventory:** pinned-source paths and factual
-claims reconciled; direct pins/hash syntax checked; links/decision/evidence/
-tracker references validated; exact-head ordinary CI recorded on its PR.
-Image build, package availability, Compose rendering and live readiness remain
-NOT RUN or UNVERIFIED until supported by their own evidence.
+**Static inventory:** pinned-source paths, object/content identities, direct
+pins/hash syntax and documentation references were checked. Original-head CI
+[38915184473](https://github.com/Gopi-git-bit/New-logistic-/actions/runs/38915184473), attempt 1, passed all five jobs for
+`318f99ffef8fcbda80e36336b33e83b096aa4a53`; its root Compose parse passed.
+That run does not validate later review corrections. Acceptance of the corrected
+head remains conditional on its own five successful checks, recorded in the
+[PR #25 audit](https://github.com/Gopi-git-bit/New-logistic-/pull/25) before merge; no self-referential CI claim is made here.
+Image build, package availability/download provenance, new staging-manifest
+rendering and live readiness remain NOT RUN or UNVERIFIED.
 
 **Rollback:** before merge, discard only this feature branch's record changes.
 After merge, propose a reviewed documentation revert. There is no infrastructure

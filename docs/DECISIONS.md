@@ -59,6 +59,14 @@ synthetic activation, provider requests, live M7 and Qwen fallback remain outsid
 this scope. Keep deployment disabled and API test-only auth/pricing guards
 intact. D-33, manual refunds and all operational/governance boundaries are unchanged.
 
+**PR #25 review follow-up, 16 October 2026:** the owner requests explicit
+identities, documented downloads and reproducibility gaps before merging.
+Correct the inventory and its two received review findings, validate the final
+head, merge that exact reviewed head normally only after all five CI checks,
+and verify post-merge CI. This supersedes the initial PR #25 no-merge checkpoint
+for this PR only. It does not authorize a build/secret workflow dispatch or any
+VPS, deployment or provider action.
+
 ### D-42: Staging Secret Availability Closeout and Next-Phase Blueprint
 
 **Status:** Owner-authorized documentation closeout, 16 October 2026.

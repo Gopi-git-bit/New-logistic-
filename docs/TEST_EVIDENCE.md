@@ -16,11 +16,21 @@
 | API contract | 14 of 15 explicit required names missing from root Compose API environment; examples also incomplete; production auth/pricing remains deliberately rejected |
 | Staging source | Five distinct systemd templates, not an application deployment manifest; production Compose referenced by disabled deployment workflow is absent |
 | Static checks | Lock syntax/direct-version comparison and tracked-path inventory executed locally; scoped documentation/link/status checks recorded on the resulting PR |
-| CI | Exact resulting-head ordinary CI to be recorded on the inventory PR; no claim that its Compose parse builds images or starts services |
-| Not run | Docker build, manifest render, service start, database/provider call, real-secret dispatch, VPS command or deployment |
+| Original-head CI | [38915184473](https://github.com/Gopi-git-bit/New-logistic-/actions/runs/38915184473), attempt 1, all five jobs successful for `318f99ffef8fcbda80e36336b33e83b096aa4a53`; root Compose parse passed |
+| Corrected-head acceptance | The identity/download and review corrections require their own five successful checks; record the exact final head/run in [PR #25](https://github.com/Gopi-git-bit/New-logistic-/pull/25) before merging. The original run is not evidence for a later head. |
+| Input identities / downloads | Git blob and full-file SHA-256 identities checked for API build/lock inputs; exact declared tools/pins listed; source-defined download operations separated from observed transfers. Platform/toolchain resolution, origins/cache outcomes and downloaded artifact receipts remain unverified (DELIVERY-10/11). |
+| Not run in this inventory | Docker build, new staging-manifest render, service start, database/provider call, real-secret dispatch, VPS command or deployment |
 | Preserved | Accepted presence/disposable DB evidence, source behavior, disabled deployment, denied live M7/Qwen and D-33 pending |
 
-This entry completes input inventory only. The authorized delivery build and
+This entry records completed static input inventory only. Corrected-head review/CI
+and merge acceptance remain separate conditions until the linked PR audit records
+their actual results; completion here must not substitute for those checks.
+
+The two initial Codex findings (missing committed CI provenance and conflicting
+current tracker authorization) are addressed by this evidence and the updated
+Current Authorized Work section. Historical review and CI are preserved.
+
+This completes no build or runtime gate. The authorized delivery build and
 placeholder-manifest work remains sequenced implementation, not completed
 runtime evidence. No new provider capability or business authority is granted.
 

@@ -31,7 +31,8 @@ A passing dry run would establish build/configuration evidence only.
 D-43 records the owner's subsequent continuation approval for Docker/build
 contexts, dependency locks, API configuration, staging templates and gap records.
 The first [input inventory](../reports/M7_DELIVERY_INPUT_INVENTORY.md) selects the
-API and records nine gaps. This records-only PR does not implement or execute
+API and records eleven gaps, including explicit input identities, declared download
+operations and unverified platform/toolchain/download provenance. This records-only PR does not implement or execute
 the proposed workflow/build/manifest steps below. Continue with the bounded
 API context/lock/placeholder-validation slice through reviewed feature PRs;
 keep merge approval, registry publication and target execution separate. Do not
@@ -42,7 +43,7 @@ interpret a manual event or environment approval as a provider capability grant.
 | Step | Sequenced work | Acceptance / stop condition |
 |---|---|---|
 | 1. Inventory — RECORDED | M7-E007 / reports/M7_DELIVERY_INPUT_INVENTORY.md at `6a6f5acd00a6aafa115f1e470821512f5434021f` | API selected as smallest build candidate; actual build not run. Missing context/locks/configuration and production contracts recorded; source behavior and accepted proofs preserved |
-| 2. Build contract | Specify exact source, runtime/toolchain, lockfile and base-image identity; document dependency downloads | Missing lock coverage or mutable inputs must be recorded as reproducibility gaps; do not claim bit-for-bit reproducibility without evidence |
+| 2. Build contract — STATIC INPUTS IDENTIFIED | Inventory records exact source/tree, API input blob/content hashes, declared runtime/tools/base, download operations and DELIVERY-01 through DELIVERY-11 | Actual platform/toolchain versions, downloaded artifacts/origins and full-image reproducibility remain unverified; capture them in the future bounded build, not by claiming declared selectors were observed |
 | 3. Secret-free CI route | Propose a manual canonical-repository/main route with the designated owner identity, immutable reviewed source binding, finite timeout and explicit input validation | Read-only contents permission only where checkout needs it; no real-secret or Production environment binding; checkout credentials not persisted; actions pinned to verified commit SHAs |
 | 4. Local image build | Build on an ephemeral GitHub-hosted runner without registry login or push; pass no credentials or production URLs into image arguments/layers | Record local image ID and build report; an unpushed image ID is not a registry manifest digest or an accepted deployment artifact |
 | 5. Manifest validation | Render/validate an explicitly staging-only manifest and environment contract using synthetic placeholders | Configuration parsing only; no compose up/run, service start, SSH, database connection, target mutation or provider request; reject missing required fields and production secret references |
