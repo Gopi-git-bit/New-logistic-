@@ -25,6 +25,16 @@ Runtime/dev lock bytes, the selected DeepSeek profile and accepted presence
 evidence are unchanged. No target/provider authority is granted. D-33 and
 manual approval for every refund remain controlling.
 
+**PR #27 review correction:** malformed nested receipt data reproduced an
+uncaught AttributeError at the CLI boundary, leaving the report empty after
+owned-image cleanup. The new regression failed on the original head. The
+correction retains BUILD_NOT_VERIFIED, stage, exception class and cleanup evidence,
+without raw exception/output or partial dependency data. All 32 local cases now
+pass (19 context/settings + 13 build-control), zero skips/warnings; scoped Ruff
+lint/format and strict MyPy on all four helpers pass. Actual corrected-head and
+post-merge CI results must be recorded in the PR audit after they exist. The
+owner's explicit review/merge instruction does not authorize actual build dispatch.
+
 ### M7-E008: API Delivery Preparation — Offline Contract Evidence
 
 **Scope:** D-44, 16 October 2026; base main

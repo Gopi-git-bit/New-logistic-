@@ -56,6 +56,12 @@ publication/start, real-secret workflow, credential provisioning, VPS change,
 provider call, live M7 or Qwen execution is included. D-33, API guards and
 financial/governance controls remain unchanged.
 
+**PR #27 review/merge instruction, 16 October 2026:** the owner explicitly
+authorizes review, scoped corrections and merge after final-head checks, then
+post-merge CI verification. The review correction preserves a failed audit
+report for malformed nested tool output; its failing/passing regression is
+recorded under M7-E009. This authorizes PR #27 merge only, not workflow dispatch.
+
 ### D-44: API Delivery Preparation Implementation
 
 **Status:** Owner continuation instruction, 16 October 2026: move to the next

@@ -106,6 +106,18 @@ No provider/network-isolation, runtime, database, production or deployment
 acceptance follows from a successful build. Existing 72 database-skipped API
 tests and two warnings remain separately recorded; no gap is waived here.
 
+### PR #27 review correction
+
+The review reproduced malformed nested receipt output escaping the CLI error
+boundary as AttributeError, leaving an empty report despite scoped image cleanup.
+The corrected boundary also handles AttributeError and IndexError, writes
+BUILD_NOT_VERIFIED with the failed stage and cleanup result, and records only
+the exception class. Messages, raw tool output and partial dependency receipts
+remain excluded. The new offline regression failed before the correction and
+now passes through the real build/evidence flow with fake commands. All 32
+affected local cases pass, plus scoped lint/format and strict helper typing.
+No actual image build or workflow dispatch is needed for this regression.
+
 ## Next execution gate
 
 1. Review this exact feature head and its offline/CI evidence.

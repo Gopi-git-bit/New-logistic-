@@ -376,7 +376,18 @@ def main() -> int:
     with args.report.open("x") as output:
         try:
             build(args.repo_root, args.source_sha, os.environ, report)
-        except (OSError, ValueError, KeyError, TypeError, subprocess.SubprocessError):
+        except (
+            OSError,
+            ValueError,
+            KeyError,
+            TypeError,
+            AttributeError,
+            IndexError,
+            subprocess.SubprocessError,
+        ) as error:
+            # Malformed nested tool output must also leave a failed audit record.
+            # Retain only the exception class, never its message or captured output.
+            report["failure_class"] = type(error).__name__
             report["status"] = "BUILD_NOT_VERIFIED"
         json.dump(report, output, sort_keys=True, indent=2)
         output.write("\n")

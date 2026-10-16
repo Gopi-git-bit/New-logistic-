@@ -331,6 +331,43 @@ class TestBoundedBuild(unittest.TestCase):
         self.assertEqual(json.loads(data)["stage"], "ADMISSION")
         self.assertEqual(report.stat().st_mode & 0o777, 0o600)
 
+    def test_malformed_receipt_retains_failed_report_and_owned_image_cleanup(self):
+        report_path = Path(self.temporary.name) / "malformed-report.json"
+        fake = FakeBuildCommands()
+        malformed = receipt()
+        # These keys satisfy the old set comparison, but a list has no values().
+        malformed["os"] = ["ID", "VERSION_ID"]
+        original_build = runner.build
+
+        def fake_build(repo, source_sha, env, report):
+            return original_build(repo, source_sha, env, report, fake)
+
+        argv = [
+            "run_api_build.py",
+            "--repo-root",
+            str(ROOT),
+            "--source-sha",
+            SOURCE,
+            "--report",
+            str(report_path),
+        ]
+        with (
+            patch.object(sys, "argv", argv),
+            patch.dict(os.environ, self.env, clear=True),
+            patch.object(runner, "build", side_effect=fake_build),
+            patch(__name__ + ".receipt", return_value=malformed),
+        ):
+            self.assertEqual(runner.main(), 1)
+        data = report_path.read_text()
+        report = json.loads(data)
+        self.assertEqual(report["status"], "BUILD_NOT_VERIFIED")
+        self.assertEqual(report["stage"], "BUILD_EVIDENCE")
+        self.assertEqual(report["failure_class"], "AttributeError")
+        self.assertTrue(report["cleanup"]["new_local_image_removed"])
+        self.assertNotIn("dependencies", report)
+        self.assertNotIn("DO_NOT_LOG", data)
+        self.assertEqual(fake.calls[-1][0], ["docker", "image", "rm", IMAGE])
+
     def test_workflow_is_manual_main_owner_bound_read_only_and_not_dispatched_by_ci(self):
         text = (ROOT / ".github/workflows/api-build-only.yml").read_text()
         workflow = yaml.load(text, Loader=yaml.BaseLoader)
