@@ -225,6 +225,12 @@ are empty; the workflow has no checkout, dependencies, API calls or deployment.
 Admission requires manual dispatch, the canonical repository and main branch.
 Offline CI must retain missing-key, redaction, input and trigger regressions.
 
+The owner-restricted follow-up additionally admits only `Gopi-git-bit` (original
+actor ID `200721521`), requires the same triggering actor and permits run attempt
+`1` only. Other actors and reruns cannot execute the secret-bearing job under
+this definition, even if GitHub accepts their dispatch request. Retain offline
+identity, missing-field and rerun rejection cases alongside existing regressions.
+
 Environment binding and a nonempty value do not establish environment-exclusive
 origin, dedicated account scope, key validity or target injection. Before any
 real-secret dispatch, audit names/scopes and environment/branch protections,
@@ -411,3 +417,25 @@ Preserve accepted evidence without rerunning completed probes. Prior VPS records
 are historical observations, not proof of today's target state. Keep production
 deployment disabled and D-33 pending; no business, financial or architecture
 invariant is changed by adopting GitHub as the development and review path.
+
+### 17.2 Owner identity and presence approval follow-up — 16 October 2026
+
+Gopinathan designates the verified repository-owner account `Gopi-git-bit`
+(`200721521`) to approve the bounded DeepSeek presence-only gate and authorizes
+an explicit actor restriction in YAML. Publish and validate the follow-up through
+a PR; do not push directly to protected main or bypass its review requirements.
+The prior PR #22 merge is complete; the new workflow revision requires its own
+reviewed merge and successful post-merge CI before it can govern any real run.
+
+`Production` must retain its main-only branch policy and owner-required reviewer.
+The owner permits administrator bypass and self-review in that environment so
+the same human can dispatch and approve. Record those settings accurately; they
+do not provide independent two-person approval. The coding agent must leave the
+actual environment approval to the owner and must not use the bypass. Main's
+one-approval PR, strict five-check and administrator-enforcement rules remain.
+
+The owner's acknowledgement covers one bounded DeepSeek presence-only run at
+the next logical gate after review and fresh verification. No dispatch occurs
+in this preparation slice, and no rerun, OpenRouter check, real credential value
+inspection, VPS change, deployment, provider request, M7 or Qwen activation is
+authorized by this follow-up. D-33 and financial approval controls are unchanged.
