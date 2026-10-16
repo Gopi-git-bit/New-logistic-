@@ -51,7 +51,8 @@ def validate_lock(content: bytes) -> int:
         if not line or line.startswith("#"):
             continue
         match = re.fullmatch(
-            r"([A-Za-z0-9_.-]+)==([A-Za-z0-9_.+!-]+)"
+            # Names cannot begin with pip-option punctuation or end with separators.
+            r"([A-Za-z0-9](?:[A-Za-z0-9_.-]*[A-Za-z0-9])?)==([A-Za-z0-9_.+!-]+)"
             r"(?:\s+--hash=sha256:[a-f0-9]{64})+",
             line,
         )

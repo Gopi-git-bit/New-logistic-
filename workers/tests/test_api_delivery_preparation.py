@@ -143,11 +143,40 @@ class TestCommittedBuildContext(unittest.TestCase):
             context.prepare_context(self.repo, sha, self.root / "context")
 
     def test_bad_lock_prevents_any_context_creation(self):
-        self.write("requirements-api.lock", "example==1.0\n")
-        sha = self.commit()
-        with self.assertRaisesRegex(context.ContextError, "UNHASHED_LOCK"):
-            context.prepare_context(self.repo, sha, self.root / "context")
-        self.assertFalse((self.root / "context").exists())
+        for lock in (
+            "example==1.0\n",
+            "-r==foo --hash=sha256:" + "a" * 64 + "\n",
+            "--extra-index-url==evil --hash=sha256:" + "a" * 64 + "\n",
+        ):
+            with self.subTest(lock=lock):
+                self.write("requirements-api.lock", lock)
+                sha = self.commit()
+                with self.assertRaisesRegex(context.ContextError, "UNHASHED_LOCK"):
+                    context.prepare_context(self.repo, sha, self.root / "context")
+                self.assertFalse((self.root / "context").exists())
+
+    def test_distribution_names_have_alphanumeric_edges(self):
+        digest = " --hash=sha256:" + "a" * 64
+        for name in (
+            "-r",
+            "-e",
+            "--extra-index-url",
+            "--no-index",
+            ".package",
+            "_package",
+            "package-",
+            "package.",
+            "package_",
+        ):
+            with self.subTest(name=name), self.assertRaises(context.ContextError):
+                context.validate_lock((name + "==1.0" + digest).encode())
+        for name in ("a", "Z", "2", "Package.Name_2-extra"):
+            with self.subTest(name=name):
+                self.assertEqual(context.validate_lock((name + "==1.0" + digest).encode()), 1)
+        with self.assertRaisesRegex(context.ContextError, "DUPLICATE"):
+            context.validate_lock(
+                ("Package.Name==1.0" + digest + "\npackage-name==1.0" + digest).encode()
+            )
 
     def test_lock_rejects_unhashed_urls_options_and_duplicates(self):
         for raw in (

@@ -58,6 +58,14 @@ credential injection, service/synthetic activation, VPS change, provider request
 M7 execution or Qwen fallback is included in this slice. Existing accepted
 presence/database/VPS evidence is reused. D-33 and financial controls are unchanged.
 
+**PR #26 review/merge instruction, 16 October 2026:** the owner explicitly
+authorizes review, scoped corrections and merging the reviewed head after its
+checks pass, followed by verified post-merge CI and confirmation. This supplies
+the separate merge instruction required above for PR #26 only. Correct the
+received lock-name finding with a failing regression first; preserve original
+commits, merge normally using an exact-head guard, and log actual CI/results.
+No image, VPS, secret, deployment or provider execution is added to this scope.
+
 ### D-43: Delivery Preparation Continuation and Input Inventory
 
 **Status:** Owner-authorized continuation, 16 October 2026. The owner grants

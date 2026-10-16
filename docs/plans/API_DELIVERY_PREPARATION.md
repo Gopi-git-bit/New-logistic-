@@ -89,7 +89,8 @@ discovers the new offline regression module; no new manual workflow or Productio
 environment/secret reference is introduced. Existing disposable DB proofs are
 not rerun for these paths; their install policy remains a separate follow-up.
 
-Local evidence: 16 unittest cases pass on Python 3.12.14, zero skips/warnings;
+Initial local evidence: 16 unittest cases passed on Python 3.12.14.
+The PR #26 lock-name review correction now passes 17 cases, zero skips/warnings;
 Ruff check/format and strict helper MyPy pass. Subcases cover all 17 missing
 environment names, unsafe service controls, malformed settings and locks, CLI
 redaction, environment restoration, dirty/untracked source exclusion, symlink
@@ -98,6 +99,21 @@ positive case forbids sockets and blocks application/database imports.
 The exact resulting-head CI run and its actual outcomes must be recorded in the
 PR audit after they exist. Local success is not a Docker Compose parse or image
 build result; no CI pass is claimed prospectively.
+
+## PR #26 review correction
+
+The received review identified option-shaped distribution names passing the
+lock parser. The new regression reproduced nine invalid-name acceptances before
+the correction. Names now require alphanumeric first and last characters, while
+single-character names and internal dots/underscores/hyphens remain accepted.
+Integration cases prove option-shaped entries are rejected before creating a
+context; normalized duplicate-name rejection and the real runtime lock still pass.
+No lock contents, pip flags, runtime capabilities or provider route changed.
+
+Original-head CI [38920878701](https://github.com/Gopi-git-bit/New-logistic-/actions/runs/38920878701) passed at
+`a17dd6b2e8c82e61bb30a95fcd0f009a350bbc70`. The review correction requires its
+own exact-head checks before merge; actual corrected-head and post-merge CI
+must be recorded on [PR #26](https://github.com/Gopi-git-bit/New-logistic-/pull/26).
 
 ## Gap disposition and next gate
 
@@ -112,8 +128,9 @@ build result; no CI pass is claimed prospectively.
 | DELIVERY-09 | No live M7/Qwen gate changes. |
 | DELIVERY-11 | Context input hashes are logged; image-build download origins/receipts, actual cache outcomes and whole-image reproducibility remain unverified. A successful locked CI install is not that ledger. |
 
-Next gate: review the exact feature head and its CI, then separately authorize
-its merge. A later bounded secret-free image build must log platform, tools,
+The owner now authorizes PR #26 review, scoped correction and merge after exact
+final-head CI, followed by post-merge verification. This supersedes the initial
+merge-pending checkpoint for this PR only. A later bounded secret-free image build must log platform, tools,
 dependency retrieval, local image ID and remaining gaps under the
 [blueprint](M7_SECRET_FREE_DELIVERY_BLUEPRINT.md). Do not publish images, dispatch
 real secrets, start services, touch a VPS or call providers under this PR.

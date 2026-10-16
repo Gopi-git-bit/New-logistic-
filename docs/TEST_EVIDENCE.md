@@ -8,12 +8,14 @@
 
 | Item | Actual result / limit |
 |---|---|
-| Local regression | `python -m unittest discover -s workers/tests -p test_api_delivery_preparation.py -v`: 16 passed on Python 3.12.14, zero skips/warnings |
+| Initial local regression | `python -m unittest discover -s workers/tests -p test_api_delivery_preparation.py -v`: 16 passed on Python 3.12.14, zero skips/warnings |
+| PR #26 corrected local regression | 17 passed, zero skips/warnings; nine invalid-name cases reproduced failures before the parser correction. New name-edge cases, valid one-character/internal-separator names, normalized duplicates and integration refusal before context creation pass. Scoped Ruff lint/format and strict helper MyPy pass. |
 | Export boundary | Tests prove committed-object selection, ignored dirty/untracked files, deterministic identity, no overwrite, and refusal of mismatched SHA, symlinks, unsupported tracked files, unsafe locks and in-checkout output |
 | Staging validation | Real api/config.py loaded directly from source with only synthetic settings; socket-blocked/import-blocked positive control, all 17 missing names, unsafe service options, malformed/live settings, redaction and environment restoration cases pass |
 | Quality | Touched helper/test Ruff lint/format PASS; strict MyPy on both helpers PASS |
 | CI implementation | Existing compose-config stages actual checkout objects, validates settings and parses the fixture; API CI switches to unchanged dev lock with --require-hashes; both jobs bounded, read-only checkout without persisted credentials |
-| Resulting-head CI | Pending execution at authoring; the actual source/run/job outcomes must be recorded on the feature PR before review/merge acceptance. No future result is asserted here. |
+| Original-head CI | [38920878701](https://github.com/Gopi-git-bit/New-logistic-/actions/runs/38920878701), attempt 1, all five jobs passed for `a17dd6b2e8c82e61bb30a95fcd0f009a350bbc70`. Workers: 838 passed / 75 subtests; offline denial: 4 passed; API: 92 passed / 72 database skips / 2 deprecation warnings. New context, synthetic Compose parse and hash-lock install steps passed. |
+| Corrected-head / merge acceptance | The parser correction needs fresh five-check success on its exact head and separate post-merge CI. Record actual SHAs/runs on [PR #26](https://github.com/Gopi-git-bit/New-logistic-/pull/26) after execution; do not reuse the original run for the corrected head or claim a future result. |
 | Not run locally | Docker Compose CLI parse, application image build/start, artifact download verification or runtime health |
 | Preserved | API runtime guards, migrations/RPC/RLS, accepted proofs, disabled production workflow and denied M7/Qwen |
 
