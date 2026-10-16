@@ -6,13 +6,35 @@ on:
   pull_request:
     branches: [master, main]
 
+permissions:
+  contents: read
+
 jobs:
   compose-config:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - run: cp .env.example .env
       - run: docker compose config
+      - name: Validate API delivery preparation
+        shell: bash
+        run: |
+          set -euo pipefail
+          task_dir="$(mktemp -d "$RUNNER_TEMP/zippy-api-contract.XXXXXX")"
+          trap 'rm -rf -- "$task_dir"' EXIT
+          python3 -I scripts/prepare_api_build_context.py \
+            --repo-root "$GITHUB_WORKSPACE" \
+            --source-sha "$(git rev-parse HEAD)" \
+            --output "$task_dir/context" > "$task_dir/context-manifest.json"
+          cat "$task_dir/context-manifest.json"
+          python3 -I scripts/validate_api_staging_config.py \
+            --repo-root "$task_dir/context" \
+            --manifest "$GITHUB_WORKSPACE/infra/staging/api-validation.compose.json"
+          docker compose --env-file /dev/null -f infra/staging/api-validation.compose.json \
+            --profile validation-only config --quiet
 
   python-checks:
     runs-on: ubuntu-latest
@@ -36,12 +58,20 @@ jobs:
 
   api-tests:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install -r requirements-api-dev.txt
+      - run: pip install --require-hashes -r requirements-api-dev.lock
+      - name: Check delivery tools
+        run: |
+          python -m ruff check --config workers/pyproject.toml scripts/prepare_api_build_context.py scripts/validate_api_staging_config.py
+          python -m ruff format --check --config workers/pyproject.toml scripts/prepare_api_build_context.py scripts/validate_api_staging_config.py
+          python -m mypy --strict scripts/prepare_api_build_context.py scripts/validate_api_staging_config.py
       - name: Run API security tests
         env:
           DATABASE_URL: postgresql://localhost/test

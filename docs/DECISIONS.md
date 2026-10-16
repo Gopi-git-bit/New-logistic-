@@ -35,6 +35,29 @@
 
 ## Bounded Development Authorizations
 
+### D-44: API Delivery Preparation Implementation
+
+**Status:** Owner continuation instruction, 16 October 2026: move to the next
+stage after PR #25 merge and exact-merge CI. Implement the inventory's bounded
+API context/lock/placeholder-validation slice through a separate feature PR.
+
+Export only committed API build inputs from an exact SHA to a new isolated
+context; preserve dirty/untracked work. Consume the existing API dev hash lock
+in ordinary CI without regenerating dependencies. Add a strictly synthetic
+Compose/settings contract, offline negative regressions and bounded validation
+steps in existing CI. Keep canonical API authentication/pricing rejection intact.
+
+[API_DELIVERY_PREPARATION.md](plans/API_DELIVERY_PREPARATION.md) and M7-E008
+record implementation and actual evidence limits. The future manual build route,
+image/download provenance and production contracts remain outstanding. A local
+context or settings PASS is not an image build or target-readiness result.
+
+Publish and validate this feature head for review; its merge requires a separate
+instruction. No image build/start, registry publication, real-secret dispatch,
+credential injection, service/synthetic activation, VPS change, provider request,
+M7 execution or Qwen fallback is included in this slice. Existing accepted
+presence/database/VPS evidence is reused. D-33 and financial controls are unchanged.
+
 ### D-43: Delivery Preparation Continuation and Input Inventory
 
 **Status:** Owner-authorized continuation, 16 October 2026. The owner grants

@@ -2,7 +2,7 @@
 
 > Source of truth for all AI agent specifications.
 
-## Current Orchestration Checkpoint (D-42/D-43, 2026-10-16)
+## Current Orchestration Checkpoint (D-42/D-43/D-44, 2026-10-16)
 
 **Controlling closeout, 2026-10-16 (D-42):** Staging Secret Availability is
 **COMPLETE for DeepSeek presence only**, supported by M7-E006 and
@@ -12,15 +12,21 @@ dedicated ownership, target injection, effective egress, spending enforcement an
 trusted live authorization remain unverified. OpenRouter presence was skipped,
 not accepted. Live M7 and Qwen remain **BLOCKED**; D-33 remains pending.
 
-**D-43 continuation, 2026-10-16:** the owner now authorizes bounded delivery
-preparation under the [blueprint](plans/M7_SECRET_FREE_DELIVERY_BLUEPRINT.md).
-The first [input inventory and gap register](reports/M7_DELIVERY_INPUT_INVENTORY.md)
-is recorded as M7-E007. API context filtering, existing lock consumption and
-placeholder-only staging validation are the next engineering slice; image build
-and manifest validation are not completed by this inventory. Keep each PR's
-review/CI and merge gate distinct. Reuse accepted presence/database/VPS evidence.
-No real-secret dispatch, registry publication, service activation, VPS change,
-deployment or provider test is included; live M7 and Qwen remain blocked.
+**D-44 continuation, 2026-10-16:** after PR #25 merge and post-merge CI, the
+owner authorizes the next API preparation stage. The
+[delivery preparation contract](plans/API_DELIVERY_PREPARATION.md) implements
+an isolated context from committed Git objects, existing API hash-lock consumption
+and synthetic Compose/settings validation. M7-E008 records 16 passing offline
+tests and scoped lint/format/strict-type checks. Exact resulting-head CI must be
+recorded on the feature PR after execution; review and merge remain separate.
+The parent delivery task is IN_PROGRESS because image build/download provenance,
+the bounded manual build route and later acceptance remain unfinished.
+
+The accepted DeepSeek presence gate remains complete under M7-E006; do not rerun
+accepted presence/database/VPS proofs. No API guard is weakened and no production
+contract is invented. No real-secret dispatch/injection, image start/publication,
+VPS/service/synthetic activation, deployment, provider call, live M7 or Qwen
+execution is included. D-33 and manual refund approval remain controlling.
 
 The presence result grants no agent, tool, assignment or financial capability.
 The next phase prepares source/build/manifest evidence, not runtime registration
