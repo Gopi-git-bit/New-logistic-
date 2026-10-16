@@ -4,6 +4,15 @@
 
 ## Current Task
 
+**D-45 continuation, 2026-10-16:** PR #26 merged at
+`f8e7cb9a548e9956a0f1f74edc6f73e8fd2a76ef`, with five passing post-merge CI jobs
+(38924063418). The [manual build-only route](plans/API_IMAGE_BUILD_ONLY.md)
+is prepared for a separate PR: owner/main/source admission, sanitized receipts
+and scoped cleanup. M7-E009 records 31 offline cases and quality checks.
+Exact-head CI, merge and actual dispatch remain separate gates. Delivery stays
+IN_PROGRESS; no actual build, VPS/provider action or live M7/Qwen execution.
+Earlier preparation checkpoints below are historical.
+
 **Controlling closeout, 2026-10-16 (D-42):** Staging Secret Availability is
 **COMPLETE for DeepSeek presence only**, supported by M7-E006 and
 [run 38903102158](https://github.com/Gopi-git-bit/New-logistic-/actions/runs/38903102158) on reviewed merge `bc135b8b605cd96c2bacaf228953d1cbf14ba3ca`.
@@ -109,3 +118,4 @@ No implementation, deployment, live credential use, external telemetry transmiss
 - Repository HEAD before acceptance commit: `7cef6e54929a3bd5328bcb2ec8dcf0be2177e61c` (M6-A implementation commit).
 - M6-A implementation commit: `7cef6e54929a3bd5328bcb2ec8dcf0be2177e61c`.
 - Acceptance evidence: D-32 (`docs/DECISIONS.md`), M6-E004 (`docs/TEST_EVIDENCE.md`).
+

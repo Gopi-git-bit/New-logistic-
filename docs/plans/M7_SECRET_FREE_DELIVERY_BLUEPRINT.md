@@ -1,11 +1,17 @@
 # M7 next development phase: secret-free delivery preparation
 
-**Status:** API CONTEXT/LOCK/STAGING CONTRACT IMPLEMENTED FOR REVIEW (D-44);
-ACTUAL IMAGE BUILD NOT RUN.
+**Status:** API CONTEXT/LOCK/STAGING CONTRACT MERGED (D-44);
+MANUAL BUILD ROUTE PREPARED FOR REVIEW (D-45); ACTUAL IMAGE BUILD NOT RUN.
 **Owner:** Gopinathan. **Date:** 16 October 2026.
 **Decision/evidence:** [D-42/D-43](../DECISIONS.md) / [M7-E006/M7-E007](../TEST_EVIDENCE.md).
 **Tracker:** M7-DELIVERY-BLUEPRINT and M7-DELIVERY-INVENTORY COMPLETE;
 M7-DELIVERY-DRYRUN IN_PROGRESS; M7-E008 records local preparation evidence.
+
+PR #26 merged at `f8e7cb9a548e9956a0f1f74edc6f73e8fd2a76ef`; all five
+[post-merge CI jobs](https://github.com/Gopi-git-bit/New-logistic-/actions/runs/38924063418)
+passed. D-45's [manual build route](API_IMAGE_BUILD_ONLY.md) implements the next
+review slice, with offline evidence in M7-E009. It remains unmerged/undispatched
+at preparation; actual image/download evidence and acceptance remain pending.
 
 ## Starting checkpoint
 
@@ -106,3 +112,4 @@ unchanged. D-33 remains pending. Deterministic assignment, RPC/RLS boundaries,
 idempotency, settlement/governance controls and manual approval for every refund
 are preserved. This blueprint neither changes the architecture nor grants any
 agent operational capabilities.
+

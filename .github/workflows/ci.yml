@@ -69,9 +69,9 @@ jobs:
       - run: pip install --require-hashes -r requirements-api-dev.lock
       - name: Check delivery tools
         run: |
-          python -m ruff check --config workers/pyproject.toml scripts/prepare_api_build_context.py scripts/validate_api_staging_config.py
-          python -m ruff format --check --config workers/pyproject.toml scripts/prepare_api_build_context.py scripts/validate_api_staging_config.py
-          python -m mypy --strict scripts/prepare_api_build_context.py scripts/validate_api_staging_config.py
+          python -m ruff check --config workers/pyproject.toml scripts/prepare_api_build_context.py scripts/validate_api_staging_config.py scripts/run_api_build.py scripts/emit_api_build_metadata.py
+          python -m ruff format --check --config workers/pyproject.toml scripts/prepare_api_build_context.py scripts/validate_api_staging_config.py scripts/run_api_build.py scripts/emit_api_build_metadata.py
+          python -m mypy --strict scripts/prepare_api_build_context.py scripts/validate_api_staging_config.py scripts/run_api_build.py scripts/emit_api_build_metadata.py
       - name: Run API security tests
         env:
           DATABASE_URL: postgresql://localhost/test
@@ -114,3 +114,4 @@ jobs:
             exit 1
           fi
           echo "Secret safety check passed"
+

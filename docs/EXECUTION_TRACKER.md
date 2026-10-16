@@ -2,7 +2,7 @@
 
 ## Control Rules
 
-- Current verdict: **BLOCKED FOR PRODUCTION — STAGING SECRET AVAILABILITY COMPLETE FOR DEEPSEEK PRESENCE ONLY (D-42/M7-E006); DELIVERY INPUT INVENTORY RECORDED (D-43/M7-E007); API DELIVERY PREPARATION IN REVIEW (D-44/M7-E008); LIVE M7 AND QWEN BLOCKED**.
+- Current verdict: **BLOCKED FOR PRODUCTION — DEEPSEEK PRESENCE COMPLETE (D-42/M7-E006); API CONTEXT/LOCK/STAGING PREPARATION MERGED (D-44/M7-E008); MANUAL BUILD ROUTE IN REVIEW (D-45/M7-E009); ACTUAL BUILD NOT RUN; LIVE M7 AND QWEN BLOCKED**.
 - Only one tracker row may be active at a time.
 - M1 is complete and owner-approved for the bounded M2 implementation recorded below.
 - Every milestone still requires its own dependency-correct scope and approval; no tracker transition authorizes production work.
@@ -60,13 +60,22 @@
 | M7-STAGING-SECRET-AVAILABILITY | M7 | Staging Secret Availability (DeepSeek) | COMPLETE | Reviewed PR #23 merge and exact-merge CI; owner-authorized presence run | Record accepted GitHub step availability only; no provider call | M7-E006; run 38903102158 attempt 1; DeepSeek PASS, OpenRouter intentionally skipped | Owner-authorized dispatch, run-specific environment approval and D-42 closeout | Revert documentation through review; do not revoke or rotate keys as rollback | No key validity, target injection, spending or live authority proven |
 | M7-DELIVERY-BLUEPRINT | M7 | Next secret-free delivery blueprint | COMPLETE | M7-STAGING-SECRET-AVAILABILITY, D-42 | Documentation design only | plans/M7_SECRET_FREE_DELIVERY_BLUEPRINT.md with scope, acceptance, stop conditions and handoff | Current owner instruction authorizes blueprint preparation only | Revert documentation through review | No workflow or deployment route implemented by this row |
 | M7-DELIVERY-INVENTORY | M7 | Docker, lock, API and staging input inventory | COMPLETE | M7-DELIVERY-BLUEPRINT, D-43 | Static input inventory and records-only feature PR | Report, M7-E007, object/content identities, lock/name/path checks; corrected-head CI is a separate pre-merge condition | Continuation authorized; current PR #25 review/correction precedes conditional merge | Reviewed documentation revert | Static completion only; original CI 38915184473 is not proof for corrected heads; no image build or new staging-manifest render |
-| M7-DELIVERY-DRYRUN | M7 | Secret-free build and staging-manifest validation | IN_PROGRESS | M7-DELIVERY-INVENTORY, D-44 | Implement committed API context, existing lock consumption and synthetic configuration validation through a feature PR | M7-E008; local regression/quality checks; exact-head CI; actual image/download evidence remains pending | Current owner continuation authorizes implementation/publication; feature merge and later build/publication/deployment remain separate | Reviewed feature revert and scoped temporary-context cleanup | API preparation implemented for review; no image build, publish, real-secret dispatch, SSH, VPS or provider execution |
+| M7-DELIVERY-DRYRUN | M7 | Secret-free build and staging-manifest validation | IN_PROGRESS | M7-DELIVERY-INVENTORY, D-44/D-45 | PR #26 preparation merged; prepare owner/main/source-bound manual build and receipt route through a new PR | M7-E008/M7-E009; local regressions/quality; exact-head CI; actual image/download evidence pending | Continuation authorizes route preparation/publication; feature merge and actual build/publication/deployment remain separate | Reviewed revert and scoped new-context/image cleanup; preserve preexisting images | Manual build route prepared for review, not dispatched; no image build/start/publish, real-secret run, SSH, VPS or provider execution |
 | M7-AGENTS | M7 | Agent activation | BLOCKED | M6-LANGFUSE staging/live gates, open provider decisions | D-34/D-37/D-38/D-39 permit recommendation, synthetic shadow/review and mocked staging-bridge development only; live activation unauthorized | Model/provider validation, capability/allowlist, shadow, HITL, and narrow-automation evidence | Product, governance, and owner approval required for activation | Pause agents and revoke capabilities | Honcho remains contextual only; M6 staging/live gates are not waived; D-33 pending |
 | M8-STAGING-E2E | M8 | Staging E2E and resilience | BLOCKED | M7-AGENTS | None currently authorized | Clean-environment unit/integration/contract/E2E/security/failure and backup-restore evidence | Engineering, security, operations approval required | Restore/tear down staging per runbook | Includes outage, retry, duplicate, lock, and rollback drills |
 | M9-READINESS | M9 | Production readiness review | BLOCKED | M8-STAGING-E2E | None currently authorized | No unresolved critical/high security findings; secrets, monitoring, backups, restores, runbook, rollback, external-system evidence | Owner, security, finance, and operations approval required | Remain in staging | Explicit human go-live decision required |
 | M10-ROLLOUT | M10 | Controlled production rollout | BLOCKED | M9-READINESS | None currently authorized | Shadow, internal pilot, canary, monitored expansion, thresholds, smoke, and rollback evidence | Explicit per-stage human approval required | Execute approved stage rollback | Live payments, DNS, financial autonomy, and irreversible actions need explicit approval |
 
 ## Current Authorized Work
+
+**D-45 continuation, 2026-10-16:** PR #26 merged at
+`f8e7cb9a548e9956a0f1f74edc6f73e8fd2a76ef`, post-merge CI 38924063418 all five
+jobs passing. Prepare the [manual build-only route](plans/API_IMAGE_BUILD_ONLY.md)
+through a separate feature PR. M7-E009 records 31 offline cases and quality
+checks. Exact-head CI, merge and actual dispatch remain separate; the parent
+M7-DELIVERY-DRYRUN stays IN_PROGRESS. No actual build, real-secret workflow, image
+publication/start, VPS action or provider execution. Earlier D-44 notes below
+are historical; live M7 and Qwen remain denied.
 
 **D-44 continuation, 2026-10-16:** after PR #25 merge and post-merge CI, the
 owner authorizes the next API preparation stage. The
@@ -125,3 +134,4 @@ without deleting prior decisions or repeating accepted audits/proofs.
 Remaining M6 gates: explicit owner acceptance/rejection of M6-E005 and completion/transition decision; explicit scope resolution on whether the PRD's separate deployed storage and real cost-ledger reconciliation are deferred beyond D-31's synthetic development boundary or remain prerequisites to M6 completion; separately approved decisions on cloud/self-hosting, deployment, residency, retention, sampling, live emitters and credentials before staging/live telemetry. No unverified item is marked PASS. Open model/OCR/permit/Honcho decisions and product/governance/owner approval remain prerequisites for M7 activation.
 
 `M4-OPERATIONS-FINANCE` remains complete for its authorized sandbox/synthetic disposable-environment scope. Production deployment, live payment, live Odoo/Razorpay, external-agent execution, autonomous financial execution, and infrastructure change remain prohibited. `/opt/paperclip` must not be modified or deployed.
+

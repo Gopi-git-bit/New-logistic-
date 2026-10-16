@@ -39,6 +39,7 @@ class TestCommittedBuildContext(unittest.TestCase):
         self.repo.mkdir()
         self.command("init", "-q")
         self.write("Dockerfile.api", "FROM scratch\nCOPY api/ /api/\n")
+        self.write("scripts/emit_api_build_metadata.py", "# synthetic build metadata helper\n")
         self.write("requirements-api.lock", "example==1.0 --hash=sha256:" + "a" * 64 + "\n")
         self.write("api/__init__.py", "")
         self.write("api/config.py", "VALUE = 'committed'\n")
@@ -89,7 +90,7 @@ class TestCommittedBuildContext(unittest.TestCase):
         output = self.root / "context"
         report = context.prepare_context(self.repo, self.sha, output)
         self.assertEqual((output / "api/config.py").read_text(), "VALUE = 'committed'\n")
-        self.assertEqual(len(report["files"]), 5)
+        self.assertEqual(len(report["files"]), 6)
         self.assertEqual(report["source_sha"], self.sha)
         self.assertEqual(report["image_build"], "NOT_RUN")
         self.assertFalse((output / "api/local_secret.py").exists())
@@ -141,6 +142,18 @@ class TestCommittedBuildContext(unittest.TestCase):
         sha = self.commit()
         with self.assertRaisesRegex(context.ContextError, "REQUIRED_BUILD_INPUT"):
             context.prepare_context(self.repo, sha, self.root / "context")
+
+    def test_build_receipt_helper_is_required_and_cannot_be_a_symlink(self):
+        helper = self.repo / "scripts/emit_api_build_metadata.py"
+        helper.unlink()
+        sha = self.commit()
+        with self.assertRaisesRegex(context.ContextError, "REQUIRED_BUILD_INPUT"):
+            context.prepare_context(self.repo, sha, self.root / "context")
+        helper.symlink_to("../api/config.py")
+        sha = self.commit()
+        with self.assertRaisesRegex(context.ContextError, "NON_REGULAR"):
+            context.prepare_context(self.repo, sha, self.root / "context")
+        self.assertFalse((self.root / "context").exists())
 
     def test_bad_lock_prevents_any_context_creation(self):
         for lock in (

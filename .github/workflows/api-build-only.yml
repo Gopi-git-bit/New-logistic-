@@ -1,0 +1,63 @@
+name: API build only (no publication)
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_sha:
+        description: Full reviewed main commit SHA; must equal this run's workflow SHA
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: api-build-only
+  cancel-in-progress: false
+
+jobs:
+  build-only:
+    if: >-
+      github.event_name == 'workflow_dispatch' &&
+      github.repository == 'Gopi-git-bit/New-logistic-' &&
+      github.ref == 'refs/heads/main' &&
+      github.actor_id == '200721521' &&
+      github.actor == 'Gopi-git-bit' &&
+      github.triggering_actor == 'Gopi-git-bit' &&
+      github.run_attempt == 1 &&
+      github.sha == inputs.source_sha &&
+      github.workflow_sha == github.sha
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Check out exact admitted source
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4, verified 2026-10-16
+        with:
+          ref: ${{ inputs.source_sha }}
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Build one local image and emit sanitized evidence
+        shell: bash
+        env:
+          API_BUILD_SOURCE_SHA: ${{ inputs.source_sha }}
+        run: |
+          set -euo pipefail
+          python3 -I scripts/run_api_build.py \
+            --repo-root "$GITHUB_WORKSPACE" \
+            --source-sha "$API_BUILD_SOURCE_SHA" \
+            --report "$RUNNER_TEMP/api-build-report.json"
+      - name: Retain sanitized report in job summary
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -f "$RUNNER_TEMP/api-build-report.json" ]; then
+            cat "$RUNNER_TEMP/api-build-report.json"
+            {
+              echo '```json'
+              cat "$RUNNER_TEMP/api-build-report.json"
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo 'BUILD_NOT_VERIFIED: no report; inspect job/step conclusions.'
+          fi

@@ -2,7 +2,16 @@
 
 > Source of truth for all AI agent specifications.
 
-## Current Orchestration Checkpoint (D-42/D-43/D-44, 2026-10-16)
+## Current Orchestration Checkpoint (D-42 through D-45, 2026-10-16)
+
+**D-45:** PR #26 merged at `f8e7cb9a548e9956a0f1f74edc6f73e8fd2a76ef`;
+post-merge CI 38924063418 passed all five jobs. The
+[manual build route](plans/API_IMAGE_BUILD_ONLY.md) is prepared through a new PR,
+with 31 offline cases (M7-E009). It binds owner/main/source, uses no application
+secrets, prepares a local image without publication/start, and records receipts
+and scoped cleanup. Exact-head CI, merge and actual dispatch remain separate.
+Delivery stays IN_PROGRESS; live M7/Qwen and provider/VPS actions remain denied.
+Earlier D-44 preparation statements are historical.
 
 **Controlling closeout, 2026-10-16 (D-42):** Staging Secret Availability is
 **COMPLETE for DeepSeek presence only**, supported by M7-E006 and
@@ -368,3 +377,4 @@ pending → claimed → completed
 | Tesseract | document_processing | OCR extraction |
 | Twilio/Resend | communication | SMS + Email delivery |
 | Apidog | All agents | API contract enforcement |
+

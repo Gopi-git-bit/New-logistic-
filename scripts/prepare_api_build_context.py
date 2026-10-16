@@ -11,7 +11,9 @@ import shutil
 import subprocess
 from pathlib import Path, PurePosixPath
 
-ROOT_INPUTS = frozenset({"Dockerfile.api", "requirements-api.lock"})
+ROOT_INPUTS = frozenset(
+    {"Dockerfile.api", "requirements-api.lock", "scripts/emit_api_build_metadata.py"}
+)
 REQUIRED = ROOT_INPUTS | {"api/__init__.py", "api/config.py", "api/main.py"}
 TEST_DIRECTORIES = frozenset({"tests", "tests_m4", "tests_m5"})
 
