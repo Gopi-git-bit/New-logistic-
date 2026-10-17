@@ -1,5 +1,32 @@
 # Zippy Test and Discovery Evidence
 
+### M7-E010: API Build Execution and Pre-Publication Review
+
+**Scope:** D-46; 17 October 2026. Records-only review at main
+`0c96e33ac887b536ef4f947b9f4c7cbb395b80f9`.
+[Review/gap dispositions](reports/API_BUILD_EVIDENCE_REVIEW_20261017.md);
+[captured report](reports/API_BUILD_ONLY_20261017.json);
+[proposed publication gate](plans/API_CANDIDATE_PUBLICATION_GATE.md).
+
+| Item | Actual evidence / limit |
+|---|---|
+| Build result | [38995824366](https://github.com/Gopi-git-bit/New-logistic-/actions/runs/38995824366), workflow_dispatch, attempt 1, owner actor; six steps passed, 30 seconds, no timeout/rerun |
+| Source/workflow | Both `0c96e33ac887b536ef4f947b9f4c7cbb395b80f9`; tree `10d46eea1a7e085ec3b70402e91c3b43f7bd9134`; preceding five-check post-merge CI 38944743155 green |
+| Context/downloads | 33 source blob IDs, content hashes and sorted context identity reviewed; 17 reported Python names/versions/SHA-256 values matched the lock. Manifest `7dd828433f4c540c5528d7c663b3443c614f9f4662a0e7a0f2faa8c57c15694b`. |
+| Local artifact | `sha256:fb5f63b31a208afa3be890f5418b2fb5bc7c6120dd422af0ad5a3d8e715662aa`, matched to metadata config digest; linux/amd64, configured user 10001:10001; no application start or registry manifest |
+| Versions | Image Python 3.12.14 / pip 25.0.1 / Debian 13; 151 installed OS packages. Host Python 3.12.3 / Docker 28.0.4 / buildx 0.38.0 / Compose 2.38.2; observed, not locked tools. |
+| Cleanup | New-image removal exit 0; temporary-directory cleanup in successful script path; base/cache left to hosted-runner teardown, not independently attested |
+| Inherited checks | PR #27 final/merge CI passed five jobs; workers 854 / 146 subtests, offline denial 4, API 92 / 72 database skips / 2 warnings. No DB gap waived. |
+| Review verdict | Bounded build VERIFIED; publication NOT READY. PUB-01–04: deleted artifact, unapproved target/access, absent publisher and missing exact-image security/provenance/read-back contract. |
+| Residual risks | REPRO-01–04: apt receipts/snapshots, toolchain control, transport observation and bit reproducibility. Candidate deferral is proposed, not granted. Runtime/DB and live M7/Qwen remain separate blockers. |
+| This slice | Static JSON/source/receipt/manifest/link checks only; no new test suite, image build or dispatch. Resulting-head CI must be recorded in the feature PR after it exists. |
+
+The JSON is source-bound historical evidence, not an OCI archive, signed
+attestation or future-build receipt. Its storage PR SHA must never replace the
+original run/source fields. Engineering review is complete for this handoff;
+parent delivery stays IN_PROGRESS pending owner review. No merge, publication,
+VPS/provider action or real-secret use is included.
+
 ### M7-E009: Manual API Build Route — Offline Preparation Evidence
 
 **Scope:** D-45, 16 October 2026; base main

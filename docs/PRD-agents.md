@@ -2,7 +2,20 @@
 
 > Source of truth for all AI agent specifications.
 
-## Current Orchestration Checkpoint (D-42 through D-45, 2026-10-16)
+## Current Orchestration Checkpoint (D-42 through D-46, 2026-10-17)
+
+**D-46 review, 2026-10-17:** the single secret-free API build passed in
+[run 38995824366](https://github.com/Gopi-git-bit/New-logistic-/actions/runs/38995824366),
+attempt 1, at source/workflow SHA `0c96e33ac887b536ef4f947b9f4c7cbb395b80f9`.
+M7-E010 and the [evidence review](reports/API_BUILD_EVIDENCE_REVIEW_20261017.md)
+verify source/download/config-ID correlation and scoped cleanup. The image was
+removed; a rebuild needs new artifact-specific evidence. Publication remains
+BLOCKED pending the [proposed contract](plans/API_CANDIDATE_PUBLICATION_GATE.md),
+target/access decisions, scoped publisher and image security/provenance evidence.
+Parent delivery stays IN_PROGRESS pending handoff acceptance. Merge, a new build
+and publication remain separate gates. This records-only review repeats no
+dispatch, touches no VPS and calls no provider. Live M7/Qwen stay disabled.
+Earlier preparation checkpoints below are historical.
 
 **D-45:** PR #26 merged at `f8e7cb9a548e9956a0f1f74edc6f73e8fd2a76ef`;
 post-merge CI 38924063418 passed all five jobs. The

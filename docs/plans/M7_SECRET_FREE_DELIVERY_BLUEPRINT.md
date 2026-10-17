@@ -1,8 +1,8 @@
 # M7 next development phase: secret-free delivery preparation
 
-**Status:** API CONTEXT/LOCK/STAGING CONTRACT MERGED (D-44);
-MANUAL BUILD ROUTE PREPARED FOR REVIEW (D-45); ACTUAL IMAGE BUILD NOT RUN.
-**Owner:** Gopinathan. **Date:** 16 October 2026.
+**Status:** BUILD ROUTE MERGED; ONE AUTHORIZED BUILD PASSED;
+EVIDENCE/GAP REVIEW PREPARED (D-46); PUBLICATION NOT AUTHORIZED.
+**Owner:** Gopinathan. **Updated:** 17 October 2026.
 **Decision/evidence:** [D-42/D-43](../DECISIONS.md) / [M7-E006/M7-E007](../TEST_EVIDENCE.md).
 **Tracker:** M7-DELIVERY-BLUEPRINT and M7-DELIVERY-INVENTORY COMPLETE;
 M7-DELIVERY-DRYRUN IN_PROGRESS; M7-E008 records local preparation evidence.
@@ -12,6 +12,19 @@ PR #26 merged at `f8e7cb9a548e9956a0f1f74edc6f73e8fd2a76ef`; all five
 passed. D-45's [manual build route](API_IMAGE_BUILD_ONLY.md) implements the next
 review slice, with offline evidence in M7-E009. It remains unmerged/undispatched
 at preparation; actual image/download evidence and acceptance remain pending.
+
+## Current evidence checkpoint
+
+The [single build](https://github.com/Gopi-git-bit/New-logistic-/actions/runs/38995824366)
+passed at source/workflow SHA `0c96e33ac887b536ef4f947b9f4c7cbb395b80f9`.
+M7-E010 captures its report and [gap review](../reports/API_BUILD_EVIDENCE_REVIEW_20261017.md).
+The tested image was deleted; future publication needs artifact-specific evidence.
+[Candidate criteria](API_CANDIDATE_PUBLICATION_GATE.md) remain a proposal.
+Parent delivery stays IN_PROGRESS pending handoff acceptance. No build is repeated.
+
+The preparation narrative and sequence below retain historical checkpoints.
+This current state supersedes their NOT_RUN/unmerged wording only for the one
+recorded build, never for publication or deployment.
 
 ## Starting checkpoint
 

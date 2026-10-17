@@ -2,7 +2,7 @@
 
 ## Control Rules
 
-- Current verdict: **BLOCKED FOR PRODUCTION — DEEPSEEK PRESENCE COMPLETE (D-42/M7-E006); API CONTEXT/LOCK/STAGING PREPARATION MERGED (D-44/M7-E008); MANUAL BUILD ROUTE IN REVIEW (D-45/M7-E009); ACTUAL BUILD NOT RUN; LIVE M7 AND QWEN BLOCKED**.
+- Current verdict: **BLOCKED FOR PRODUCTION — DEEPSEEK PRESENCE COMPLETE; ONE API BUILD PASSED AND EVIDENCE REVIEWED (D-46/M7-E010); PUBLICATION BLOCKED; LIVE M7 AND QWEN DISABLED**.
 - Only one tracker row may be active at a time.
 - M1 is complete and owner-approved for the bounded M2 implementation recorded below.
 - Every milestone still requires its own dependency-correct scope and approval; no tracker transition authorizes production work.
@@ -60,13 +60,26 @@
 | M7-STAGING-SECRET-AVAILABILITY | M7 | Staging Secret Availability (DeepSeek) | COMPLETE | Reviewed PR #23 merge and exact-merge CI; owner-authorized presence run | Record accepted GitHub step availability only; no provider call | M7-E006; run 38903102158 attempt 1; DeepSeek PASS, OpenRouter intentionally skipped | Owner-authorized dispatch, run-specific environment approval and D-42 closeout | Revert documentation through review; do not revoke or rotate keys as rollback | No key validity, target injection, spending or live authority proven |
 | M7-DELIVERY-BLUEPRINT | M7 | Next secret-free delivery blueprint | COMPLETE | M7-STAGING-SECRET-AVAILABILITY, D-42 | Documentation design only | plans/M7_SECRET_FREE_DELIVERY_BLUEPRINT.md with scope, acceptance, stop conditions and handoff | Current owner instruction authorizes blueprint preparation only | Revert documentation through review | No workflow or deployment route implemented by this row |
 | M7-DELIVERY-INVENTORY | M7 | Docker, lock, API and staging input inventory | COMPLETE | M7-DELIVERY-BLUEPRINT, D-43 | Static input inventory and records-only feature PR | Report, M7-E007, object/content identities, lock/name/path checks; corrected-head CI is a separate pre-merge condition | Continuation authorized; current PR #25 review/correction precedes conditional merge | Reviewed documentation revert | Static completion only; original CI 38915184473 is not proof for corrected heads; no image build or new staging-manifest render |
-| M7-DELIVERY-DRYRUN | M7 | Secret-free build and staging-manifest validation | IN_PROGRESS | M7-DELIVERY-INVENTORY, D-44/D-45 | PR #26 preparation merged; prepare owner/main/source-bound manual build and receipt route through a new PR | M7-E008/M7-E009; local regressions/quality; exact-head CI; actual image/download evidence pending | Continuation authorizes route preparation/publication; feature merge and actual build/publication/deployment remain separate | Reviewed revert and scoped new-context/image cleanup; preserve preexisting images | Manual build route prepared for review, not dispatched; no image build/start/publish, real-secret run, SSH, VPS or provider execution |
+| M7-DELIVERY-DRYRUN | M7 | Secret-free build and staging-manifest validation | IN_PROGRESS | M7-DELIVERY-INVENTORY, D-44/D-45/D-46 | Review the completed build and record candidate criteria in a records-only PR | M7-E010; run 38995824366; captured report/gap dispositions; exact-head records CI | Current instruction authorizes records review/publication only; merge, new build and registry publication separate | Reviewed records revert; built image already removed | Build-only PASS verified; handoff acceptance pending; no reproducibility, runtime, DB or live-provider waiver |
 | M7-AGENTS | M7 | Agent activation | BLOCKED | M6-LANGFUSE staging/live gates, open provider decisions | D-34/D-37/D-38/D-39 permit recommendation, synthetic shadow/review and mocked staging-bridge development only; live activation unauthorized | Model/provider validation, capability/allowlist, shadow, HITL, and narrow-automation evidence | Product, governance, and owner approval required for activation | Pause agents and revoke capabilities | Honcho remains contextual only; M6 staging/live gates are not waived; D-33 pending |
 | M8-STAGING-E2E | M8 | Staging E2E and resilience | BLOCKED | M7-AGENTS | None currently authorized | Clean-environment unit/integration/contract/E2E/security/failure and backup-restore evidence | Engineering, security, operations approval required | Restore/tear down staging per runbook | Includes outage, retry, duplicate, lock, and rollback drills |
 | M9-READINESS | M9 | Production readiness review | BLOCKED | M8-STAGING-E2E | None currently authorized | No unresolved critical/high security findings; secrets, monitoring, backups, restores, runbook, rollback, external-system evidence | Owner, security, finance, and operations approval required | Remain in staging | Explicit human go-live decision required |
 | M10-ROLLOUT | M10 | Controlled production rollout | BLOCKED | M9-READINESS | None currently authorized | Shadow, internal pilot, canary, monitored expansion, thresholds, smoke, and rollback evidence | Explicit per-stage human approval required | Execute approved stage rollback | Live payments, DNS, financial autonomy, and irreversible actions need explicit approval |
 
 ## Current Authorized Work
+
+**D-46 review, 2026-10-17:** the single secret-free API build passed in
+[run 38995824366](https://github.com/Gopi-git-bit/New-logistic-/actions/runs/38995824366),
+attempt 1, at source/workflow SHA `0c96e33ac887b536ef4f947b9f4c7cbb395b80f9`.
+M7-E010 and the [evidence review](reports/API_BUILD_EVIDENCE_REVIEW_20261017.md)
+verify source/download/config-ID correlation and scoped cleanup. The image was
+removed; a rebuild needs new artifact-specific evidence. Publication remains
+BLOCKED pending the [proposed contract](plans/API_CANDIDATE_PUBLICATION_GATE.md),
+target/access decisions, scoped publisher and image security/provenance evidence.
+Parent delivery stays IN_PROGRESS pending handoff acceptance. Merge, a new build
+and publication remain separate gates. This records-only review repeats no
+dispatch, touches no VPS and calls no provider. Live M7/Qwen stay disabled.
+Earlier preparation checkpoints below are historical.
 
 **D-45 continuation, 2026-10-16:** PR #26 merged at
 `f8e7cb9a548e9956a0f1f74edc6f73e8fd2a76ef`, post-merge CI 38924063418 all five

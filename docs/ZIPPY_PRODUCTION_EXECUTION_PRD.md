@@ -503,3 +503,18 @@ M7-E009 records 31 offline cases. Feature review/CI, merge and actual dispatch
 remain separate. The image has not been built or published; no production
 configuration is invented. Delivery remains IN_PROGRESS; no VPS/provider action
 or live M7/Qwen execution. D-33 and financial/governance controls persist.
+
+### 17.7 Build evidence review and publication boundary — 17 October 2026
+
+D-46/M7-E010 record run 38995824366 as build-only PASS at source/workflow SHA
+`0c96e33ac887b536ef4f947b9f4c7cbb395b80f9`. The
+[review](reports/API_BUILD_EVIDENCE_REVIEW_20261017.md) verifies source, Python
+receipts and local config ID/cleanup while preserving apt/toolchain/transport/bit
+reproducibility gaps. The image was removed; no published artifact/runtime proof.
+
+[Candidate criteria](plans/API_CANDIDATE_PUBLICATION_GATE.md) are for owner review.
+Registry/name/visibility, publisher scope, artifact/security/provenance and
+residual-risk decisions remain open. No candidate exception or publication
+authority is granted; parent delivery stays IN_PROGRESS pending acceptance.
+This records-only slice does not merge itself, repeat a build, publish an image,
+modify a VPS or call providers. Live M7/Qwen, D-33 and manual refunds are unchanged.
