@@ -1,5 +1,7 @@
 # PRD — Backend (§7, §8, §9 FastAPI, Supabase, RPCs, Webhooks, Idempotency)
 
+> **D-50 evaluation, 17 October 2026:** [Isolated Xano prototype](plans/XANO_ISOLATED_PROTOTYPE.md) prepares an offline synthetic reference and migration acceptance blueprint. It does not replace this backend contract, existing RPC/RLS or financial/governance authority. Actual Xano code, authentication and platform proofs await a scoped disposable workspace connection. All 72 database cases remain unverified; live M7/Qwen and production migration remain disabled.
+
 > Source of truth for all backend specifications.
 
 ## 1. Backend Architecture

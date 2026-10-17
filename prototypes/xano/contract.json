@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "mode": "OFFLINE_REFERENCE_ONLY",
+  "xano_runtime_verified": false,
+  "migration_authorized": false,
+  "external_effects_enabled": false,
+  "data_classification": "synthetic_disposable",
+  "identity": {
+    "source": "verified authentication context, never request tenant/actor/role",
+    "roles": ["customer", "vendor", "dispatcher", "human_admin", "agent"],
+    "human_approval": "authenticated owner session; agents cannot mint or assume this role"
+  },
+  "endpoints": [
+    {"method":"POST", "path":"/prototype/orders", "role":"customer", "idempotency":true, "transaction":"create + idempotency + audit"},
+    {"method":"GET", "path":"/prototype/orders/{id}", "role":"customer-or-assigned-vendor", "idempotency":false, "transaction":"tenant and participant filtered read; not found on denial"},
+    {"method":"POST", "path":"/prototype/assignments", "role":"dispatcher", "idempotency":true, "transaction":"lock order and vehicle + recheck eligibility + unique active assignment + transition + audit + outbox + idempotency"},
+    {"method":"POST", "path":"/prototype/synthetic-payment-webhook", "role":"signed-synthetic-webhook", "idempotency":true, "transaction":"verified raw signature + event uniqueness + payment/order mapping + ledger effect + audit"},
+    {"method":"POST", "path":"/prototype/refund-requests", "role":"customer", "idempotency":true, "transaction":"owned order + request bound to order/actor + audit"},
+    {"method":"POST", "path":"/prototype/refund-approvals", "role":"human_admin", "idempotency":true, "transaction":"manual authenticated approval + no self-approval + audit; no payout"},
+    {"method":"POST", "path":"/prototype/agent-reservations", "role":"agent", "idempotency":true, "transaction":"trusted one-use grant + endpoint/model/expiry + atomic budget reserve + audit; no inference"}
+  ],
+  "invariants": {
+    "assignment": "unique active order and unique active vehicle; no partial effects on losing request",
+    "isolation": "tenant plus participant authorization and response field filtering at every surface",
+    "idempotency": "scope tenant/actor/action/key with canonical payload hash; same payload replays, changed payload conflicts",
+    "recovery": "transactional outbox; durable lease; stale owner fenced; idempotent receiver required",
+    "refund": "human approval required; no provider execution implemented",
+    "agent": "trusted grant and conservative reservation under hard local test cap; no claim of provider spending cap"
+  },
+  "reference_72_groups": [
+    {"category":"core_order_worker", "count":2, "xano_status":"NOT_PORTED_NOT_VERIFIED"},
+    {"category":"dispatch", "count":31, "xano_status":"NOT_PORTED_NOT_VERIFIED"},
+    {"category":"finance", "count":23, "xano_status":"NOT_PORTED_NOT_VERIFIED"},
+    {"category":"payment_intent_privileges", "count":4, "xano_status":"NOT_PORTED_NOT_VERIFIED"},
+    {"category":"governance", "count":12, "xano_status":"NOT_PORTED_NOT_VERIFIED"}
+  ],
+  "platform_gates": [
+    "verified disposable workspace, branch/data source isolation and installed capabilities",
+    "XanoScript export and platform syntax validation against actual workspace",
+    "transaction/lock/unique-index behavior under concurrent HTTP requests",
+    "auth/tenant/participant restrictions on APIs, realtime, tasks, tools and auto-generated CRUD",
+    "durable restart/lease recovery and idempotent external side-effect design",
+    "human approval provenance and protected immutable audit path",
+    "credential scope, revocation, redaction and environment separation",
+    "spending cap and trusted authorization before external inference",
+    "full 72-case source-to-Xano coverage mapping and platform execution evidence",
+    "backup/export/restore, residency, plan limits, realtime/geospatial performance and cost"
+  ]
+}

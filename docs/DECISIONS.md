@@ -913,3 +913,14 @@ The inherited PR-triggered database workflow is replaced by a manual-only, owner
 A new container adapter reuses unchanged canonical migrations, roles, SQL fixtures and integration assertions while preserving legacy harness defaults. Test processes have no network, no capabilities, no new privileges, a read-only source/root filesystem, generated application credentials only and bounded tmpfs/output transfer. Bootstrap/migration credentials remain outside tests. The runner derives the pinned PostgreSQL image's UID/GID and verifies positive/negative socket controls, actual role/process observations and source/run/phase-bound reports. Unknown resource cleanup is a failure; shared/prune operations are excluded.
 
 No Docker build/start, SQL proof, manual dispatch, registry/key configuration, protection change, VPS deployment or provider call is authorized/executed by this implementation slice. Reproducibility and all 72 database gaps remain open until their own evidence is accepted. Publication/live M7/Qwen remain denied; D-33 pending and every refund manually approved.
+
+
+## D-50 — Isolated Xano evaluation before any backend migration
+
+**Date:** 2026-10-17. **Owner:** Gopinathan / Gopi-git-bit.
+
+The owner accepts a synthetic prototype for create order, eligibility, assignment and audit before considering Xano consolidation. Authorized now: repository-only reference code/tests, Xano table/endpoint and acceptance blueprint, docs and feature-PR CI. [Xano isolated prototype](plans/XANO_ISOLATED_PROTOTYPE.md) is controlling for this evaluation. The SQLite oracle is not XanoScript, platform evidence, a replacement financial ledger or a port of all 72 database tests. Current RPC/RLS/state/governance/accounting authority remains unchanged. D-33 remains pending and every refund requires human approval.
+
+PR #31 is merged at `52ca43d8a2fb4f3d5d105dc6bb9f7420e5cfca26`; all five post-merge checks passed in CI 39013608948. Its disposable PostgreSQL proof remains undispatched. Preserve that reference and its 72 unverified cases. Xano connection, actual schema/endpoint implementation and platform verification remain pending a securely scoped disposable workspace connection; request connection metadata and secure token integration only after repository preparation. No secret belongs in chat or Git.
+
+No adoption/migration approval, paid account provisioning, Xano authenticated action, production promotion, service removal, existing workflow dispatch, provider call, VPS change, credential provisioning or registry publication occurs in this slice. Live M7 and Qwen remain disabled. New Xano syntax/tool downloads must be verified/pinned before execution; native realtime availability is not an acceptance test. Exact-head CI evidence is recorded on the feature PR.
