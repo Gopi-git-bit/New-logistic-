@@ -1,0 +1,1017 @@
+{
+  "application_start": "NOT_RUN",
+  "base": {
+    "declared": "python:3.12-slim@sha256:78387bc3881b8273120a12ebe6c1ab22b018ccc2c9adf565ae1ac9b536e184ea",
+    "platform": "linux/amd64",
+    "resolved_platform_manifest": "sha256:2fe5997d249a808b8eeea52c58a1dbffbba28754dc11699ef5c029f2d818ce79"
+  },
+  "build_metadata": {
+    "config_digest": "sha256:fb5f63b31a208afa3be890f5418b2fb5bc7c6120dd422af0ad5a3d8e715662aa"
+  },
+  "build_output_sha256": "c3bd6e397ed87bfa0247a4e9c17db7933d758a00947d9c13d545674a6f3aeda1",
+  "cleanup": {
+    "build_cache": "hosted-runner teardown; no broad prune",
+    "image_remove_exit_status": 0,
+    "new_local_image_removed": true
+  },
+  "command_results": [
+    {
+      "exit_status": 0,
+      "stage": "SOURCE_AND_CONTEXT"
+    },
+    {
+      "exit_status": 0,
+      "stage": "SOURCE_AND_CONTEXT"
+    },
+    {
+      "exit_status": 0,
+      "stage": "SOURCE_AND_CONTEXT"
+    },
+    {
+      "exit_status": 0,
+      "stage": "PLACEHOLDER_CONFIGURATION"
+    },
+    {
+      "exit_status": 0,
+      "stage": "PLACEHOLDER_CONFIGURATION"
+    },
+    {
+      "exit_status": 0,
+      "stage": "BUILD_TOOLCHAIN"
+    },
+    {
+      "exit_status": 0,
+      "stage": "BUILD_TOOLCHAIN"
+    },
+    {
+      "exit_status": 0,
+      "stage": "BUILD_TOOLCHAIN"
+    },
+    {
+      "exit_status": 0,
+      "stage": "BUILD_TOOLCHAIN"
+    },
+    {
+      "exit_status": 0,
+      "stage": "BUILD_TOOLCHAIN"
+    },
+    {
+      "exit_status": 0,
+      "stage": "BASE_PLATFORM"
+    },
+    {
+      "exit_status": 0,
+      "stage": "BASE_PLATFORM"
+    },
+    {
+      "exit_status": 0,
+      "stage": "LOCAL_IMAGE_BUILD"
+    },
+    {
+      "exit_status": 0,
+      "stage": "BUILD_EVIDENCE"
+    }
+  ],
+  "configured_image_user": "10001:10001",
+  "context": {
+    "context_manifest_sha256": "7dd828433f4c540c5528d7c663b3443c614f9f4662a0e7a0f2faa8c57c15694b",
+    "files": [
+      {
+        "git_blob_sha1": "061f259f5f78218f8c3af1716d4b2a7996ecfe19",
+        "path": "Dockerfile.api",
+        "sha256": "bdf85963cbdee27b5c42bb176b492a5c7381d10de89e295820d0b05205a8e904"
+      },
+      {
+        "git_blob_sha1": "8252ecc8796a11d38cedac766aae5c16126b600a",
+        "path": "api/__init__.py",
+        "sha256": "9765915df8174d95aa0e9e6deb449be388bbe38b0568382b95892c79d8a93afe"
+      },
+      {
+        "git_blob_sha1": "52902847bdd3600ecd5488eef38d2da96e3a9266",
+        "path": "api/auth.py",
+        "sha256": "3859f13edd340ec9b2f2591848220ebfa860080683d706bc7804b076200b4f25"
+      },
+      {
+        "git_blob_sha1": "361ca2e8b26f8bcc77f2c8a83758d3b896535653",
+        "path": "api/config.py",
+        "sha256": "414cc3db57bd2989bc791095765997c7e4ded26d9f0fed00c523111a596ec806"
+      },
+      {
+        "git_blob_sha1": "d7c99a4df72b189d6dee063b44eaf4ae15e0cab3",
+        "path": "api/database.py",
+        "sha256": "de3ef969cd89b474e08d90c3d1316ff38b2db8d759c4157d4bb958218c1bdbd2"
+      },
+      {
+        "git_blob_sha1": "8e4a35ee2f5e8578f2f85e687dfd5168f5f9678d",
+        "path": "api/gateway.py",
+        "sha256": "e75f2508b0abfa45bdf33c5c06f5fd3a28477fa57812a35e818ad18b959aadee"
+      },
+      {
+        "git_blob_sha1": "d4411560c8bda0a175ad7a20ad7f65f6e3fc608b",
+        "path": "api/main.py",
+        "sha256": "063bb65e62f68045406a013827b3c407b1ffe62e968a2a805b11a7ce40e30289"
+      },
+      {
+        "git_blob_sha1": "4d1b5b0efff584d1b37bf27fa70bf74ed6655f93",
+        "path": "api/models/__init__.py",
+        "sha256": "51ea6444e42481bd56039224d80cab869dd1df246266e70b2386a123141a1d21"
+      },
+      {
+        "git_blob_sha1": "626df43add9c16c17b3c602d7a094ef6f556910c",
+        "path": "api/models/core.py",
+        "sha256": "5c8bf463c177cbacc4be8682680d0b2929727a3c513e22cf1e5420a013c37935"
+      },
+      {
+        "git_blob_sha1": "c1b6e41f0a87f5b250a83c2977cebeaaac6e6421",
+        "path": "api/models/dispatch.py",
+        "sha256": "9fc4a438ba93f835713865e79ce18c7d6ff01fae1e8b49203bbac4678957ebe5"
+      },
+      {
+        "git_blob_sha1": "cdd22931394862f90463174c0d550bb1ac32d040",
+        "path": "api/models/finance.py",
+        "sha256": "467db0bb1a539512a9e37eb7a1eef9f2038404c2c210d63eac7b1947e8302bbd"
+      },
+      {
+        "git_blob_sha1": "e10dd8d4fceaad768f72a45d3e20342fe3fe8d60",
+        "path": "api/models/paperclip.py",
+        "sha256": "578bece66917e5fce9de322ed82a2362b09f2413181d66246c46802057d5467b"
+      },
+      {
+        "git_blob_sha1": "1820f6997f3303c2c9abcd9dea5a542b9a0b316d",
+        "path": "api/odoo.py",
+        "sha256": "349158c46959a008b608d40041044ab57b3fad467f542f5400821dadeab51ff0"
+      },
+      {
+        "git_blob_sha1": "a2f1a41f7b3dc1b1e6e863b0731576e929250c05",
+        "path": "api/pod_lifecycle.py",
+        "sha256": "6eff0a4e21a01e1f82de71bdb92af5279e53b09a11e715ff399032e4b49d6ce1"
+      },
+      {
+        "git_blob_sha1": "492c985ddb7a0bc46eaa9a7d9ff8a4397e4f3dcb",
+        "path": "api/pricing.py",
+        "sha256": "ff2bf2e9e3af61e910f3d5b8c9e06f69563886c5c3c2a3bf34c65291966a95ac"
+      },
+      {
+        "git_blob_sha1": "4cc4a28f3daeda2a5c99baad827c1062c9924c0e",
+        "path": "api/redaction.py",
+        "sha256": "71e3ff82299b6decb168da803a02a760ec7fd80cf904aca7acb7117a5a97b612"
+      },
+      {
+        "git_blob_sha1": "e8c91779a2246bcd282299b1cf8c66239ff1c214",
+        "path": "api/repositories.py",
+        "sha256": "3e6075f1aef3a1ffb5f2700ece24f6df358baa06f17cfafd525bc70db81db9fa"
+      },
+      {
+        "git_blob_sha1": "a654dc11a260ee3844987daa6b6092adbf389e83",
+        "path": "api/repositories_dispatch.py",
+        "sha256": "2949067465a74ac371d1a0e2736c539a4072c116a75a19383485d3439f88656d"
+      },
+      {
+        "git_blob_sha1": "ae7811840a3ce6565cd609424a36d4c30d081a03",
+        "path": "api/repositories_finance.py",
+        "sha256": "dee294f61bbcd5bf985f2d56b245eddfaec1a2eb44fc7330169b8d786637896d"
+      },
+      {
+        "git_blob_sha1": "9fc9b259ce080b63e063705818430cd409ba22a3",
+        "path": "api/repositories_paperclip.py",
+        "sha256": "9dca600b28eafcf84b92aac806b36a97e46ab82c951bcb29bd6d0eb436a62ccc"
+      },
+      {
+        "git_blob_sha1": "8248c6ca29448b2f76e12f9bc1e2adbcd1b7faf0",
+        "path": "api/routers/__init__.py",
+        "sha256": "d1145010d06cb2435cd976c1c912a632830ebbde0b297578ee0c6e1f256062ce"
+      },
+      {
+        "git_blob_sha1": "9f5c2ab29e45b6cd04a0e646b63ad0344943be62",
+        "path": "api/routes_dispatch.py",
+        "sha256": "dd929111af3ff6f4a445ee7729fe06edfe076eca0df432e236b72d2caa2bfde6"
+      },
+      {
+        "git_blob_sha1": "9b16701747692664b6438d9f4bb9b737659868b1",
+        "path": "api/routes_finance.py",
+        "sha256": "942447070e660e302ceb0d14fa43510337403cea3af553c7556ba21b8f2a7016"
+      },
+      {
+        "git_blob_sha1": "ac7a6b01fdd216b171b243f47f7c88cc3d53c658",
+        "path": "api/routes_paperclip.py",
+        "sha256": "c889ee1ee72d9f48ff14abd668dead3554f08b7e48ff250fa9bf88c85eab6666"
+      },
+      {
+        "git_blob_sha1": "32a24cb81870d86c7d84d8c0fc2049c880ac1064",
+        "path": "api/services/__init__.py",
+        "sha256": "989e83a907cc79b2e75f4cf7298c8069953876352b81853cde03a3b1663bfa66"
+      },
+      {
+        "git_blob_sha1": "f05f9f468876a607a404f38bbd262a196230a6fe",
+        "path": "api/services/hermes.py",
+        "sha256": "739d42a8e3feac533a7a5afd830f2bcf53226ec8d18c0c41d67a9f97124ef752"
+      },
+      {
+        "git_blob_sha1": "b360a60079a2f2c9b1aee29b7d488ebf0db7fa5a",
+        "path": "api/services/paperclip.py",
+        "sha256": "6671787226a7c763348cf8178826a37d5e198cc20ef3dbf5adc1024973b6e184"
+      },
+      {
+        "git_blob_sha1": "db1dbf2d81789f63944eaa87b3c83cb7e29a6798",
+        "path": "api/services/paperclip_envelope.py",
+        "sha256": "8cb767356e30ca0bfe12f5ff3c0a28932b38fdf25a2deba5ce1d7a96c1fc1e06"
+      },
+      {
+        "git_blob_sha1": "18d78ddb640f7768ed8b9ed0804d8c93f335d3dd",
+        "path": "api/services/synthetic_executor.py",
+        "sha256": "7a5537b59a2daf25a80a54b0ccc941a13b2f98d20156e2bede494abf262a1cc2"
+      },
+      {
+        "git_blob_sha1": "86f3e2a02ef2888ffc3135fe58c0b286523b9fc5",
+        "path": "api/worker.py",
+        "sha256": "1871b2b971d1f7ec279db8490d6335bcb54f00eb2f16b8da6487ae404d581d7e"
+      },
+      {
+        "git_blob_sha1": "88743a6bb81cb8665cd0d2ec48c738b3f97c27ce",
+        "path": "api/worker_finance.py",
+        "sha256": "d6e1cf2e11137a7fd6b977ca427468f0cdc3f1ba4cc090309d4425d29f672625"
+      },
+      {
+        "git_blob_sha1": "1d738675da827537bef8484a000b3b24b1a023ec",
+        "path": "requirements-api.lock",
+        "sha256": "851d4200ac029aa7dbb104328a2208efec6cc5e2631a11b5e6c8efa8cad65b2d"
+      },
+      {
+        "git_blob_sha1": "081a567d664e4a78e99e1b966e63ea57d403e5a2",
+        "path": "scripts/emit_api_build_metadata.py",
+        "sha256": "f2a37acb1f994dcd5e986ae6c27b4d20369d0335a62fbcf2f174b044dabc6933"
+      }
+    ],
+    "image_build": "NOT_RUN",
+    "locked_distributions": 17,
+    "runtime_readiness": "UNVERIFIED",
+    "source_sha": "0c96e33ac887b536ef4f947b9f4c7cbb395b80f9",
+    "source_tree": "10d46eea1a7e085ec3b70402e91c3b43f7bd9134",
+    "status": "CONTEXT_PREPARED"
+  },
+  "dependencies": {
+    "apt_archive_receipts": "UNVERIFIED; installed versions only, mutable apt repositories",
+    "installed_os_packages": [
+      {
+        "name": "adduser",
+        "version": "3.152"
+      },
+      {
+        "name": "apt",
+        "version": "3.0.3"
+      },
+      {
+        "name": "base-files",
+        "version": "13.8+deb13u6"
+      },
+      {
+        "name": "base-passwd",
+        "version": "3.6.7"
+      },
+      {
+        "name": "bash",
+        "version": "5.2.37-2+b9"
+      },
+      {
+        "name": "binutils",
+        "version": "2.44-3"
+      },
+      {
+        "name": "binutils-common:amd64",
+        "version": "2.44-3"
+      },
+      {
+        "name": "binutils-x86-64-linux-gnu",
+        "version": "2.44-3"
+      },
+      {
+        "name": "bsdutils",
+        "version": "1:2.41.5-0+deb13u1"
+      },
+      {
+        "name": "build-essential",
+        "version": "12.12"
+      },
+      {
+        "name": "bzip2",
+        "version": "1.0.8-6"
+      },
+      {
+        "name": "ca-certificates",
+        "version": "20250419"
+      },
+      {
+        "name": "coreutils",
+        "version": "9.7-3"
+      },
+      {
+        "name": "cpp",
+        "version": "4:14.2.0-1"
+      },
+      {
+        "name": "cpp-14",
+        "version": "14.2.0-19"
+      },
+      {
+        "name": "cpp-14-x86-64-linux-gnu",
+        "version": "14.2.0-19"
+      },
+      {
+        "name": "cpp-x86-64-linux-gnu",
+        "version": "4:14.2.0-1"
+      },
+      {
+        "name": "dash",
+        "version": "0.5.12-12"
+      },
+      {
+        "name": "debconf",
+        "version": "1.5.91"
+      },
+      {
+        "name": "debian-archive-keyring",
+        "version": "2025.1"
+      },
+      {
+        "name": "debianutils",
+        "version": "5.23.2"
+      },
+      {
+        "name": "diffutils",
+        "version": "1:3.10-4"
+      },
+      {
+        "name": "dpkg",
+        "version": "1.22.22"
+      },
+      {
+        "name": "dpkg-dev",
+        "version": "1.22.22"
+      },
+      {
+        "name": "findutils",
+        "version": "4.10.0-3"
+      },
+      {
+        "name": "g++",
+        "version": "4:14.2.0-1"
+      },
+      {
+        "name": "g++-14",
+        "version": "14.2.0-19"
+      },
+      {
+        "name": "g++-14-x86-64-linux-gnu",
+        "version": "14.2.0-19"
+      },
+      {
+        "name": "g++-x86-64-linux-gnu",
+        "version": "4:14.2.0-1"
+      },
+      {
+        "name": "gcc",
+        "version": "4:14.2.0-1"
+      },
+      {
+        "name": "gcc-14",
+        "version": "14.2.0-19"
+      },
+      {
+        "name": "gcc-14-base:amd64",
+        "version": "14.2.0-19"
+      },
+      {
+        "name": "gcc-14-x86-64-linux-gnu",
+        "version": "14.2.0-19"
+      },
+      {
+        "name": "gcc-x86-64-linux-gnu",
+        "version": "4:14.2.0-1"
+      },
+      {
+        "name": "grep",
+        "version": "3.11-4"
+      },
+      {
+        "name": "gzip",
+        "version": "1.13-1"
+      },
+      {
+        "name": "hostname",
+        "version": "3.25"
+      },
+      {
+        "name": "init-system-helpers",
+        "version": "1.69~deb13u1"
+      },
+      {
+        "name": "libacl1:amd64",
+        "version": "2.3.2-2+b1"
+      },
+      {
+        "name": "libapt-pkg7.0:amd64",
+        "version": "3.0.3"
+      },
+      {
+        "name": "libasan8:amd64",
+        "version": "14.2.0-19"
+      },
+      {
+        "name": "libatomic1:amd64",
+        "version": "14.2.0-19"
+      },
+      {
+        "name": "libattr1:amd64",
+        "version": "1:2.5.2-3"
+      },
+      {
+        "name": "libaudit-common",
+        "version": "1:4.0.2-2"
+      },
+      {
+        "name": "libaudit1:amd64",
+        "version": "1:4.0.2-2+b2"
+      },
+      {
+        "name": "libbinutils:amd64",
+        "version": "2.44-3"
+      },
+      {
+        "name": "libblkid1:amd64",
+        "version": "2.41.5-0+deb13u1"
+      },
+      {
+        "name": "libbsd0:amd64",
+        "version": "0.12.2-2"
+      },
+      {
+        "name": "libbz2-1.0:amd64",
+        "version": "1.0.8-6"
+      },
+      {
+        "name": "libc-bin",
+        "version": "2.41-12+deb13u4"
+      },
+      {
+        "name": "libc-dev-bin",
+        "version": "2.41-12+deb13u4"
+      },
+      {
+        "name": "libc6-dev:amd64",
+        "version": "2.41-12+deb13u4"
+      },
+      {
+        "name": "libc6:amd64",
+        "version": "2.41-12+deb13u4"
+      },
+      {
+        "name": "libcap-ng0:amd64",
+        "version": "0.8.5-4+b1"
+      },
+      {
+        "name": "libcap2:amd64",
+        "version": "1:2.75-10+deb13u1+b1"
+      },
+      {
+        "name": "libcc1-0:amd64",
+        "version": "14.2.0-19"
+      },
+      {
+        "name": "libcom-err2:amd64",
+        "version": "1.47.2-3+b12"
+      },
+      {
+        "name": "libcrypt-dev:amd64",
+        "version": "1:4.4.38-1"
+      },
+      {
+        "name": "libcrypt1:amd64",
+        "version": "1:4.4.38-1"
+      },
+      {
+        "name": "libctf-nobfd0:amd64",
+        "version": "2.44-3"
+      },
+      {
+        "name": "libctf0:amd64",
+        "version": "2.44-3"
+      },
+      {
+        "name": "libdb5.3t64:amd64",
+        "version": "5.3.28+dfsg2-9"
+      },
+      {
+        "name": "libdebconfclient0:amd64",
+        "version": "0.280"
+      },
+      {
+        "name": "libdpkg-perl",
+        "version": "1.22.22"
+      },
+      {
+        "name": "libffi8:amd64",
+        "version": "3.4.8-2"
+      },
+      {
+        "name": "libgcc-14-dev:amd64",
+        "version": "14.2.0-19"
+      },
+      {
+        "name": "libgcc-s1:amd64",
+        "version": "14.2.0-19"
+      },
+      {
+        "name": "libgdbm-compat4t64:amd64",
+        "version": "1.24-2"
+      },
+      {
+        "name": "libgdbm6t64:amd64",
+        "version": "1.24-2"
+      },
+      {
+        "name": "libgmp10:amd64",
+        "version": "2:6.3.0+dfsg-3"
+      },
+      {
+        "name": "libgomp1:amd64",
+        "version": "14.2.0-19"
+      },
+      {
+        "name": "libgprofng0:amd64",
+        "version": "2.44-3"
+      },
+      {
+        "name": "libgssapi-krb5-2:amd64",
+        "version": "1.21.3-5+deb13u1"
+      },
+      {
+        "name": "libhogweed6t64:amd64",
+        "version": "3.10.1-1"
+      },
+      {
+        "name": "libhwasan0:amd64",
+        "version": "14.2.0-19"
+      },
+      {
+        "name": "libisl23:amd64",
+        "version": "0.27-1"
+      },
+      {
+        "name": "libitm1:amd64",
+        "version": "14.2.0-19"
+      },
+      {
+        "name": "libjansson4:amd64",
+        "version": "2.14-2+b3"
+      },
+      {
+        "name": "libk5crypto3:amd64",
+        "version": "1.21.3-5+deb13u1"
+      },
+      {
+        "name": "libkeyutils1:amd64",
+        "version": "1.6.3-6"
+      },
+      {
+        "name": "libkrb5-3:amd64",
+        "version": "1.21.3-5+deb13u1"
+      },
+      {
+        "name": "libkrb5support0:amd64",
+        "version": "1.21.3-5+deb13u1"
+      },
+      {
+        "name": "liblastlog2-2:amd64",
+        "version": "2.41.5-0+deb13u1"
+      },
+      {
+        "name": "libldap2:amd64",
+        "version": "2.6.10+dfsg-1"
+      },
+      {
+        "name": "liblsan0:amd64",
+        "version": "14.2.0-19"
+      },
+      {
+        "name": "liblz4-1:amd64",
+        "version": "1.10.0-4"
+      },
+      {
+        "name": "liblzma5:amd64",
+        "version": "5.8.1-1+deb13u2"
+      },
+      {
+        "name": "libmd0:amd64",
+        "version": "1.1.0-2+b1"
+      },
+      {
+        "name": "libmount1:amd64",
+        "version": "2.41.5-0+deb13u1"
+      },
+      {
+        "name": "libmpc3:amd64",
+        "version": "1.3.1-1+b3"
+      },
+      {
+        "name": "libmpfr6:amd64",
+        "version": "4.2.2-1"
+      },
+      {
+        "name": "libncursesw6:amd64",
+        "version": "6.5+20250216-2"
+      },
+      {
+        "name": "libnettle8t64:amd64",
+        "version": "3.10.1-1"
+      },
+      {
+        "name": "libpam-modules-bin",
+        "version": "1.7.0-5"
+      },
+      {
+        "name": "libpam-modules:amd64",
+        "version": "1.7.0-5"
+      },
+      {
+        "name": "libpam-runtime",
+        "version": "1.7.0-5"
+      },
+      {
+        "name": "libpam0g:amd64",
+        "version": "1.7.0-5"
+      },
+      {
+        "name": "libpcre2-8-0:amd64",
+        "version": "10.46-1~deb13u1"
+      },
+      {
+        "name": "libperl5.40:amd64",
+        "version": "5.40.1-6+deb13u1"
+      },
+      {
+        "name": "libpq-dev",
+        "version": "17.11-0+deb13u1"
+      },
+      {
+        "name": "libpq5:amd64",
+        "version": "17.11-0+deb13u1"
+      },
+      {
+        "name": "libquadmath0:amd64",
+        "version": "14.2.0-19"
+      },
+      {
+        "name": "libreadline8t64:amd64",
+        "version": "8.2-6"
+      },
+      {
+        "name": "libsasl2-2:amd64",
+        "version": "2.1.28+dfsg1-9"
+      },
+      {
+        "name": "libsasl2-modules-db:amd64",
+        "version": "2.1.28+dfsg1-9"
+      },
+      {
+        "name": "libseccomp2:amd64",
+        "version": "2.6.0-2"
+      },
+      {
+        "name": "libselinux1:amd64",
+        "version": "3.8.1-1"
+      },
+      {
+        "name": "libsemanage-common",
+        "version": "3.8.1-1"
+      },
+      {
+        "name": "libsemanage2:amd64",
+        "version": "3.8.1-1"
+      },
+      {
+        "name": "libsepol2:amd64",
+        "version": "3.8.1-1"
+      },
+      {
+        "name": "libsframe1:amd64",
+        "version": "2.44-3"
+      },
+      {
+        "name": "libsmartcols1:amd64",
+        "version": "2.41.5-0+deb13u1"
+      },
+      {
+        "name": "libsqlite3-0:amd64",
+        "version": "3.46.1-7+deb13u1"
+      },
+      {
+        "name": "libssl-dev:amd64",
+        "version": "3.5.7-1~deb13u3"
+      },
+      {
+        "name": "libssl3t64:amd64",
+        "version": "3.5.7-1~deb13u3"
+      },
+      {
+        "name": "libstdc++-14-dev:amd64",
+        "version": "14.2.0-19"
+      },
+      {
+        "name": "libstdc++6:amd64",
+        "version": "14.2.0-19"
+      },
+      {
+        "name": "libsystemd0:amd64",
+        "version": "257.13-1~deb13u1"
+      },
+      {
+        "name": "libtinfo6:amd64",
+        "version": "6.5+20250216-2"
+      },
+      {
+        "name": "libtsan2:amd64",
+        "version": "14.2.0-19"
+      },
+      {
+        "name": "libubsan1:amd64",
+        "version": "14.2.0-19"
+      },
+      {
+        "name": "libudev1:amd64",
+        "version": "257.13-1~deb13u1"
+      },
+      {
+        "name": "libuuid1:amd64",
+        "version": "2.41.5-0+deb13u1"
+      },
+      {
+        "name": "libxxhash0:amd64",
+        "version": "0.8.3-2"
+      },
+      {
+        "name": "libzstd1:amd64",
+        "version": "1.5.7+dfsg-1"
+      },
+      {
+        "name": "linux-libc-dev",
+        "version": "6.12.113-1"
+      },
+      {
+        "name": "login",
+        "version": "1:4.16.0-2+really2.41.5-0+deb13u1"
+      },
+      {
+        "name": "login.defs",
+        "version": "1:4.17.4-2"
+      },
+      {
+        "name": "make",
+        "version": "4.4.1-2"
+      },
+      {
+        "name": "mawk",
+        "version": "1.3.4.20250131-1"
+      },
+      {
+        "name": "mount",
+        "version": "2.41.5-0+deb13u1"
+      },
+      {
+        "name": "ncurses-base",
+        "version": "6.5+20250216-2"
+      },
+      {
+        "name": "ncurses-bin",
+        "version": "6.5+20250216-2"
+      },
+      {
+        "name": "netbase",
+        "version": "6.5"
+      },
+      {
+        "name": "openssl",
+        "version": "3.5.7-1~deb13u3"
+      },
+      {
+        "name": "openssl-provider-legacy",
+        "version": "3.5.7-1~deb13u3"
+      },
+      {
+        "name": "passwd",
+        "version": "1:4.17.4-2"
+      },
+      {
+        "name": "patch",
+        "version": "2.8-2"
+      },
+      {
+        "name": "perl",
+        "version": "5.40.1-6+deb13u1"
+      },
+      {
+        "name": "perl-base",
+        "version": "5.40.1-6+deb13u1"
+      },
+      {
+        "name": "perl-modules-5.40",
+        "version": "5.40.1-6+deb13u1"
+      },
+      {
+        "name": "readline-common",
+        "version": "8.2-6"
+      },
+      {
+        "name": "rpcsvc-proto",
+        "version": "1.4.3-1"
+      },
+      {
+        "name": "sed",
+        "version": "4.9-2+deb13u1"
+      },
+      {
+        "name": "sqv",
+        "version": "1.3.0-3+b2"
+      },
+      {
+        "name": "sysvinit-utils",
+        "version": "3.14-4"
+      },
+      {
+        "name": "tar",
+        "version": "1.35+dfsg-3.1"
+      },
+      {
+        "name": "tzdata",
+        "version": "2026b-0+deb13u1"
+      },
+      {
+        "name": "util-linux",
+        "version": "2.41.5-0+deb13u1"
+      },
+      {
+        "name": "xz-utils",
+        "version": "5.8.1-1+deb13u2"
+      },
+      {
+        "name": "zlib1g:amd64",
+        "version": "1:1.3.dfsg+really1.3.1-1+b1"
+      }
+    ],
+    "os": {
+      "ID": "debian",
+      "VERSION_ID": "13"
+    },
+    "pip": "25.0.1",
+    "pip_downloads": [
+      {
+        "name": "annotated-doc",
+        "sha256": "117bac03a25ede5df5440e855b32d556049ca169ead221505badf432fed4b101",
+        "url": "https://files.pythonhosted.org/packages/3e/30/e900b21425a860e195f32e37657aa1f7c7f2b1bfb26f03ca209b90933c06/annotated_doc-0.0.5-py3-none-any.whl",
+        "version": "0.0.5"
+      },
+      {
+        "name": "annotated-types",
+        "sha256": "f072f4d804ea359e4eaf198b1af7a8b0943881a87f31bb764f8bf219bb9419e0",
+        "url": "https://files.pythonhosted.org/packages/99/91/8acff4f5e50511b911bbccb72b8628a49c68ce14148cd9f6431094859a90/annotated_types-0.8.0-py3-none-any.whl",
+        "version": "0.8.0"
+      },
+      {
+        "name": "anyio",
+        "sha256": "6152fdbbf9a77fdec97731721bebf7c4c44f7c29b424b0065826173efc7ed101",
+        "url": "https://files.pythonhosted.org/packages/12/b8/4bd346e22b28902df4d651910f5242c28d84e4a5c2435ca5c3f797ed7e2e/anyio-4.15.1-py3-none-any.whl",
+        "version": "4.15.1"
+      },
+      {
+        "name": "click",
+        "sha256": "255bc9599cf7748b4b1a446ccc735421bd08a2ae529a8b88597d3de5664ee360",
+        "url": "https://files.pythonhosted.org/packages/58/50/6c0d534c5f134586a8e1ba4e330569e32f057e33372ae556463212fb4cd3/click-8.5.0-py3-none-any.whl",
+        "version": "8.5.0"
+      },
+      {
+        "name": "fastapi",
+        "sha256": "bfb91aa2d334c61cb35ba9a116fc123b3d3df31640b801cf57a7a78ec3f603b3",
+        "url": "https://files.pythonhosted.org/packages/cb/03/10388a42375ee7e4ac9b94eb2c5c569c8b5795e377e701c9ac3ad63de890/fastapi-0.141.1-py3-none-any.whl",
+        "version": "0.141.1"
+      },
+      {
+        "name": "h11",
+        "sha256": "63cf8bbe7522de3bf65932fda1d9c2772064ffb3dae62d55932da54b31cb6c86",
+        "url": "https://files.pythonhosted.org/packages/04/4b/29cac41a4d98d144bf5f6d33995617b185d14b22401f75ca86f384e87ff1/h11-0.16.0-py3-none-any.whl",
+        "version": "0.16.0"
+      },
+      {
+        "name": "idna",
+        "sha256": "815e7be7a7806d54abb586dc943addc79e8b2ee16915059658cbeff4b1b43bf4",
+        "url": "https://files.pythonhosted.org/packages/57/b0/0e52c878c53f245edd3a11020f20979b3f490f245af532c7cae3027754b5/idna-3.19-py3-none-any.whl",
+        "version": "3.19"
+      },
+      {
+        "name": "psycopg",
+        "sha256": "ce5aa5cdb4f9379f00f487590e5890bfa7df9a164648c969ffa628505e21af4e",
+        "url": "https://files.pythonhosted.org/packages/3d/2e/d0a645bcaadde68bd6d93c43f02f14b0191bdda367ce3f7722abe3da744a/psycopg-3.3.5-py3-none-any.whl",
+        "version": "3.3.5"
+      },
+      {
+        "name": "psycopg-binary",
+        "sha256": "682a17a57415c3ca1731eec018ed031f012ffcb81ba74806eb219cb396065672",
+        "url": "https://files.pythonhosted.org/packages/21/d1/0f244dfef389e52e9dc3056f2a9033d1f6901e97d24d9a9c8b836e32ab6b/psycopg_binary-3.3.5-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl",
+        "version": "3.3.5"
+      },
+      {
+        "name": "psycopg-pool",
+        "sha256": "2af5b432941c4c9ad5c87b3fa410aec910ec8f7c122855897983a06c45f2e4b5",
+        "url": "https://files.pythonhosted.org/packages/37/ed/89c2c620af0e1660354cd8aabf9f5b21f911597ce22acb37c805d6c86bc8/psycopg_pool-3.3.1-py3-none-any.whl",
+        "version": "3.3.1"
+      },
+      {
+        "name": "pydantic",
+        "sha256": "346a034f080da3755d8e9cb5e00e8b07de1d39e4f6e2c87d8ab7cafa0b269a73",
+        "url": "https://files.pythonhosted.org/packages/eb/47/c95ffc2009878c7aac0c5e08528022dcb885933252a88b5f170058014464/pydantic-2.13.5-py3-none-any.whl",
+        "version": "2.13.5"
+      },
+      {
+        "name": "pydantic-core",
+        "sha256": "0fc5be0abd4a407e200d844b404e33639a554e7bd0d448e7b9ae181be4789ac2",
+        "url": "https://files.pythonhosted.org/packages/c0/a4/eb9409ec0736e50aa70a412f16c204ed149516846912f7e6724d4c73ee53/pydantic_core-2.46.5-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+        "version": "2.46.5"
+      },
+      {
+        "name": "pyjwt",
+        "sha256": "66adcc2aff09b3f1bbd95fc1e1577df8ac8723c978552fd43304c8a290ac5728",
+        "url": "https://files.pythonhosted.org/packages/a3/5e/ecf12fdb62546d64385c158514e9b2b671f7832108ef2ecd2020ce0af2d1/pyjwt-2.13.0-py3-none-any.whl",
+        "version": "2.13.0"
+      },
+      {
+        "name": "starlette",
+        "sha256": "a86dd39d14bb45f85a3d18525215a9ef0cfd1f192ac793220e72598c90335f0c",
+        "url": "https://files.pythonhosted.org/packages/c8/cb/6a6a47d5b464bd08695d254f3da6e7986cc70c9fa5d778eda57538edfe56/starlette-1.6.0-py3-none-any.whl",
+        "version": "1.6.0"
+      },
+      {
+        "name": "typing-extensions",
+        "sha256": "481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8",
+        "url": "https://files.pythonhosted.org/packages/49/d3/b8441a820a491ddfc024b0b0cf0393375b75ea13866d9c66727e54c2fc80/typing_extensions-4.16.0-py3-none-any.whl",
+        "version": "4.16.0"
+      },
+      {
+        "name": "typing-inspection",
+        "sha256": "65b8397ba37ccbce054456aaccddfc91e6e3083c92824df348d96ca832f3f147",
+        "url": "https://files.pythonhosted.org/packages/67/81/4add07e5172b7ac40d8ed5ff580409a7801a4fe26d529bdd915401dabfbe/typing_inspection-0.4.4-py3-none-any.whl",
+        "version": "0.4.4"
+      },
+      {
+        "name": "uvicorn",
+        "sha256": "f86e41a149d7d05a9969337e3946a9c171c06a5d42680896daaba624aeac8da1",
+        "url": "https://files.pythonhosted.org/packages/f1/79/4a20b54ab0491485ccd8c077db2d39187c7f12b3e15485d38a7be37c81b4/uvicorn-0.52.4-py3-none-any.whl",
+        "version": "0.52.4"
+      }
+    ],
+    "pip_hash_evidence": "pip --require-hashes plus installation-report v1; not independent capture",
+    "python": "3.12.14",
+    "schema": 1
+  },
+  "gaps": [
+    "apt archive origins/hashes and repository snapshots not captured",
+    "upstream redirects, transport mirrors and effective egress not independently observed",
+    "hosted runner/build tools observed, not locked; whole-image bit reproducibility unproven",
+    "local config ID is not a published registry manifest or deployment acceptance",
+    "daemon cancellation after CLI timeout not independently proven; hosted runner teardown required"
+  ],
+  "image_publication": "NOT_RUN",
+  "local_image_id": "sha256:fb5f63b31a208afa3be890f5418b2fb5bc7c6120dd422af0ad5a3d8e715662aa",
+  "placeholder_configuration": {
+    "provider_execution": "DENIED",
+    "runtime_readiness": "UNVERIFIED",
+    "scope": "compose_schema_and_canonical_settings_only",
+    "status": "OFFLINE_CONTRACT_VALIDATED"
+  },
+  "provider_calls": 0,
+  "run_identity": {
+    "GITHUB_ACTIONS": "true",
+    "GITHUB_ACTOR": "Gopi-git-bit",
+    "GITHUB_ACTOR_ID": "200721521",
+    "GITHUB_EVENT_NAME": "workflow_dispatch",
+    "GITHUB_REF": "refs/heads/main",
+    "GITHUB_REPOSITORY": "Gopi-git-bit/New-logistic-",
+    "GITHUB_RUN_ATTEMPT": "1",
+    "GITHUB_RUN_ID": "38995824366",
+    "GITHUB_SHA": "0c96e33ac887b536ef4f947b9f4c7cbb395b80f9",
+    "GITHUB_TRIGGERING_ACTOR": "Gopi-git-bit",
+    "GITHUB_WORKFLOW_REF": "Gopi-git-bit/New-logistic-/.github/workflows/api-build-only.yml@refs/heads/main",
+    "GITHUB_WORKFLOW_SHA": "0c96e33ac887b536ef4f947b9f4c7cbb395b80f9",
+    "RUNNER_ARCH": "X64",
+    "RUNNER_ENVIRONMENT": "github-hosted",
+    "RUNNER_OS": "Linux"
+  },
+  "runtime_readiness": "UNVERIFIED",
+  "stage": "COMPLETE",
+  "status": "BUILD_ONLY_PASSED",
+  "tools": {
+    "buildx": "github.com/docker/buildx v0.38.0 0dbe87f36ed472fe36b6796c3f70b4210a731fc5",
+    "compose": "2.38.2",
+    "docker_client": "28.0.4",
+    "docker_server": "28.0.4",
+    "host_python": "3.12.3"
+  },
+  "vps_changes": 0
+}

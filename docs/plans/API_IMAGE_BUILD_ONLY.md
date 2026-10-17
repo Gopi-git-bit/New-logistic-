@@ -2,7 +2,8 @@
 
 **Date:** 16 October 2026. **Decision/evidence:** D-45 / M7-E009.
 **Preparation base:** merged PR #26, `f8e7cb9a548e9956a0f1f74edc6f73e8fd2a76ef`.
-**State:** route prepared for review; actual image build and dispatch NOT RUN.
+**Current state, 17 October 2026:** PR #27 merged; one authorized build PASSED.
+Publication and runtime activation remain NOT RUN.
 
 PR #26 is merged. Its final reviewed tree is
 `61fca5826a4fdcf018d1df077d10eea4681639ab` and
@@ -10,6 +11,18 @@ PR #26 is merged. Its final reviewed tree is
 passed all five jobs. This continuation implements blueprint steps 3–4 as a
 manual route; it does not execute them. The parent M7-DELIVERY-DRYRUN remains
 IN_PROGRESS until separately authorized build evidence has been reviewed.
+
+## Execution closeout
+
+[Run 38995824366](https://github.com/Gopi-git-bit/New-logistic-/actions/runs/38995824366)
+passed once at source/workflow SHA `0c96e33ac887b536ef4f947b9f4c7cbb395b80f9`,
+tree `10d46eea1a7e085ec3b70402e91c3b43f7bd9134`. M7-E010 and the
+[review](../reports/API_BUILD_EVIDENCE_REVIEW_20261017.md) record source/download
+correlation, local config ID and scoped cleanup. The
+[captured report](../reports/API_BUILD_ONLY_20261017.json) remains bound to that
+run; no image remains for push. [Publication criteria](API_CANDIDATE_PUBLICATION_GATE.md)
+are separate proposals. Earlier preparation/execution instructions are historical
+and do not authorize a repeat run.
 
 ## Admission and permissions
 

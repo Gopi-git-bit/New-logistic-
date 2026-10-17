@@ -35,6 +35,24 @@
 
 ## Bounded Development Authorizations
 
+### D-46: Build Evidence Review and Candidate Publication Criteria
+
+**Status:** Owner instruction, 17 October 2026: review successful build evidence
+and remaining reproducibility gaps before publication. Authorizes records review,
+a feature PR and normal exact-head CI; no merge, new build, registry access/push,
+credential/settings change or target/provider execution.
+
+Reuse run 38995824366 and preserve its original source/run binding. M7-E010
+distinguishes publication blockers, reproducibility risks and deployment/live
+gaps. A deleted local image/config ID is not a retained or published artifact.
+The [review](reports/API_BUILD_EVIDENCE_REVIEW_20261017.md) and
+[candidate criteria](plans/API_CANDIDATE_PUBLICATION_GATE.md) are the handoff.
+
+Private GHCR/package/visibility, permissions, retention, image security/provenance
+and candidate-only deferrals are proposals, not owner approvals. Parent delivery
+remains IN_PROGRESS pending handoff acceptance. No reproducibility/DB/runtime/live
+gap is waived; D-33 and financial controls remain unchanged.
+
 ### D-45: Manual Secret-Free API Build Route Preparation
 
 **Status:** Owner continuation instruction, 16 October 2026, after PR #26 merge
