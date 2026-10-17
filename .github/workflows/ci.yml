@@ -78,6 +78,11 @@ jobs:
           python -m ruff format --check --config workers/pyproject.toml db/scripts/disposable_contract.py db/scripts/disposable_runtime.py db/scripts/admit_disposable_ci.py db/scripts/run_disposable_ci.py db/tests/test_disposable_ci.py
           python -m mypy --strict --explicit-package-bases --follow-imports=silent db/scripts/disposable_contract.py db/scripts/disposable_runtime.py db/scripts/admit_disposable_ci.py db/scripts/run_disposable_ci.py
           python -m pytest db/tests -q
+      - name: Check Xano evaluation contracts offline
+        run: |
+          python -m ruff check --config workers/pyproject.toml prototypes/xano
+          python -m ruff format --check --config workers/pyproject.toml prototypes/xano
+          python -m unittest discover -s prototypes/xano/tests -v
       - name: Run API security tests
         env:
           DATABASE_URL: postgresql://localhost/test
