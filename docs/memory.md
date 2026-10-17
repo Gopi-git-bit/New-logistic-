@@ -1,5 +1,7 @@
 # Zippy Logistics — Memory
 
+**D-49 implementation, 2026-10-17:** The owner selects the disposable PostgreSQL workflow implementation first, independently of the registry/key verifier. PR #30 is merged at `0dc43287886755a440a39a5dcc07399119da515d`, with all five post-merge CI jobs passed in run 39008342302. The [implementation contract](plans/DISPOSABLE_POSTGRES_CI_IMPLEMENTATION.md) prepares a bounded manual-only route for all 72 cases. Implementation review and merge do not authorize its first proof dispatch. Ordinary CI runs offline guard regressions only. The 72 database cases remain unverified; publication, live M7 and Qwen remain denied. No registry/key setup, provider call, VPS change or database proof is performed in this slice.
+
 **D-48 planning, 2026-10-17:** PR #29 merged into main at
 `2fabdd8eaa16435d705a769d8cb15e8460a665ae`; post-merge
 [CI 39000950241](https://github.com/Gopi-git-bit/New-logistic-/actions/runs/39000950241)
