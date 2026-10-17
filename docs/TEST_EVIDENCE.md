@@ -1766,3 +1766,30 @@ REPRO-01 through REPRO-04 remain explicit, unaccepted risks. No new reproducibil
 security, database, deployment or live-provider waiver. Historical M7-E010 and
 its build identities remain unchanged. Live M7/Qwen disabled; D-33 pending;
 all refunds require manual approval.
+
+### PR #29 merge-review correction — 17 October 2026
+
+Two interface regressions were reproduced before correction:
+
+- Automated review identified that Trivy's separate secret configuration could
+  suppress rules. Both archive scan and SBOM commands now explicitly pass
+  `--secret-config ""`, alongside the disabled general config. A synthetic
+  ambient secret-rules file cannot select the scanner configuration.
+- The pinned upload-artifact v4.6.2 emits bare SHA-256 hex while REST artifact
+  metadata includes `sha256:`. The publisher now validates the exact bare-hex
+  action output before comparing its labelled value with REST metadata;
+  malformed, incorrectly prefixed and mismatched values still fail closed.
+
+Both new regressions failed against the prior head. After the fixes, the
+scoped suite reports **58 passed**, zero skips/warnings: 19 preparation,
+13 build-only and 26 publisher cases. Ruff lint/format and strict typing of
+all seven helpers pass. Corrected-head and post-merge CI must be recorded on PR #29.
+The earlier 56-case checkpoint above remains the initial implementation result.
+
+Interfaces verified against pinned primary sources:
+[Trivy secret flag](https://github.com/aquasecurity/trivy/blob/v0.76.0/pkg/flag/secret_flags.go),
+[empty-path behavior](https://github.com/aquasecurity/trivy/blob/v0.76.0/pkg/fanal/secret/scanner.go),
+[upload action digest output](https://github.com/actions/upload-artifact/blob/ea165f8d65b6e75b540449e92b4886f43607fa02/README.md#outputs).
+No image build, provider call, real-secret dispatch, publication, deployment or
+VPS change occurred. Registry/key verification and publication authorization
+remain separate; no reproducibility or database gap was closed by this fix.

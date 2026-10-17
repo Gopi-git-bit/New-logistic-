@@ -45,8 +45,10 @@ def transfer(folder: Path, env: dict[str, str], auth: dict[str, Any], token: str
     )
     c.require(artifact["id"] == int(env["API_ARTIFACT_ID"]) and not artifact["expired"])
     c.require(artifact["name"] == "encrypted-api-candidate-" + auth["run_id"])
+    # The pinned upload action emits bare SHA-256 hex; the REST API labels the algorithm.
+    c.require(re.fullmatch(r"[a-f0-9]{64}", env["API_ARTIFACT_DIGEST"]))
     c.require(
-        artifact["digest"] == env["API_ARTIFACT_DIGEST"]
+        artifact["digest"] == "sha256:" + env["API_ARTIFACT_DIGEST"]
         and re.fullmatch(c.DIGEST, artifact["digest"])
     )
     c.require(artifact["workflow_run"]["id"] == int(auth["run_id"]))

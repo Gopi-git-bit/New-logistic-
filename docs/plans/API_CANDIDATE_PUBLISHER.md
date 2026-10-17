@@ -75,7 +75,8 @@ Archive/registry compatibility has not been demonstrated by a real build in
 this slice.
 
 Pinned Trivy scans archive vulnerabilities and filesystem/image-configuration
-secrets. Ambient config loading, telemetry and version notices are disabled;
+secrets. Both general and separate secret-config loading are explicitly disabled
+with empty paths; telemetry and version notices are disabled;
 offline dependency identification avoids enrichment API calls while the explicit
 security database repository remains available. HIGH/CRITICAL findings,
 tool errors, missing/mismatched reports or an empty SBOM stop publication.
@@ -87,7 +88,10 @@ resolution input. Database failures are not converted to passes.
 
 Unsigned provenance binds workflow/source/run/expiry, build report/context and
 pip receipts, base/platform, policy/tools/gaps, archive, scan, SBOM and database
-hashes. The transfer binds ciphertext, bundle and provenance hashes to producer
+hashes. The pinned upload action emits bare SHA-256 hex; the publisher validates
+that exact representation and compares its algorithm-prefixed value to REST
+artifact metadata, refusing malformed values and mismatches. The transfer binds
+ciphertext, bundle and provenance hashes to producer
 outputs and the same GitHub run/artifact ID/digest/source. age authenticates the
 ciphertext; workflow/artifact identity supplies the selected authenticity
 boundary. No OIDC/id-token or attestation permission is requested, and no signed

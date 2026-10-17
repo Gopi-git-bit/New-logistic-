@@ -593,7 +593,7 @@ class PipelineHarness(unittest.TestCase):
         for line in Path(self.env["GITHUB_OUTPUT"]).read_text().splitlines():
             key, value = line.split("=", 1)
             self.env["API_" + key.upper()] = value
-        self.env.update(API_ARTIFACT_ID="42", API_ARTIFACT_DIGEST="sha256:" + "e" * 64)
+        self.env.update(API_ARTIFACT_ID="42", API_ARTIFACT_DIGEST="e" * 64)
         return output, result
 
     def artifact_api(self, path, token):
@@ -689,6 +689,31 @@ class PipelineHarness(unittest.TestCase):
             self.prepare()
         self.assertEqual(list((self.root / "export").iterdir()), [])
         self.assertFalse(list(self.root.glob("api-candidate-*")))
+
+    def test_pinned_upload_action_bare_digest_matches_prefixed_rest_digest(self):
+        output, _ = self.prepare()
+        # upload-artifact v4.6.2 emits bare hex; REST artifact metadata includes the algorithm.
+        self.env["API_ARTIFACT_DIGEST"] = "e" * 64
+        result = {}
+        self.publish(output, result)
+        self.assertEqual(result["status"], "PRIVATE_CANDIDATE_PUBLISHED")
+        for value in ("e" * 63, "sha256:" + "e" * 64, "z" * 64, "0" * 64):
+            self.env["API_ARTIFACT_DIGEST"] = value
+            self.calls.clear()
+            with self.subTest(digest=value), self.assertRaises(ValueError):
+                self.publish(output, {})
+            self.assertTrue(all(args[0] == "git" for args in self.calls))
+
+    def test_trivy_ignores_separate_ambient_secret_configuration(self):
+        (self.repo / "trivy-secret.yaml").write_text(
+            "enable-builtin-rules: [synthetic-disabled-rule]\n"
+        )
+        self.prepare()
+        scans = [args for args in self.calls if Path(args[0]).name == "trivy"]
+        self.assertEqual(len(scans), 2)
+        for args in scans:
+            self.assertIn("--secret-config", args)
+            self.assertEqual(args[args.index("--secret-config") + 1], "")
 
     def test_readback_mismatch_keeps_unknown_push_audit_and_never_replays(self):
         output, _ = self.prepare()

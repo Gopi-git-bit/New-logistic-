@@ -108,6 +108,8 @@ def prepare(
             str(archive),
             "--config",
             "",
+            "--secret-config",
+            "",
             "--ignorefile",
             os.devnull,
             "--cache-dir",
