@@ -533,6 +533,12 @@ class PipelineHarness(unittest.TestCase):
                 target.write_bytes(b"FAKE" + source.read_bytes())
             return ""
         if tool == "trivy":
+            self.assertEqual(args[args.index("--config") + 1], "")
+            self.assertIn("--disable-telemetry", args)
+            self.assertIn("--offline-scan", args)
+            self.assertIn("--skip-version-check", args)
+            if "cyclonedx" not in args:
+                self.assertEqual(args[args.index("--image-config-scanners") + 1], "secret")
             if self.scan_failure:
                 raise ValueError("TOOL_FAILED")
             cache = Path(args[args.index("--cache-dir") + 1])

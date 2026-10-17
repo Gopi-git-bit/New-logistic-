@@ -107,7 +107,7 @@ def prepare(
             "--input",
             str(archive),
             "--config",
-            os.devnull,
+            "",
             "--ignorefile",
             os.devnull,
             "--cache-dir",
@@ -116,12 +116,17 @@ def prepare(
             "3m",
             "--db-repository",
             "ghcr.io/aquasecurity/trivy-db:2",
+            "--disable-telemetry",
+            "--skip-version-check",
+            "--offline-scan",
         ]
         c.command(
             flags
             + [
                 "--scanners",
                 "vuln,secret",
+                "--image-config-scanners",
+                "secret",
                 "--severity",
                 "HIGH,CRITICAL",
                 "--exit-code",

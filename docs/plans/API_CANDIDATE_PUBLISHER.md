@@ -74,7 +74,10 @@ representations fail closed and require a reviewed compatibility correction.
 Archive/registry compatibility has not been demonstrated by a real build in
 this slice.
 
-Pinned Trivy scans archive vulnerabilities and secrets. HIGH/CRITICAL findings,
+Pinned Trivy scans archive vulnerabilities and filesystem/image-configuration
+secrets. Ambient config loading, telemetry and version notices are disabled;
+offline dependency identification avoids enrichment API calls while the explicit
+security database repository remains available. HIGH/CRITICAL findings,
 tool errors, missing/mismatched reports or an empty SBOM stop publication.
 There is **no image-security exception input**. CycloneDX SBOM and database
 metadata/content hash are retained; the database must have schema 2, be at most
