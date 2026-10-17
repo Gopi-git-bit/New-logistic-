@@ -1822,3 +1822,13 @@ remain gaps. Earlier 58-case publisher regressions and five-job post-merge CI
 39000950241 are reused as existing preparation evidence, not rerun as a live
 verification. No real secret, key provisioning, SQL proof, Docker build/start,
 registry publication, manual dispatch, VPS action or provider call occurred.
+
+## M7-E013 — Disposable database implementation preparation (2026-10-17)
+
+**Decision:** D-49. **Baseline:** `0dc43287886755a440a39a5dcc07399119da515d`.
+
+Implements the [manual-only disposable CI contract](plans/DISPOSABLE_POSTGRES_CI_IMPLEMENTATION.md) for review. The inherited automatic PR proof trigger is removed; ordinary five-job CI runs offline guard tests only. Canonical migrations, SQL roles/fixtures, integration test assertions and minimum-count report checker are unchanged. M4's Settings fixture receives explicit public synthetic governance fields; no configuration validator is weakened.
+
+Local offline validation: **114 db guard/report/socket regression cases passed**. Synthetic subprocesses/XML and mocked Docker/GitHub responses test admission, identity/caps/mounts, real-denial errno handling, report/source/nonce binding, nonzero exit/timeout propagation, secret/size rejection, resource conflict, ambiguous creation and guarded cleanup. These are not the 72 PostgreSQL integration proofs. Scoped Ruff lint/format and strict host-helper typing are checked; complete dependency-aware runtime typing and ordinary API regressions are also required in exact-head CI. Action pins were read from upstream commit metadata; no action binary or container was executed locally.
+
+The proof workflow and all image pulls/builds/SQL phases remain undispatched. Actual Docker behavior, PostgreSQL fixture compatibility and execution bounds require the separately approved first proof. No raw SQL log/secret, registry write, provider/VPS call or reproducibility acceptance is claimed. Exact published head, CI results and any corrections are recorded on the implementation PR.

@@ -1,3 +1,7 @@
+# Historical disposable proof preparation
+
+**D-49 supersedes the automatic PR execution route below.** The [current implementation](DISPOSABLE_POSTGRES_CI_IMPLEMENTATION.md) is manual-only and unexecuted. Legacy harness defaults remain available for separately authorized use. Historical configuration is retained below as evidence, not a dispatch instruction.
+
 # Disposable database proof slice
 
 Authority: the owner accepted the mock-plus-real-PostgreSQL plan on 2026-10-12.

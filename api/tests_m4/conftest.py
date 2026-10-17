@@ -7,7 +7,7 @@ from uuid import UUID, uuid4
 import jwt
 import pytest
 
-from api.config import Settings
+from api.config import SecretStr, Settings
 from api.database import Database
 from api.repositories_finance import FinanceRepository
 
@@ -54,6 +54,13 @@ def settings() -> Settings:
         pricing_per_km=Decimal("12.50"),
         pricing_per_kg=Decimal("0.75"),
         razorpay_webhook_secret=WEBHOOK_SECRET,
+        # Public synthetic governance configuration; no remote database is opened.
+        paperclip_database_url=SecretStr("host=/not-mounted dbname=unused user=unused"),
+        paperclip_owner_subject="paperclip-owner-test",
+        paperclip_executor_subject="paperclip-executor-test",
+        paperclip_policy_id=UUID("30000000-0000-0000-0000-000000000001"),
+        paperclip_agent_bindings={"paperclip-agent-test": UUID("20000000-0000-0000-0000-000000000001")},
+        paperclip_envelope_signing_key=SecretStr("paperclip-test-signing-key-32-bytes"),
     )
 
 

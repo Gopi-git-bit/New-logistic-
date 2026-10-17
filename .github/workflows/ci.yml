@@ -72,6 +72,12 @@ jobs:
           python -m ruff check --config workers/pyproject.toml scripts/prepare_api_build_context.py scripts/validate_api_staging_config.py scripts/run_api_build.py scripts/emit_api_build_metadata.py scripts/api_candidate_contract.py scripts/run_api_candidate.py scripts/publish_api_candidate.py
           python -m ruff format --check --config workers/pyproject.toml scripts/prepare_api_build_context.py scripts/validate_api_staging_config.py scripts/run_api_build.py scripts/emit_api_build_metadata.py scripts/api_candidate_contract.py scripts/run_api_candidate.py scripts/publish_api_candidate.py
           python -m mypy --strict scripts/prepare_api_build_context.py scripts/validate_api_staging_config.py scripts/run_api_build.py scripts/emit_api_build_metadata.py scripts/api_candidate_contract.py scripts/run_api_candidate.py scripts/publish_api_candidate.py
+      - name: Check disposable proof guards offline (no Docker or SQL)
+        run: |
+          python -m ruff check --config workers/pyproject.toml db/scripts/disposable_contract.py db/scripts/disposable_runtime.py db/scripts/admit_disposable_ci.py db/scripts/run_disposable_ci.py db/tests/test_disposable_ci.py
+          python -m ruff format --check --config workers/pyproject.toml db/scripts/disposable_contract.py db/scripts/disposable_runtime.py db/scripts/admit_disposable_ci.py db/scripts/run_disposable_ci.py db/tests/test_disposable_ci.py
+          python -m mypy --strict --explicit-package-bases --follow-imports=silent db/scripts/disposable_contract.py db/scripts/disposable_runtime.py db/scripts/admit_disposable_ci.py db/scripts/run_disposable_ci.py
+          python -m pytest db/tests -q
       - name: Run API security tests
         env:
           DATABASE_URL: postgresql://localhost/test

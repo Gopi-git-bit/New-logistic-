@@ -1,7 +1,8 @@
 # Disposable PostgreSQL CI proposal
 
 **Date:** 17 October 2026. **Decision/evidence:** D-48 / M7-E012.
-**Status:** DESIGN ONLY; NO WORKFLOW IMPLEMENTED OR EXECUTED.
+**Status:** DESIGN MERGED IN PR #30; D-49 IMPLEMENTATION IN REVIEW; NO PROOF EXECUTED.
+See the [implementation contract](DISPOSABLE_POSTGRES_CI_IMPLEMENTATION.md) for the new manual-only route and retained execution gates. Earlier implementation-pending language below records the approved design baseline.
 Baseline: `2fabdd8eaa16435d705a769d8cb15e8460a665ae`.
 This is a planning baseline. A later proof must bind its current approved
 main/workflow/source and post-merge CI; do not reuse this SHA as a dispatch input.

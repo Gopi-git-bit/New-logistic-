@@ -884,3 +884,32 @@ runtime/security/reproducibility/database proof is claimed. PR #29 merge
 `2fabdd8eaa16435d705a769d8cb15e8460a665ae` and post-merge CI 39000950241
 remain accepted preparation evidence. Parent delivery stays IN_PROGRESS;
 publication/live M7/Qwen denied; D-33 pending and every refund manually approved.
+
+## D-49 — Disposable PostgreSQL workflow implementation before registry/key verification
+
+**Date:** 2026-10-17. **Owner:** Gopinathan / Gopi-git-bit.
+
+The owner authorizes implementation of the [independent database proof](plans/DISPOSABLE_POSTGRES_CI_IMPLEMENTATION.md), covering all 72 currently skipped cases. PR #30 merge `0dc43287886755a440a39a5dcc07399119da515d` and post-merge CI 39008342302 (all five jobs passed) are the source baseline. Scope: workflow/harness code, necessary synthetic fixture configuration, meaningful offline regressions, documentation and feature-PR CI. Merge and the first disposable proof dispatch remain separately authorized. Registry/key verifier implementation is excluded from this slice.
+
+### Classification of the 72 skips
+
+**Intentional prerequisite-gated skips; database integration coverage outstanding.** The conditions demonstrate explicit test gating, not correctness of the unexecuted assertions.
+
+| Category | Cases | Guard in ordinary CI | Outstanding proof |
+|---|---:|---|---|
+| Core order/worker | 2 | ZIPPY_M3_TEST_DATABASE_URL absent | State transitions, workers/outbox and terminal evidence |
+| Dispatch | 31 | ZIPPY_M4_TEST_DATABASE_URL absent | Eligibility, tenant/actor boundaries, idempotency, atomic assignment, concurrency and rollback |
+| Finance | 23 | ZIPPY_M4_TEST_DATABASE_URL absent | Webhook/mapping validation, refunds, reconciliation and settlement gates |
+| Payment-intent privileges | 4 | ZIPPY_M4_TEST_DATABASE_URL absent | Restricted grants, denied writes/deletes and migration-owner separation |
+| Governance | 12 | PAPERCLIP_DISPOSABLE_PROOF not YES | Approval/grant binding, replay/concurrent consumption, locks and revocation |
+| **Total** | **72** | **Disposable-proof prerequisites unavailable** | **All unverified in ordinary CI** |
+
+These skips do not establish missing schemas/migrations. No production database, real service credential or live provider is required to test them. A later disposable proof must actually pass the canonical 60 operations and 12 governance cases with zero skips/failures/errors, restricted roles, controls, rollback/reapply and exact cleanup. Mocks test contracts and verifier failure paths; they cannot replace PostgreSQL evidence.
+
+### Implementation boundary
+
+The inherited PR-triggered database workflow is replaced by a manual-only, owner/main/source/first-attempt gate. This prevents implementation PR publication from starting the SQL proof. The existing five required checks remain; the api-tests job gains offline guard regressions, not a sixth required check. Two action commits are verified against their upstream repositories and pinned in the manual workflow.
+
+A new container adapter reuses unchanged canonical migrations, roles, SQL fixtures and integration assertions while preserving legacy harness defaults. Test processes have no network, no capabilities, no new privileges, a read-only source/root filesystem, generated application credentials only and bounded tmpfs/output transfer. Bootstrap/migration credentials remain outside tests. The runner derives the pinned PostgreSQL image's UID/GID and verifies positive/negative socket controls, actual role/process observations and source/run/phase-bound reports. Unknown resource cleanup is a failure; shared/prune operations are excluded.
+
+No Docker build/start, SQL proof, manual dispatch, registry/key configuration, protection change, VPS deployment or provider call is authorized/executed by this implementation slice. Reproducibility and all 72 database gaps remain open until their own evidence is accepted. Publication/live M7/Qwen remain denied; D-33 pending and every refund manually approved.
