@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "registry": "ghcr.io/gopi-git-bit/zippy-api",
+  "visibility": "private",
+  "package_id": null,
+  "recipient": null,
+  "access_review_sha256": null,
+  "access_review_expires_utc": null,
+  "max_archive_bytes": 2147483648,
+  "artifact_retention_days": 1,
+  "tools": {
+    "age": {
+      "version": "v1.3.2",
+      "url": "https://github.com/FiloSottile/age/releases/download/v1.3.2/age-v1.3.2-linux-amd64.tar.gz",
+      "sha256": "cbe24006683f8eb669266162894b9a522a1af52f2665fbc63a4bb032ed26ac10",
+      "member": "age/age"
+    },
+    "crane": {
+      "version": "v0.22.1",
+      "url": "https://github.com/google/go-containerregistry/releases/download/v0.22.1/go-containerregistry_Linux_x86_64.tar.gz",
+      "sha256": "0ab7a1d6932a213aed964ce97666c3077fe691c8606413674a8b3e0b9ec4cda0",
+      "member": "crane"
+    },
+    "trivy": {
+      "version": "v0.76.0",
+      "url": "https://github.com/aquasecurity/trivy/releases/download/v0.76.0/trivy_0.76.0_Linux-64bit.tar.gz",
+      "sha256": "e24b1c51293c1b15e4ba8d45bbc7891ba053f90278ec2698f3562c993e145fe7",
+      "member": "trivy"
+    }
+  },
+  "gaps": {
+    "REPRO-01": "Mutable apt sources; installed versions only, no archive hashes or signed snapshot receipt. Remediate with verified Debian/security snapshots and transitive .deb receipts.",
+    "REPRO-02": "Hosted runner, Python, Docker daemon, BuildKit and Compose observed but not fully pinned. Remediate with an approved pinned builder/toolchain.",
+    "REPRO-03": "Effective download redirects/mirrors/egress not independently observed. Remediate with reviewed transport evidence.",
+    "REPRO-04": "Whole-image bit reproducibility unproven. Remediate with a separately authorized comparison."
+  }
+}

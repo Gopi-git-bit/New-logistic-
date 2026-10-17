@@ -2,7 +2,7 @@
 
 ## Control Rules
 
-- Current verdict: **BLOCKED FOR PRODUCTION — DEEPSEEK PRESENCE COMPLETE; ONE API BUILD PASSED AND EVIDENCE REVIEWED (D-46/M7-E010); PUBLICATION BLOCKED; LIVE M7 AND QWEN DISABLED**.
+- Current verdict: **BLOCKED FOR PRODUCTION — DEEPSEEK PRESENCE COMPLETE; PUBLISHER IMPLEMENTATION IN REVIEW (D-47/M7-E011); PUBLICATION BLOCKED; LIVE M7 AND QWEN DISABLED**.
 - Only one tracker row may be active at a time.
 - M1 is complete and owner-approved for the bounded M2 implementation recorded below.
 - Every milestone still requires its own dependency-correct scope and approval; no tracker transition authorizes production work.
@@ -60,13 +60,29 @@
 | M7-STAGING-SECRET-AVAILABILITY | M7 | Staging Secret Availability (DeepSeek) | COMPLETE | Reviewed PR #23 merge and exact-merge CI; owner-authorized presence run | Record accepted GitHub step availability only; no provider call | M7-E006; run 38903102158 attempt 1; DeepSeek PASS, OpenRouter intentionally skipped | Owner-authorized dispatch, run-specific environment approval and D-42 closeout | Revert documentation through review; do not revoke or rotate keys as rollback | No key validity, target injection, spending or live authority proven |
 | M7-DELIVERY-BLUEPRINT | M7 | Next secret-free delivery blueprint | COMPLETE | M7-STAGING-SECRET-AVAILABILITY, D-42 | Documentation design only | plans/M7_SECRET_FREE_DELIVERY_BLUEPRINT.md with scope, acceptance, stop conditions and handoff | Current owner instruction authorizes blueprint preparation only | Revert documentation through review | No workflow or deployment route implemented by this row |
 | M7-DELIVERY-INVENTORY | M7 | Docker, lock, API and staging input inventory | COMPLETE | M7-DELIVERY-BLUEPRINT, D-43 | Static input inventory and records-only feature PR | Report, M7-E007, object/content identities, lock/name/path checks; corrected-head CI is a separate pre-merge condition | Continuation authorized; current PR #25 review/correction precedes conditional merge | Reviewed documentation revert | Static completion only; original CI 38915184473 is not proof for corrected heads; no image build or new staging-manifest render |
-| M7-DELIVERY-DRYRUN | M7 | Secret-free build and staging-manifest validation | IN_PROGRESS | M7-DELIVERY-INVENTORY, D-44/D-45/D-46 | Review the completed build and record candidate criteria in a records-only PR | M7-E010; run 38995824366; captured report/gap dispositions; exact-head records CI | Current instruction authorizes records review/publication only; merge, new build and registry publication separate | Reviewed records revert; built image already removed | Build-only PASS verified; handoff acceptance pending; no reproducibility, runtime, DB or live-provider waiver |
+| M7-DELIVERY-DRYRUN | M7 | Bounded API build and private candidate publisher | IN_PROGRESS | M7-DELIVERY-INVENTORY, D-44 through D-47 | Review encrypted candidate publisher implementation and exact-head CI | M7-E010 historical build; M7-E011 56 scoped offline cases; implementation PR CI | Publisher code/constraints/gap handling only; merge, key/package setup and actual build/publication separate | Reviewed code/docs revert; no registry or runtime mutation performed | Publication blocked by unconfigured policy and separate authorization; no reproducibility, runtime, DB or live-provider waiver |
 | M7-AGENTS | M7 | Agent activation | BLOCKED | M6-LANGFUSE staging/live gates, open provider decisions | D-34/D-37/D-38/D-39 permit recommendation, synthetic shadow/review and mocked staging-bridge development only; live activation unauthorized | Model/provider validation, capability/allowlist, shadow, HITL, and narrow-automation evidence | Product, governance, and owner approval required for activation | Pause agents and revoke capabilities | Honcho remains contextual only; M6 staging/live gates are not waived; D-33 pending |
 | M8-STAGING-E2E | M8 | Staging E2E and resilience | BLOCKED | M7-AGENTS | None currently authorized | Clean-environment unit/integration/contract/E2E/security/failure and backup-restore evidence | Engineering, security, operations approval required | Restore/tear down staging per runbook | Includes outage, retry, duplicate, lock, and rollback drills |
 | M9-READINESS | M9 | Production readiness review | BLOCKED | M8-STAGING-E2E | None currently authorized | No unresolved critical/high security findings; secrets, monitoring, backups, restores, runbook, rollback, external-system evidence | Owner, security, finance, and operations approval required | Remain in staging | Explicit human go-live decision required |
 | M10-ROLLOUT | M10 | Controlled production rollout | BLOCKED | M9-READINESS | None currently authorized | Shadow, internal pilot, canary, monitored expansion, thresholds, smoke, and rollback evidence | Explicit per-stage human approval required | Execute approved stage rollback | Live payments, DNS, financial autonomy, and irreversible actions need explicit approval |
 
 ## Current Authorized Work
+
+**D-47 implementation, 2026-10-17:** the owner authorizes the private GHCR
+candidate publisher implementation, separately from publication. The
+[publisher contract](plans/API_CANDIDATE_PUBLISHER.md) adds isolated build/scan
+and daemonless package-write jobs, encrypted artifact transfer, source/owner/
+expiry checks, private-package/digest read-back and named reproducibility-gap
+handling. M7-E011 records 56 scoped offline tests (24 new publisher cases) and
+lint/format/strict typing. Exact-head CI is recorded on the feature PR.
+The checked-in package ID, age recipient and access-review fields remain unset:
+no operational configuration or publication pass is implied. Merge, dedicated
+publication-environment/key/package verification and any actual build/push need
+their separate gates. Parent delivery stays IN_PROGRESS. No workflow dispatch,
+VPS, deployment, real-secret provisioning or provider action; live M7/Qwen denied.
+The earlier D-46 design-only status is historical, superseded for implementation
+scope only; its captured build evidence and unresolved gaps remain valid.
+
 
 **D-46 review, 2026-10-17:** the single secret-free API build passed in
 [run 38995824366](https://github.com/Gopi-git-bit/New-logistic-/actions/runs/38995824366),

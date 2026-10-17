@@ -1,7 +1,10 @@
 # Proposed API candidate publication gate
 
 **Date:** 17 October 2026. **Decision/evidence:** D-46 / M7-E010.
-**State:** DESIGN FOR REVIEW; NOT IMPLEMENTED OR AUTHORIZED.
+**State:** HISTORICAL D-46 DESIGN; implementation is now authorized under D-47.
+See the [publisher implementation](API_CANDIDATE_PUBLISHER.md) for controlling
+implementation constraints. Publication remains separately unauthorized.
+The design-only statements below describe the prior review checkpoint.
 [Evidence and gap review](../reports/API_BUILD_EVIDENCE_REVIEW_20261017.md).
 
 The one authorized build-only run passed and removed its image. This plan defines

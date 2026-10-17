@@ -1733,3 +1733,36 @@ FAIL history below are retained; no staging/live item is upgraded to PASS.
 
 **Exact next owner decision:** accept or reject M6-E005, and explicitly resolve whether M6 completion is limited to D-31's synthetic development scope with separate deployed storage and real cost-ledger reconciliation deferred to approved staging, or whether M6 stays incomplete pending those checks. Do not infer either choice from passing tests or draft PR CI. Before staging/live telemetry, separately approve cloud versus self-hosting, deployment, live emitters/credentials, data residency, retention and sampling; no production settings are chosen here. Gopinathan remains the only approved initial observability administrator. M6 remains `IN_PROGRESS` and M7 activation `BLOCKED` until the explicit acceptance/transition decision.
 
+## M7-E011 — Publisher implementation regressions (2026-10-17)
+
+**Decision:** D-47. **Scope:** private candidate publisher code and documentation;
+implementation and publication are separate gates. Base main:
+`d94335e6f1b07e5a606b11de5d6091f65c40096d`.
+
+- `python -m unittest discover -s workers/tests -p 'test_api_*.py' -q`:
+  **56 passed**, zero skips/warnings: 19 preparation, 13 existing build-only,
+  24 new publisher cases. New cases cover identity/expiry/scope, five-job/current
+  main CI binding, unconfigured policy, private package identity/linkage, source
+  cleanliness, selected-tool archive checksum, tar traversal/link/duplicate
+  refusal, config/layer hashes, HIGH/CRITICAL/secret/image/DB failures,
+  encrypted-transfer ID/digest/run and tampering, policy drift, retained-image
+  hook cleanup, duplicate tag refusal, read-back and one-attempt unknown push.
+- Ruff 0.16.5 lint and format: scoped helper/test files **PASS**.
+- Strict MyPy: all seven delivery helper modules **PASS**.
+- New workflow YAML/permissions/action pins checked by offline regression.
+  Existing five-job CI checks all seven helpers and discovers the new worker
+  cases. Exact resulting-head CI must be verified on the implementation PR.
+
+No Docker build/start, tool binary download/execution, crypto round-trip, real
+image scan, registry query/push, environment/secret setup, dispatch, VPS or
+provider call was performed. Crypto/network/registry processes are fakes;
+archive/hash validation uses real synthetic bytes. This proves implementation
+behavior only, not effective registry access, encryption, image security or
+publication. A future real candidate requires its own evidence.
+
+See [publisher contract](plans/API_CANDIDATE_PUBLISHER.md) and the intentionally
+unconfigured policy for remaining package/key/access/authorization requirements.
+REPRO-01 through REPRO-04 remain explicit, unaccepted risks. No new reproducibility,
+security, database, deployment or live-provider waiver. Historical M7-E010 and
+its build identities remain unchanged. Live M7/Qwen disabled; D-33 pending;
+all refunds require manual approval.
