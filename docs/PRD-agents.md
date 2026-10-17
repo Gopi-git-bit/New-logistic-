@@ -1,5 +1,21 @@
 # PRD — Agents (§15 Harness, Hermes, Paperclip, Honcho)
 
+**D-47 implementation, 2026-10-17:** the owner authorizes the private GHCR
+candidate publisher implementation, separately from publication. The
+[publisher contract](plans/API_CANDIDATE_PUBLISHER.md) adds isolated build/scan
+and daemonless package-write jobs, encrypted artifact transfer, source/owner/
+expiry checks, private-package/digest read-back and named reproducibility-gap
+handling. M7-E011 records 56 scoped offline tests (24 new publisher cases) and
+lint/format/strict typing. Exact-head CI is recorded on the feature PR.
+The checked-in package ID, age recipient and access-review fields remain unset:
+no operational configuration or publication pass is implied. Merge, dedicated
+publication-environment/key/package verification and any actual build/push need
+their separate gates. Parent delivery stays IN_PROGRESS. No workflow dispatch,
+VPS, deployment, real-secret provisioning or provider action; live M7/Qwen denied.
+The earlier D-46 design-only status is historical, superseded for implementation
+scope only; its captured build evidence and unresolved gaps remain valid.
+
+
 > Source of truth for all AI agent specifications.
 
 ## Current Orchestration Checkpoint (D-42 through D-46, 2026-10-17)

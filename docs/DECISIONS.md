@@ -820,3 +820,36 @@ These directions are **OWNER APPROVED** by Gopinathan on 2026-09-08. Implementat
 - No test, proof, installation, deployment, live credential use, external telemetry transmission, or production action occurred during this acceptance.
 - External spending during and after M6-A acceptance remains ₹0.
 
+## D-47 — Private API candidate publisher implementation; publication separate
+
+**Date:** 2026-10-17. **Owner:** Gopinathan / Gopi-git-bit.
+
+The owner explicitly authorizes publisher implementation, registry/visibility
+constraints, scoped permissions, image security/provenance checks and apt/toolchain
+gap handling. Implement the private GHCR candidate target
+`ghcr.io/gopi-git-bit/zippy-api` through a new manual-only workflow and
+[reviewed contract](plans/API_CANDIDATE_PUBLISHER.md). This decision authorizes
+code/tests/docs and a feature PR; it does not authorize merge, a new build,
+publication, package/settings changes, credential provisioning or deployment.
+
+Because the repository is public, image/evidence transfer is age-encrypted.
+Read-only build/scan and daemonless package-write jobs remain separate. New
+binaries/actions are pinned; source/owner/run/expiry and exact artifact/digest
+checks fail closed. Existing private package identity/linkage plus an independent
+expiring access review are prerequisites. No implicit package bootstrap or PAT.
+Unsigned provenance is labelled honestly; HIGH/CRITICAL security failures have
+no exception. No provider/Production secret is referenced.
+
+REPRO-01 mutable apt/no archive receipts, REPRO-02 hosted toolchain variability,
+REPRO-03 effective transport and REPRO-04 whole-image reproducibility remain
+unresolved. The code requires a later explicit, named, time-limited owner
+acceptance for a private nondeployable candidate or reviewed remediation. This
+implementation grants no deferral. Package ID, recipient and access-review
+configuration remain unset. The historical deleted image cannot be republished
+or treated as the new candidate's scan/provenance evidence.
+
+M7-E011 records 56 scoped offline tests, including 24 new publisher cases,
+and scoped lint/format/strict typing; resulting-head CI is recorded on the PR.
+No new build, publisher binary execution/download, real secret, registry write, VPS,
+provider or runtime action occurred. Parent delivery remains IN_PROGRESS;
+72 database tests remain unverified, D-33 pending, every refund manual.

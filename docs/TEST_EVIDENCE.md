@@ -1733,3 +1733,63 @@ FAIL history below are retained; no staging/live item is upgraded to PASS.
 
 **Exact next owner decision:** accept or reject M6-E005, and explicitly resolve whether M6 completion is limited to D-31's synthetic development scope with separate deployed storage and real cost-ledger reconciliation deferred to approved staging, or whether M6 stays incomplete pending those checks. Do not infer either choice from passing tests or draft PR CI. Before staging/live telemetry, separately approve cloud versus self-hosting, deployment, live emitters/credentials, data residency, retention and sampling; no production settings are chosen here. Gopinathan remains the only approved initial observability administrator. M6 remains `IN_PROGRESS` and M7 activation `BLOCKED` until the explicit acceptance/transition decision.
 
+## M7-E011 — Publisher implementation regressions (2026-10-17)
+
+**Decision:** D-47. **Scope:** private candidate publisher code and documentation;
+implementation and publication are separate gates. Base main:
+`d94335e6f1b07e5a606b11de5d6091f65c40096d`.
+
+- `python -m unittest discover -s workers/tests -p 'test_api_*.py' -q`:
+  **56 passed**, zero skips/warnings: 19 preparation, 13 existing build-only,
+  24 new publisher cases. New cases cover identity/expiry/scope, five-job/current
+  main CI binding, unconfigured policy, private package identity/linkage, source
+  cleanliness, selected-tool archive checksum, tar traversal/link/duplicate
+  refusal, config/layer hashes, HIGH/CRITICAL/secret/image/DB failures,
+  encrypted-transfer ID/digest/run and tampering, policy drift, retained-image
+  hook cleanup, duplicate tag refusal, read-back and one-attempt unknown push.
+- Ruff 0.16.5 lint and format: scoped helper/test files **PASS**.
+- Strict MyPy: all seven delivery helper modules **PASS**.
+- New workflow YAML/permissions/action pins checked by offline regression.
+  Existing five-job CI checks all seven helpers and discovers the new worker
+  cases. Exact resulting-head CI must be verified on the implementation PR.
+
+No Docker build/start, tool binary download/execution, crypto round-trip, real
+image scan, registry query/push, environment/secret setup, dispatch, VPS or
+provider call was performed. Crypto/network/registry processes are fakes;
+archive/hash validation uses real synthetic bytes. This proves implementation
+behavior only, not effective registry access, encryption, image security or
+publication. A future real candidate requires its own evidence.
+
+See [publisher contract](plans/API_CANDIDATE_PUBLISHER.md) and the intentionally
+unconfigured policy for remaining package/key/access/authorization requirements.
+REPRO-01 through REPRO-04 remain explicit, unaccepted risks. No new reproducibility,
+security, database, deployment or live-provider waiver. Historical M7-E010 and
+its build identities remain unchanged. Live M7/Qwen disabled; D-33 pending;
+all refunds require manual approval.
+
+### PR #29 merge-review correction — 17 October 2026
+
+Two interface regressions were reproduced before correction:
+
+- Automated review identified that Trivy's separate secret configuration could
+  suppress rules. Both archive scan and SBOM commands now explicitly pass
+  `--secret-config ""`, alongside the disabled general config. A synthetic
+  ambient secret-rules file cannot select the scanner configuration.
+- The pinned upload-artifact v4.6.2 emits bare SHA-256 hex while REST artifact
+  metadata includes `sha256:`. The publisher now validates the exact bare-hex
+  action output before comparing its labelled value with REST metadata;
+  malformed, incorrectly prefixed and mismatched values still fail closed.
+
+Both new regressions failed against the prior head. After the fixes, the
+scoped suite reports **58 passed**, zero skips/warnings: 19 preparation,
+13 build-only and 26 publisher cases. Ruff lint/format and strict typing of
+all seven helpers pass. Corrected-head and post-merge CI must be recorded on PR #29.
+The earlier 56-case checkpoint above remains the initial implementation result.
+
+Interfaces verified against pinned primary sources:
+[Trivy secret flag](https://github.com/aquasecurity/trivy/blob/v0.76.0/pkg/flag/secret_flags.go),
+[empty-path behavior](https://github.com/aquasecurity/trivy/blob/v0.76.0/pkg/fanal/secret/scanner.go),
+[upload action digest output](https://github.com/actions/upload-artifact/blob/ea165f8d65b6e75b540449e92b4886f43607fa02/README.md#outputs).
+No image build, provider call, real-secret dispatch, publication, deployment or
+VPS change occurred. Registry/key verification and publication authorization
+remain separate; no reproducibility or database gap was closed by this fix.

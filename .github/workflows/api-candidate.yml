@@ -1,0 +1,136 @@
+name: Private API candidate (manual publication gate)
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_sha:
+        description: Reviewed current main SHA; must equal workflow SHA
+        required: true
+        type: string
+      authorization_expires_utc:
+        description: Explicit publication authorization expiry (YYYY-MM-DDTHH:MM:SSZ, within one hour)
+        required: true
+        type: string
+      publication_scope:
+        description: Explicitly authorize one private nondeployable candidate
+        required: true
+        type: choice
+        options: [not-authorized, one-private-nondeployable-candidate]
+        default: not-authorized
+      accept_gaps:
+        description: Explicit candidate-only acceptance of REPRO-01,REPRO-02,REPRO-03,REPRO-04; otherwise blocked
+        required: true
+        type: string
+        default: not-accepted
+
+permissions: {}
+
+concurrency:
+  group: api-private-candidate-publication
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    if: >-
+      github.event_name == 'workflow_dispatch' &&
+      github.repository == 'Gopi-git-bit/New-logistic-' &&
+      github.ref == 'refs/heads/main' &&
+      github.actor == 'Gopi-git-bit' && github.actor_id == '200721521' &&
+      github.triggering_actor == 'Gopi-git-bit' && github.run_attempt == 1 &&
+      github.sha == inputs.source_sha && github.workflow_sha == github.sha &&
+      inputs.publication_scope == 'one-private-nondeployable-candidate' &&
+      inputs.accept_gaps == 'REPRO-01,REPRO-02,REPRO-03,REPRO-04'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    permissions:
+      contents: read
+      actions: read
+    outputs:
+      artifact_id: ${{ steps.upload.outputs.artifact-id }}
+      artifact_digest: ${{ steps.upload.outputs.artifact-digest }}
+      cipher_sha256: ${{ steps.prepare.outputs.cipher_sha256 }}
+      transfer_sha256: ${{ steps.prepare.outputs.transfer_sha256 }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ inputs.source_sha }}
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Build, scan, bind and encrypt one candidate
+        id: prepare
+        shell: bash
+        env:
+          API_SOURCE_SHA: ${{ inputs.source_sha }}
+          API_AUTHORIZATION_EXPIRES: ${{ inputs.authorization_expires_utc }}
+          API_PUBLICATION_SCOPE: ${{ inputs.publication_scope }}
+          API_ACCEPT_GAPS: ${{ inputs.accept_gaps }}
+          GH_READ_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 -I scripts/run_api_candidate.py \
+            --repo-root "$GITHUB_WORKSPACE" --source-sha "$API_SOURCE_SHA" \
+            --output "$RUNNER_TEMP/candidate-export" \
+            --report "$RUNNER_TEMP/candidate-summary.json"
+      - name: Retain encrypted artifact only
+        id: upload
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: encrypted-api-candidate-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/candidate-export/candidate.age
+            ${{ runner.temp }}/candidate-export/transfer.json
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 0
+          overwrite: false
+
+  publish:
+    needs: prepare
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    environment: Candidate-Publication
+    permissions:
+      contents: read
+      actions: read
+      packages: write
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ inputs.source_sha }}
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Download exact encrypted artifact ID
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          artifact-ids: ${{ needs.prepare.outputs.artifact_id }}
+          path: ${{ runner.temp }}/candidate-incoming
+          merge-multiple: true
+      - name: Verify then publish the retained candidate; never build or start it
+        shell: bash
+        env:
+          API_SOURCE_SHA: ${{ inputs.source_sha }}
+          API_AUTHORIZATION_EXPIRES: ${{ inputs.authorization_expires_utc }}
+          API_PUBLICATION_SCOPE: ${{ inputs.publication_scope }}
+          API_ACCEPT_GAPS: ${{ inputs.accept_gaps }}
+          API_ARTIFACT_ID: ${{ needs.prepare.outputs.artifact_id }}
+          API_ARTIFACT_DIGEST: ${{ needs.prepare.outputs.artifact_digest }}
+          API_CIPHER_SHA256: ${{ needs.prepare.outputs.cipher_sha256 }}
+          API_TRANSFER_SHA256: ${{ needs.prepare.outputs.transfer_sha256 }}
+          API_PRIVATE_RESULT: ${{ runner.temp }}/publication.json.age
+          GH_PUBLISH_TOKEN: ${{ github.token }}
+          CANDIDATE_AGE_IDENTITY: ${{ secrets.CANDIDATE_AGE_IDENTITY }}
+        run: |
+          set -euo pipefail
+          python3 -I scripts/publish_api_candidate.py \
+            --repo-root "$GITHUB_WORKSPACE" --source-sha "$API_SOURCE_SHA" \
+            --artifact "$RUNNER_TEMP/candidate-incoming" \
+            --report "$RUNNER_TEMP/publication-summary.json"
+      - name: Retain encrypted registry verification
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: encrypted-api-publication-${{ github.run_id }}
+          path: ${{ runner.temp }}/publication.json.age
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 0
+          overwrite: false

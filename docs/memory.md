@@ -1,5 +1,21 @@
 # Zippy Logistics — Memory
 
+**D-47 implementation, 2026-10-17:** the owner authorizes the private GHCR
+candidate publisher implementation, separately from publication. The
+[publisher contract](plans/API_CANDIDATE_PUBLISHER.md) adds isolated build/scan
+and daemonless package-write jobs, encrypted artifact transfer, source/owner/
+expiry checks, private-package/digest read-back and named reproducibility-gap
+handling. M7-E011 records 56 scoped offline tests (24 new publisher cases) and
+lint/format/strict typing. Exact-head CI is recorded on the feature PR.
+The checked-in package ID, age recipient and access-review fields remain unset:
+no operational configuration or publication pass is implied. Merge, dedicated
+publication-environment/key/package verification and any actual build/push need
+their separate gates. Parent delivery stays IN_PROGRESS. No workflow dispatch,
+VPS, deployment, real-secret provisioning or provider action; live M7/Qwen denied.
+The earlier D-46 design-only status is historical, superseded for implementation
+scope only; its captured build evidence and unresolved gaps remain valid.
+
+
 **D-46 review, 2026-10-17:** the single secret-free API build passed in
 [run 38995824366](https://github.com/Gopi-git-bit/New-logistic-/actions/runs/38995824366),
 attempt 1, at source/workflow SHA `0c96e33ac887b536ef4f947b9f4c7cbb395b80f9`.
@@ -22,9 +38,9 @@ Delivery stays IN_PROGRESS; live M7/Qwen denied. Older checkpoints are historica
 
 > Current state of the project. Updated after each milestone completion.
 
-## Current Phase: Build Evidence Reviewed; Publication Blocked; Live M7 and Qwen Disabled
+## Current Phase: Publisher Implementation Review; Publication Blocked; Live M7 and Qwen Disabled
 
-**Last updated**: 2026-10-16
+**Last updated**: 2026-10-17
 
 **Controlling closeout, 2026-10-16 (D-42):** Staging Secret Availability is
 **COMPLETE for DeepSeek presence only**, supported by M7-E006 and

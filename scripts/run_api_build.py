@@ -1,4 +1,4 @@
-"""Admit one owner/main build on a hosted runner; never publish or start the image."""
+"""Admit one owner/main build; optionally retain it, never publish or start it."""
 
 from __future__ import annotations
 
@@ -19,6 +19,7 @@ from urllib.parse import urlsplit
 
 REPOSITORY = "Gopi-git-bit/New-logistic-"
 WORKFLOW = REPOSITORY + "/.github/workflows/api-build-only.yml@refs/heads/main"
+CANDIDATE_WORKFLOW = REPOSITORY + "/.github/workflows/api-candidate.yml@refs/heads/main"
 BASE_IMAGE = (
     "python:3.12-slim@sha256:78387bc3881b8273120a12ebe6c1ab22b018ccc2c9adf565ae1ac9b536e184ea"
 )
@@ -36,7 +37,8 @@ def require(ok: object) -> None:
         raise BuildError("BUILD_NOT_VERIFIED")
 
 
-def admit(env: Mapping[str, str], source_sha: str) -> dict[str, str]:
+def admit(env: Mapping[str, str], source_sha: str, workflow: str = WORKFLOW) -> dict[str, str]:
+    require(workflow in (WORKFLOW, CANDIDATE_WORKFLOW))
     require(re.fullmatch(r"[a-f0-9]{40}", source_sha))
     expected = {
         "GITHUB_ACTIONS": "true",
@@ -49,7 +51,7 @@ def admit(env: Mapping[str, str], source_sha: str) -> dict[str, str]:
         "GITHUB_RUN_ATTEMPT": "1",
         "GITHUB_SHA": source_sha,
         "GITHUB_WORKFLOW_SHA": source_sha,
-        "GITHUB_WORKFLOW_REF": WORKFLOW,
+        "GITHUB_WORKFLOW_REF": workflow,
         "RUNNER_ENVIRONMENT": "github-hosted",
         "RUNNER_OS": "Linux",
         "RUNNER_ARCH": "X64",
@@ -148,9 +150,12 @@ def build(
     env: Mapping[str, str],
     report: dict[str, Any],
     command: Command = execute,
+    *,
+    workflow: str = WORKFLOW,
+    retain: Callable[[str, Path, Callable[[list[str], float], str]], None] | None = None,
 ) -> None:
     report["stage"] = "ADMISSION"
-    report["run_identity"] = admit(env, source_sha)
+    report["run_identity"] = admit(env, source_sha, workflow)
     deadline = time.monotonic() + 720  # Leave hosted-job time for evidence and cleanup.
     with tempfile.TemporaryDirectory(prefix="zippy-api-build-", dir=env["RUNNER_TEMP"]) as raw:
         private = Path(raw)
@@ -321,6 +326,9 @@ def build(
             )
             require(image["Config"]["User"] == "10001:10001")
             report["configured_image_user"] = "10001:10001"
+            if retain is not None:
+                report["stage"] = "RETAIN_CANDIDATE"
+                retain(image_id, private, run)
         finally:
             # An iidfile can exist even if receipt validation or the CLI fails.
             candidate = private / "image-id"
