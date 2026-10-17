@@ -1793,3 +1793,32 @@ Interfaces verified against pinned primary sources:
 No image build, provider call, real-secret dispatch, publication, deployment or
 VPS change occurred. Registry/key verification and publication authorization
 remain separate; no reproducibility or database gap was closed by this fix.
+
+## M7-E012 — Verification procedure and disposable database CI design (2026-10-17)
+
+**Decision:** D-48. **Source baseline:**
+`2fabdd8eaa16435d705a769d8cb15e8460a665ae` (merged PR #29).
+Documentation only; neither proposed verification workflow is implemented.
+
+Static AST inspection expands the existing integration-test parameters to
+**72 cases**: core 2, dispatch 31, finance 23, payment-intent privileges 4,
+governance 12. The existing check_proof_report.py requires these groups and
+rejects skips/failures/errors/duplicates. This inventory does not execute tests
+or close any of the 72 gaps. Existing M4/M5-B harness prerequisites were read,
+including Python paths, socket UID, separate roles, private logging and cleanup.
+
+Prepared the [registry/key procedure](plans/API_REGISTRY_KEY_VERIFICATION.md)
+and [independent database proposal](plans/DISPOSABLE_POSTGRES_CI_PROPOSAL.md),
+with separate authority/evidence gates. Local validation checks newly introduced
+repository links against the exact source tree/new documents, referenced paths,
+72-case report thresholds and Bash syntax of the metadata-only GET example.
+The Bash example is parsed only; no gh command, package/environment probe or
+cryptographic command is executed. All changed paths are documentation; policy,
+workflows, code, tests, locks, images and migrations remain unchanged.
+
+No dummy implementation tests are added for these reversible records. Normal
+feature-PR CI is recorded on the PR after it completes; its ordinary 72 skips
+remain gaps. Earlier 58-case publisher regressions and five-job post-merge CI
+39000950241 are reused as existing preparation evidence, not rerun as a live
+verification. No real secret, key provisioning, SQL proof, Docker build/start,
+registry publication, manual dispatch, VPS action or provider call occurred.

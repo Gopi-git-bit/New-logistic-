@@ -1,7 +1,10 @@
 # Private API candidate publisher implementation
 
 **Date:** 17 October 2026. **Decision/evidence:** D-47 / M7-E011.
-**State:** IMPLEMENTATION FOR REVIEW; PUBLICATION NOT AUTHORIZED.
+**State:** IMPLEMENTATION MERGED IN PR #29; PUBLICATION NOT AUTHORIZED.
+[Registry/key procedure](API_REGISTRY_KEY_VERIFICATION.md) and
+[separate database CI proposal](DISPOSABLE_POSTGRES_CI_PROPOSAL.md) are D-48
+plans for review; neither has been implemented or executed.
 This supersedes the implementation-pending portions of the
 [publication design](API_CANDIDATE_PUBLICATION_GATE.md). It does not complete
 the delivery milestone or any runtime/provider gate.

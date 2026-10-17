@@ -853,3 +853,34 @@ and scoped lint/format/strict typing; resulting-head CI is recorded on the PR.
 No new build, publisher binary execution/download, real secret, registry write, VPS,
 provider or runtime action occurred. Parent delivery remains IN_PROGRESS;
 72 database tests remain unverified, D-33 pending, every refund manual.
+
+## D-48 — Registry/key verification procedure and independent database CI proposal
+
+**Date:** 2026-10-17. **Owner:** Gopinathan / Gopi-git-bit.
+
+Following the read-only review of merged PR #29, the owner requests preparation
+of the [registry/key verification procedure](plans/API_REGISTRY_KEY_VERIFICATION.md)
+and a separate [disposable PostgreSQL CI proposal](plans/DISPOSABLE_POSTGRES_CI_PROPOSAL.md).
+Scope is repository documentation, source-backed review, a feature PR and its
+normal five-job CI. Merge remains separate. No new workflow/helper, package,
+environment/protection change, key generation/injection, actual verification
+run, SQL proof, publication, deployment, provider call or VPS change is authorized.
+
+The registry procedure separates metadata/ACL evidence from authenticated age
+canary decryption. Environment secret names cannot prove key matching; package
+identity/private visibility cannot prove effective ACLs. Unknown/403/404
+remains blocked. First-package bootstrap is a publication action, excluded.
+A later verifier must have no package write or provider credentials. Actual
+policy values stay unset until accepted evidence and a reviewed pin change.
+
+The database proposal retains the existing zero-skip report checker: 60 real
+operations cases plus 12 governance cases. Review harness Python-path, UID,
+network, role/socket, fixture, redaction and cleanup requirements before any
+implementation/run. Proposed isolated tests need no production DB, VPS or
+registry key. A socket-only success or mocks cannot close these gaps.
+
+M7-E012 records static inventory and documentation/syntax/link checks. No new
+runtime/security/reproducibility/database proof is claimed. PR #29 merge
+`2fabdd8eaa16435d705a769d8cb15e8460a665ae` and post-merge CI 39000950241
+remain accepted preparation evidence. Parent delivery stays IN_PROGRESS;
+publication/live M7/Qwen denied; D-33 pending and every refund manually approved.
