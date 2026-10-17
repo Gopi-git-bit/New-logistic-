@@ -1,5 +1,20 @@
 # Zippy Logistics — Memory
 
+**D-48 planning, 2026-10-17:** PR #29 merged into main at
+`2fabdd8eaa16435d705a769d8cb15e8460a665ae`; post-merge
+[CI 39000950241](https://github.com/Gopi-git-bit/New-logistic-/actions/runs/39000950241)
+passed all five jobs. The owner now authorizes preparation of the
+[registry/key verification procedure](plans/API_REGISTRY_KEY_VERIFICATION.md)
+and the separate [disposable PostgreSQL CI proposal](plans/DISPOSABLE_POSTGRES_CI_PROPOSAL.md).
+This is documentation/review scope only: no new verifier/database workflow,
+package/key/protection configuration, dispatch, SQL proof or publication.
+M7-E012 records source inventory and document validation; the 72 database cases
+remain unverified. Actual settings inspection, implementation, key setup,
+synthetic canary and disposable proof execution each await their defined gate.
+Publication, live M7 and Qwen remain blocked; D-33 and manual refund approval
+remain unchanged. Earlier D-47 implementation-review wording is historical.
+
+
 **D-47 implementation, 2026-10-17:** the owner authorizes the private GHCR
 candidate publisher implementation, separately from publication. The
 [publisher contract](plans/API_CANDIDATE_PUBLISHER.md) adds isolated build/scan
@@ -38,7 +53,7 @@ Delivery stays IN_PROGRESS; live M7/Qwen denied. Older checkpoints are historica
 
 > Current state of the project. Updated after each milestone completion.
 
-## Current Phase: Publisher Implementation Review; Publication Blocked; Live M7 and Qwen Disabled
+## Current Phase: Verification Procedures Proposed; Publication Blocked; Live M7 and Qwen Disabled
 
 **Last updated**: 2026-10-17
 
@@ -164,4 +179,3 @@ Backend execution model corrected:
 5. **`agent_registry` CHECK constraint** — Hard-coded; adding new agent requires `DROP CONSTRAINT` + `ADD CONSTRAINT`
 6. **Docker healthcheck race** — Container turns green while init scripts still run; gate on stable table count
 7. **`validate_payment_plan` full mode** — Requires `advance == total`, not just non-zero
-
