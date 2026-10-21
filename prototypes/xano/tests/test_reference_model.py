@@ -169,11 +169,33 @@ class ReferenceContracts(unittest.TestCase):
         self.p.assign(DISPATCHER, "order-a", "vehicle-a", "a")
         job = self.p.claim("worker-a", 10)
         self.assertIsNone(Prototype(self.path).claim("worker-b", 11))
-        self.assertEqual(Prototype(self.path).claim("worker-b", 15), job)
+        replacement = Prototype(self.path).claim("worker-b", 15)
+        self.assertEqual(replacement.job, job.job)
+        self.assertEqual(replacement.generation, job.generation + 1)
         with self.assertRaisesRegex(Rejected, "STALE_LEASE"):
             self.p.acknowledge(job, "worker-a", 16)
-        self.p.acknowledge(job, "worker-b", 16)
+        self.p.acknowledge(replacement, "worker-b", 16)
         self.assertIsNone(self.p.claim("worker-c", 20))
+
+    def test_reused_worker_identity_cannot_acknowledge_old_generation(self):
+        self.p.assign(DISPATCHER, "order-a", "vehicle-a", "a")
+        old = self.p.claim("same-worker", 10)
+        current = Prototype(self.path).claim("same-worker", 15)
+        self.assertEqual(current.job, old.job)
+        self.assertGreater(current.generation, old.generation)
+        with self.assertRaisesRegex(Rejected, "STALE_LEASE"):
+            self.p.acknowledge(old, "same-worker", 16)
+        self.p.acknowledge(current, "same-worker", 16)
+        with self.assertRaisesRegex(Rejected, "STALE_LEASE"):
+            self.p.acknowledge(current, "same-worker", 17)
+
+    def test_expired_lease_is_rejected_before_reclaim(self):
+        self.p.assign(DISPATCHER, "order-a", "vehicle-a", "a")
+        lease = self.p.claim("worker", 10)
+        with self.assertRaisesRegex(Rejected, "STALE_LEASE"):
+            self.p.acknowledge(lease, "worker", 15)
+        with self.p.connection() as db:
+            self.assertEqual(db.execute("SELECT done FROM outbox").fetchone()[0], 0)
 
     def test_concurrent_worker_claim(self):
         self.p.assign(DISPATCHER, "order-a", "vehicle-a", "a")

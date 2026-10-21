@@ -924,3 +924,21 @@ The owner accepts a synthetic prototype for create order, eligibility, assignmen
 PR #31 is merged at `52ca43d8a2fb4f3d5d105dc6bb9f7420e5cfca26`; all five post-merge checks passed in CI 39013608948. Its disposable PostgreSQL proof remains undispatched. Preserve that reference and its 72 unverified cases. Xano connection, actual schema/endpoint implementation and platform verification remain pending a securely scoped disposable workspace connection; request connection metadata and secure token integration only after repository preparation. No secret belongs in chat or Git.
 
 No adoption/migration approval, paid account provisioning, Xano authenticated action, production promotion, service removal, existing workflow dispatch, provider call, VPS change, credential provisioning or registry publication occurs in this slice. Live M7 and Qwen remain disabled. New Xano syntax/tool downloads must be verified/pinned before execution; native realtime availability is not an acceptance test. Exact-head CI evidence is recorded on the feature PR.
+
+
+### D-50 continuation — 21 October 2026
+
+The owner requests continued prototype work in New-logistic- while publication,
+migration, live M7 and Qwen remain disabled. The [platform handoff](plans/XANO_PLATFORM_EXECUTION_HANDOFF.md)
+separates the owner's successful direct Windows Codex inspection from this
+session's failed Composio workspace read (`Invalid token`). Workspace 1 and its
+sandbox counts are reported evidence, not independently verified isolation or
+runtime behavior. Do not change the working direct connection merely because
+Composio authentication fails.
+
+The offline oracle now fences outbox acknowledgements with a persisted claim
+generation, including reclaim by the same worker identity. All 23 local
+reference tests pass, with lint and format checks. Xano authentication fixes,
+transactional endpoints and platform tests remain pending source access and
+verified isolation; no Xano objects or existing runtime paths were changed.
+All 72 PostgreSQL cases remain unverified. No proof workflow was dispatched.

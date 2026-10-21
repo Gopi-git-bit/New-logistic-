@@ -2,6 +2,7 @@
 
 Date: 17 October 2026. Owner: Gopinathan / Gopi-git-bit.
 Reference source: PR #31 merge `52ca43d8a2fb4f3d5d105dc6bb9f7420e5cfca26`.
+Continuation: [21 October platform handoff](XANO_PLATFORM_EXECUTION_HANDOFF.md).
 Decision: D-50. Status: OFFLINE REFERENCE PREPARED; XANO RUNTIME NOT VERIFIED.
 
 ## Purpose and authority
@@ -112,7 +113,7 @@ lease plus monotonic fencing generation, bounded attempts/backoff, terminal
 failure and manual recovery. Test interruption before commit, after commit
 before delivery, after external success before acknowledgement, and stale
 worker resumption. The local oracle covers rollback, durable restart and
-lease-token replacement only; remaining external-effect/fencing cases require
+lease-generation replacement (including the same worker identity) only; remaining external-effect/fencing cases require
 Xano proof. Delivery is at least once; recipients need stable idempotency keys.
 Never claim exactly-once delivery from a queue or local transaction alone.
 

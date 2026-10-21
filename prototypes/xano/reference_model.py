@@ -34,7 +34,7 @@ CREATE TABLE commands(tenant TEXT, actor TEXT, action TEXT, key TEXT, fingerprin
  result TEXT, PRIMARY KEY(tenant,actor,action,key));
 CREATE TABLE audit(id INTEGER PRIMARY KEY, tenant TEXT, actor TEXT, action TEXT, subject TEXT);
 CREATE TABLE outbox(id INTEGER PRIMARY KEY, subject TEXT UNIQUE, lease TEXT, until_at INTEGER,
- done INTEGER DEFAULT 0);
+ done INTEGER DEFAULT 0, generation INTEGER NOT NULL DEFAULT 0);
 CREATE TABLE payments(payment_id TEXT PRIMARY KEY, tenant TEXT, order_id TEXT UNIQUE,
  amount INTEGER CHECK(amount>0));
 CREATE TABLE events(event_id TEXT PRIMARY KEY, fingerprint TEXT);
@@ -55,6 +55,14 @@ def fingerprint(value: object) -> str:
     return hashlib.sha256(
         json.dumps(value, sort_keys=True, separators=(",", ":")).encode()
     ).hexdigest()
+
+
+@dataclass(frozen=True)
+class Lease:
+    """A persisted generation fences every earlier claim, even for the same worker."""
+
+    job: int
+    generation: int
 
 
 class Prototype:
@@ -173,25 +181,26 @@ class Prototype:
             require(not fail_before_commit, "INJECTED_INTERRUPTION")
             return self.remember(db, p, "assign", key, payload, order)
 
-    def claim(self, token: str, now: int, ttl: int = 5) -> int | None:
+    def claim(self, token: str, now: int, ttl: int = 5) -> Lease | None:
         require(bool(token) and 0 < ttl <= 5, "LEASE_REJECTED")
         with self.connection() as db:
             row = db.execute(
-                "SELECT id FROM outbox WHERE done=0 AND (lease IS NULL OR until_at<=?) ORDER BY id LIMIT 1",
+                "SELECT id,generation FROM outbox WHERE done=0 AND (lease IS NULL OR until_at<=?) ORDER BY id LIMIT 1",
                 (now,),
             ).fetchone()
             if row is None:
                 return None
             db.execute(
-                "UPDATE outbox SET lease=?,until_at=? WHERE id=?", (token, now + ttl, row["id"])
+                "UPDATE outbox SET lease=?,until_at=?,generation=generation+1 WHERE id=?",
+                (token, now + ttl, row["id"]),
             )
-            return int(row["id"])
+            return Lease(int(row["id"]), int(row["generation"]) + 1)
 
-    def acknowledge(self, job: int, token: str, now: int) -> None:
+    def acknowledge(self, lease: Lease, token: str, now: int) -> None:
         with self.connection() as db:
             count = db.execute(
-                "UPDATE outbox SET done=1 WHERE id=? AND lease=? AND until_at>? AND done=0",
-                (job, token, now),
+                "UPDATE outbox SET done=1 WHERE id=? AND generation=? AND lease=? AND until_at>? AND done=0",
+                (lease.job, lease.generation, token, now),
             ).rowcount
             require(count == 1, "STALE_LEASE")
 
