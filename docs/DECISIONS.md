@@ -942,3 +942,22 @@ reference tests pass, with lint and format checks. Xano authentication fixes,
 transactional endpoints and platform tests remain pending source access and
 verified isolation; no Xano objects or existing runtime paths were changed.
 All 72 PostgreSQL cases remain unverified. No proof workflow was dispatched.
+
+
+## D-51 — First disposable PostgreSQL proof failure and scoped Git ownership fix
+
+**Date:** 2026-10-21. **Owner:** Gopinathan / Gopi-git-bit.
+
+The owner authorized PR #32 merge and starting PostgreSQL verification. Merge
+`b0a6579` passed all five push CI jobs before one proof was dispatched.
+[First-run evidence](reports/DISPOSABLE_POSTGRES_FIRST_RUN_20261021.md) records
+run 39639263651 attempt 1: admission passed, first Git source read exited 128,
+NOT_VERIFIED, no phases executed, private cleanup PASS. All 72 cases remain
+unverified. The consumed proof is not automatically replayed.
+
+A command-local exact-checkout safe.directory override corrects the locally
+reproduced ownership boundary without persisting global trust, allowing wildcard
+trust, or weakening clean/source-byte checks. This feature change needs review,
+merge and green post-merge CI before a freshly authorized proof. No SQL assertion,
+role boundary, action pin, image digest or production runtime is changed.
+Publication, migration, live M7 and Qwen remain disabled; refunds remain manual.

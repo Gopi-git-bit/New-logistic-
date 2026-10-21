@@ -11,6 +11,7 @@ import errno
 import json
 import os
 import socket
+import subprocess
 import sys
 import time
 import xml.etree.ElementTree as ET
@@ -621,3 +622,56 @@ def test_existing_public_timestamp_parameter_is_not_rejected_as_unsafe_identity(
     tree.write(path)
     cases, counts = c.report_cases(path, "operations")
     assert len(cases) == 61 and sum(counts.values()) == 60
+
+
+def test_source_reads_trust_only_exact_checkout_under_different_owner(tmp_path):
+    repo, source, context = tmp_path / "repo", tmp_path / "source", tmp_path / "context"
+    repo.mkdir()
+    source.mkdir()
+    subprocess.run(["git", "init", "-q", str(repo)], check=True)
+    paths = [f"api/module_{n}.py" for n in range(95)] + [
+        "db/Dockerfile.proof",
+        "requirements-api-dev.lock",
+        "scripts/emit_api_build_metadata.py",
+    ]
+    for name in paths:
+        path = repo / name
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("public synthetic source\n")
+    subprocess.run(["git", "-C", str(repo), "add", "."], check=True)
+    subprocess.run(
+        [
+            "git",
+            "-C",
+            str(repo),
+            "-c",
+            "user.name=Synthetic",
+            "-c",
+            "user.email=synthetic@example.invalid",
+            "commit",
+            "-qm",
+            "fixture",
+        ],
+        check=True,
+    )
+    sha = subprocess.check_output(["git", "-C", str(repo), "rev-parse", "HEAD"], text=True).strip()
+    private = tmp_path / "private"
+    private.mkdir()
+    command = runner.Executor(private, time.monotonic() + 30, {"commands": []})
+    command.environment["GIT_TEST_ASSUME_DIFFERENT_OWNER"] = "1"
+    code, output = command.run(["git", "-C", str(repo), "status", "--porcelain"], check=False)
+    assert code == 128 and "dubious ownership" in output
+    hashes = runner.prepare_source(repo, source, context, command, sha)
+    assert len(hashes) == len(paths)
+    assert (context / "Dockerfile").read_text() == "public synthetic source\n"
+    # The exact-path override did not persist trust for this or another checkout.
+    other = tmp_path / "other"
+    subprocess.run(["git", "init", "-q", str(other)], check=True)
+    for checkout in (repo, other):
+        code, output = command.run(
+            ["git", "-C", str(checkout), "status", "--porcelain"], check=False
+        )
+        assert code == 128 and "dubious ownership" in output
+    (repo / paths[0]).write_text("unreviewed drift\n")
+    with pytest.raises(c.ProofError, match="DIRTY_SOURCE_REJECTED"):
+        runner.prepare_source(repo, source, context, command, sha)

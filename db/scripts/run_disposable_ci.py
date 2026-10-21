@@ -129,14 +129,15 @@ def environment_file(path: Path, values: dict[str, str]) -> Path:
 def prepare_source(
     repo: Path, source: Path, context: Path, run: Executor, sha: str
 ) -> dict[str, str]:
+    # sudo changes identity: trust only this checkout for these read-only Git calls.
+    # Never persist global trust or use safe.directory=*.
+    git = ["git", "-c", "safe.directory=" + str(repo.resolve()), "-C", str(repo)]
+    require(run.out(git + ["rev-parse", "HEAD"]).strip() == sha, "SOURCE_REJECTED")
     require(
-        run.out(["git", "-C", str(repo), "rev-parse", "HEAD"]).strip() == sha, "SOURCE_REJECTED"
-    )
-    require(
-        not run.out(["git", "-C", str(repo), "status", "--porcelain"]).strip(),
+        not run.out(git + ["status", "--porcelain"]).strip(),
         "DIRTY_SOURCE_REJECTED",
     )
-    tracked = run.out(["git", "-C", str(repo), "ls-files", "-z"]).split("\0")
+    tracked = run.out(git + ["ls-files", "-z"]).split("\0")
     selected = [
         p for p in tracked if p.startswith(("api/", "db/")) and "/tests/__pycache__/" not in p
     ]
@@ -149,7 +150,7 @@ def prepare_source(
         original = repo / name
         info = original.lstat()
         require(stat.S_ISREG(info.st_mode) and info.st_nlink == 1, "SOURCE_PATH_REJECTED")
-        expected = run.out(["git", "-C", str(repo), "show", sha + ":" + name]).encode()
+        expected = run.out(git + ["show", sha + ":" + name]).encode()
         data = original.read_bytes()
         require(data == expected, "SOURCE_BYTES_REJECTED")
         target = source / name
