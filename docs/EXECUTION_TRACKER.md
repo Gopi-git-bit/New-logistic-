@@ -1,8 +1,10 @@
 # Zippy Production Execution Tracker
 
+> **17 October 2026 / D-50:** [Xano evaluation](plans/XANO_ISOLATED_PROTOTYPE.md) is a bounded repository preparation subtask under the existing delivery milestone, not an additional active milestone or migration. PR #31 merge `52ca43d` and five passing post-merge CI jobs are accepted preparation evidence; its SQL proof is still undispatched. Actual Xano implementation/verification awaits a securely scoped disposable workspace. Existing runtime authority is preserved. All 72 database cases remain unverified.
+
 ## Control Rules
 
-- Current verdict: **BLOCKED FOR PRODUCTION — DEEPSEEK PRESENCE COMPLETE; DISPOSABLE DATABASE IMPLEMENTATION IN REVIEW (D-49/M7-E013); PUBLICATION BLOCKED; LIVE M7 AND QWEN DISABLED**.
+- Current verdict: **BLOCKED FOR PRODUCTION — DEEPSEEK PRESENCE COMPLETE; DISPOSABLE DATABASE PREPARATION MERGED; XANO OFFLINE EVALUATION PREPARATION (D-50); PUBLICATION BLOCKED; LIVE M7 AND QWEN DISABLED**.
 - Only one tracker row may be active at a time.
 - M1 is complete and owner-approved for the bounded M2 implementation recorded below.
 - Every milestone still requires its own dependency-correct scope and approval; no tracker transition authorizes production work.
